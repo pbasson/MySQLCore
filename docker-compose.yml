@@ -1,0 +1,37 @@
+services:
+  mysqlcore.db:
+    image: mysql:8.3
+    ports:
+      - 33066:3306
+    env_file:
+      - env/db-dev.env
+    volumes:
+      - mysqlcore_vol:/var/lib/mysql
+    networks:
+      - mysqlcore_network
+    
+  mysqlcore:
+    image: mysqlcore
+    build:
+      context: .
+      dockerfile: src/MySQLCore.API/Dockerfile
+    ports:
+      - 5840:5840
+    env_file:
+      - env/api-dev.env
+    restart: always
+    depends_on:
+      - mysqlcore.db
+    # volumes:
+    #   - ./data/tables/tables-Create/CRUDTransaction-CreateTable.sql:/docker-entrypoint-initdb.d/1.sql:ro
+    networks:
+      - mysqlcore_network
+
+volumes:
+  mysqlcore_vol:
+
+networks:
+  mysqlcore_network:
+    name: mysqlcore_network
+    external: true
+      
