@@ -1,6 +1,7 @@
-using MySQLCore.Core.DTOs;
+using ElmahCore;
 using MySQLCore.Core.Interfaces.InterfaceRepos;
 using MySQLCore.Core.Interfaces.InterfaceServices;
+using MySQLCore.Core.Models.DTOs;
 
 namespace MySQLCore.Core.Services;
 
@@ -20,8 +21,9 @@ public class CRUDTransactionService : ICRUDTransactionService
             var result = await _repo.GetAllRecords();
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            ElmahExtensions.RaiseError(ex);
             throw;
         }
     }
@@ -33,8 +35,9 @@ public class CRUDTransactionService : ICRUDTransactionService
             var result = await _repo.GetRecordById(id);
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            ElmahExtensions.RaiseError(ex);
             throw;
         }
     }
@@ -46,8 +49,9 @@ public class CRUDTransactionService : ICRUDTransactionService
             var result = await _repo.CreateRecord(dto);
             return result;
         }
-        catch (Exception)
+       catch (Exception ex)
         {
+            ElmahExtensions.RaiseError(ex);
             throw;
         }
     }
@@ -60,8 +64,9 @@ public class CRUDTransactionService : ICRUDTransactionService
             var result = await _repo.UpdateRecord(dto);
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            ElmahExtensions.RaiseError(ex);
             throw;
         }
     }
@@ -73,8 +78,9 @@ public class CRUDTransactionService : ICRUDTransactionService
             var result = await _repo.DeleteRecord(id);
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            ElmahExtensions.RaiseError(ex);
             throw;
         }
     }

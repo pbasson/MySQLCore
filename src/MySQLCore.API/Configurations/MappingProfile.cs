@@ -1,6 +1,6 @@
 using System;
 using AutoMapper;
-using MySQLCore.Core.DTOs;
+using MySQLCore.Core.Models.DTOs;
 using MySQLCore.Infrastructure.Entities.Tables;
 
 namespace MySQLCore.API.Configurations;

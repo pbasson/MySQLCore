@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.DTOs;
+namespace MySQLCore.Core.Models.DTOs;
 
 public class CRUDTransactionDTO
 {
