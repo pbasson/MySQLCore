@@ -1,8 +1,8 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MySQLCore.Core.CoreHelpers;
-using MySQLCore.Core.DTOs;
 using MySQLCore.Core.Interfaces.InterfaceRepos;
+using MySQLCore.Core.Models.DTOs;
 using MySQLCore.Infrastructure.Entities.Tables;
 using MySQLCore.Infrastructure.Models;
 

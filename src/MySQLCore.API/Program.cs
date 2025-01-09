@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using ElmahCore.Mvc;
 using Microsoft.OpenApi.Models;
 using MySQLCore.API.Configurations;
 
@@ -18,8 +19,9 @@ if (app.Environment.IsDevelopment())
    app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.UseElmah();
 
 app.Run();

@@ -1,5 +1,7 @@
 using System;
 using AutoMapper;
+using ElmahCore;
+using ElmahCore.Mvc;
 using MySQLCore.Core.Interfaces.InterfaceRepos;
 using MySQLCore.Core.Interfaces.InterfaceServices;
 using MySQLCore.Core.Services;
@@ -27,6 +29,10 @@ public static class RegisterServices
         RegisterCoreRepos(services);
         #endregion
 
+        #region Register Other Services
+        services.AddElmah<XmlFileErrorLog>( x => x.LogPath = configuration.GetValue<string>("ElmahPath") );
+        #endregion
+
         return services;
     }
     
@@ -40,4 +46,6 @@ public static class RegisterServices
     {
         services.AddScoped<ICRUDTransactionRepo, CRUDTransactionRepo>();
     }
+
+    
 }

@@ -1,4 +1,4 @@
-using MySQLCore.Core.DTOs;
+using MySQLCore.Core.Models.DTOs;
 
 namespace MySQLCore.Core.Interfaces.InterfaceServices;
 
