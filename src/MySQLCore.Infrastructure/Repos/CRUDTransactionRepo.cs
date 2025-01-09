@@ -69,7 +69,7 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
     {
         try
         {
-            var existDTO = await GetRecordById(dto.Id);
+            CRUDTransaction? existDTO = await FindRecord(dto.Id);
 
             if (existDTO.NullChecker())
             {
@@ -78,7 +78,7 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
                 _dBContext.Entry(mapped).State = EntityState.Modified;
                 var result = await _dBContext.SaveChangesAsync();
                 return result > 0;
-            }   
+            }
 
             return false;
         }
@@ -88,12 +88,12 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
+
     public async Task<bool> DeleteRecord(int id)
     {
         try
         {
-            var existDTO = await _dBContext.CRUDTransaction.FindAsync(id);
-
+            CRUDTransaction? existDTO = await FindRecord(id);
             if (existDTO.NullChecker())
             {
                 _dBContext.CRUDTransaction.Remove(existDTO);
@@ -108,5 +108,10 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
             throw;
         }
     }
-
+    
+    private async Task<CRUDTransaction?> FindRecord(int id)
+    {
+        var result = await _dBContext.CRUDTransaction.FindAsync(id);
+        return result.NullChecker() ? result : null;
+    }
 }
