@@ -9,6 +9,7 @@ public class ConfiguationVariables
 
 public readonly struct AppSettings
 {
+    public static readonly string API_KEY = "X-API-KEY";
     public static readonly string DB_Host = "DB_HOST";
     public static readonly string DB_Port = "DB_PORT";
     public static readonly string MySQL_Database = "MYSQL_DATABASE";

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MySQLCore.API.Configurations;
 using MySQLCore.Core.CoreHelpers;
 using MySQLCore.Core.Interfaces.InterfaceServices;
 using MySQLCore.Core.Models.DTOs;
@@ -7,6 +8,7 @@ namespace MySQLCore.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ApiKey]
     public class CRUDTransactionController : BaseController
     {
         private readonly ICRUDTransactionService _service;
