@@ -1,4 +1,3 @@
-using System;
 using AutoMapper;
 using MySQLCore.Core.Models.DTOs;
 using MySQLCore.Infrastructure.Entities.Tables;

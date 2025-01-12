@@ -8,7 +8,7 @@ namespace MySQLCore.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [ApiKey]
+    // [ApiKey]
     public class CRUDTransactionController : BaseController
     {
         private readonly ICRUDTransactionService _service;
@@ -17,8 +17,8 @@ namespace MySQLCore.API.Controllers
         }
 
         [HttpGet]
-        [Route("GetRecords")]
-        public async Task<ActionResult<List<CRUDTransactionDTO>>> GetRecords() {
+        [Route("GetAllRecords")]
+        public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecords() {
             var result = await _service.GetAllRecords();
             return result.NullChecker() && result.Any() ? result : new List<CRUDTransactionDTO>();
         }

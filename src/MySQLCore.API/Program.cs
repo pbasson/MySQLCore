@@ -43,7 +43,7 @@ if (app.Environment.IsDevelopment())
    app.UseSwaggerUI();
 }
 
-// app.UseMiddleware<ApiKeyMiddleware>( );
+app.UseMiddleware<ApiKeyMiddleware>( );
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
