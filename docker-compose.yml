@@ -20,6 +20,7 @@ services:
       - 5840:5840
     env_file:
       - env/api-dev.env
+      - env/apikey-dev.env
     restart: always
     depends_on:
       - mysqlcore.db
