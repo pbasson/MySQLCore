@@ -32,6 +32,34 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"
-        envFrom:
-        - secretRef:
-          name: dev-secrets
+        env: 
+        - name: ASPNETCORE_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: core_environment 
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: db_host 
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: mysql_database 
+        - name: MYSQL_ROOT_USER
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: mysql_root_user 
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: mysql_root_password 
+        - name: X-API-KEY
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: x_api_key 
