@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Filters;
+using MySQLCore.Core.CoreHelpers;
 
 namespace MySQLCore.API.Configurations
 {
@@ -9,18 +10,21 @@ namespace MySQLCore.API.Configurations
         {
             if (!context.HttpContext.Request.Headers.TryGetValue(AppSettings.API_KEY, out var apiKeyVal))
             {
-                context.HttpContext.Response.StatusCode = 401;
-                await context.HttpContext.Response.WriteAsync("Api Key not found!");
+                await ErrorStatus(context, 401, API_Variables.APIKeyNotFound);
             }
 
             var appSettings = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
             var apiKey = appSettings.GetValue<string>(AppSettings.API_KEY);
             if (!apiKey.Equals(apiKeyVal))
             {
-                context.HttpContext.Response.StatusCode = 401;
-                await context.HttpContext.Response.WriteAsync("Unauthorized client");
+                await ErrorStatus(context, 403, API_Variables.UnauthorizedClient);
             }
+        }
 
+        private static async Task ErrorStatus(ActionExecutingContext context, int errorCode, string errorMsg)
+        {
+            context.HttpContext.Response.StatusCode = errorCode;
+            await context.HttpContext.Response.WriteAsync(errorMsg);
         }
     }
 }

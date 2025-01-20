@@ -1,4 +1,5 @@
 using ElmahCore;
+using MySQLCore.Core.CoreHelpers;
 
 namespace MySQLCore.API.Configurations;
 
@@ -17,21 +18,17 @@ public class ApiKeyMiddleware
         try
         {
             var getApiKey = context.RequestServices.GetRequiredService<IConfiguration>().GetValue<string>(ApiKeyHeader);
-            Console.WriteLine($"Test02: {getApiKey}");
 
             if (!context.Request.Headers.TryGetValue(ApiKeyHeader, out var extractedApiKey))
             {
-                Console.WriteLine($"Test01: {extractedApiKey}");
-                context.Response.StatusCode = 401; // Unauthorized
-                await context.Response.WriteAsync("API Key was not provided.");
+                await ErrorStatus(context, 401, API_Variables.APIKeyNotFound);
                 return;
             }
 
 
             if (!getApiKey.Equals(extractedApiKey))
             {
-                context.Response.StatusCode = 403; // Forbidden
-                await context.Response.WriteAsync("Unauthorized client.");
+                await ErrorStatus(context, 403, API_Variables.UnauthorizedClient);
                 return;
             }
 
@@ -42,5 +39,11 @@ public class ApiKeyMiddleware
             ElmahExtensions.RaiseError(ex);
             throw;  
         }
+    }
+
+    private static async Task ErrorStatus(HttpContext context, int errorCode, string errorMsg)
+    {
+        context.Response.StatusCode = errorCode;
+        await context.Response.WriteAsync(errorMsg);
     }
 }
