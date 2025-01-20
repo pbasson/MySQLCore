@@ -15,7 +15,7 @@ public static class RegisterDatabases
 
     private static void SetDBConnection(IServiceCollection services, IConfiguration configuration){
         var setDB = SetConnectionString(configuration);
-        Console.WriteLine(setDB);
+        // Console.WriteLine(setDB);
 
         services.AddDbContext<MySQLCoreDBContext>( db => {
             db.UseMySql(setDB,ServerVersion.AutoDetect(setDB),
