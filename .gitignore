@@ -115,3 +115,8 @@ _[Ss]cripts
 *.nupkg
 *.ncrunchsolution
 *.dot[Cc]over
+
+
+*.env
+*secret.yml
+kube-config

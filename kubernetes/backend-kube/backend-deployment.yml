@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: mysqlcore-app
+  type: LoadBalancer
+  ports:
+    - port: 5840
+      targetPort: 5840
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysqlcore-app-deployment
+spec:
+  selector:
+    matchLabels:
+      app: mysqlcore-app
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: mysqlcore-app
+        tier: backend
+    spec:
+      containers:
+      - name: mysqlcore-node
+        image: preetbasson/mysqlcore-api
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        env: 
+        - name: ASPNETCORE_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: core_environment 
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: db_host 
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: db_port 
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: mysql_database 
+        - name: MYSQL_ROOT_USER
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: mysql_root_user 
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: mysql_root_password 
+        - name: X-API-KEY
+          valueFrom:
+            configMapKeyRef:
+              name: dev-configmap
+              key: x_api_key 

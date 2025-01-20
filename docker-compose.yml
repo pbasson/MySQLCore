@@ -10,8 +10,9 @@ services:
     networks:
       - mysqlcore_network
     
-  mysqlcore:
-    image: mysqlcore
+  mysqlcore.api:
+    # image: preetbasson/mysqlcore-api:latest
+    image: mysqlcore-api:latest
     build:
       context: .
       dockerfile: src/MySQLCore.API/Dockerfile
@@ -19,11 +20,11 @@ services:
       - 5840:5840
     env_file:
       - env/api-dev.env
+      - env/apikey-dev.env
+      - env/db-user.dev.env
     restart: always
     depends_on:
       - mysqlcore.db
-    # volumes:
-    #   - ./data/tables/tables-Create/CRUDTransaction-CreateTable.sql:/docker-entrypoint-initdb.d/1.sql:ro
     networks:
       - mysqlcore_network
 
