@@ -15,7 +15,7 @@ namespace MySQLCore.API.Configurations
 
             var appSettings = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
             var apiKey = appSettings.GetValue<string>(AppSettings.API_KEY);
-            if (!apiKey.Equals(apiKeyVal))
+            if (apiKey != null && !apiKey.Equals(apiKeyVal))
             {
                 await ErrorStatus(context, 403, API_Variables.UnauthorizedClient);
             }
