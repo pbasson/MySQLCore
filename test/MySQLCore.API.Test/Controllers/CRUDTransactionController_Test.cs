@@ -1,19 +1,19 @@
 using MySQLCore.API.Controllers;
+using MySQLCore.Core.Interfaces.InterfaceControllers.Test;
 using MySQLCore.Core.Interfaces.InterfaceServices;
+using MySQLCore.Core.Models.DTOs;
 using AutoFixture;
 using Microsoft.Extensions.Logging;
 using Moq;
-using MySQLCore.Core.Models.DTOs;
-using System.Threading.Tasks;
 
 namespace MySQLCore.API.Test.Controllers;
 
-public class CRUDTransactionController_Test
+public class CRUDTransactionController_Test : ICRUDTransactionController_Test
 {
     private readonly IFixture _fixture;
     private readonly Mock<ICRUDTransactionService> _service;
     private readonly CRUDTransactionController _controller;
-    private readonly ILogger<CRUDTransactionController> _logger;
+    private readonly ILogger<CRUDTransactionController> _logger = default!;
 
     public CRUDTransactionController_Test()
     {
@@ -38,7 +38,7 @@ public class CRUDTransactionController_Test
     }
 
     [Fact]
-    public async Task GetRecordById() {
+    public async Task GetRecordById_CheckIsValue() {
         var response = _fixture.Create<CRUDTransactionDTO>();
         var parameter = _fixture.Create<int>();
         var request = _service.Setup(x => x.GetRecordById(parameter)).ReturnsAsync(response);
@@ -49,8 +49,50 @@ public class CRUDTransactionController_Test
 
             Assert.NotNull(result);
         }
-        catch (System.Exception)
+        catch (Exception)
         {
+            throw;
+        }
+    }
+
+    [Fact]
+    public async Task CreateRecord_CheckIsValue() {
+        var response = true;
+        var parameter = new CRUDTransactionDTO { Name = "John Doe"};
+        var request = _service.Setup( x => x.CreateRecord(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _controller.CreateRecord(parameter);
+            Assert.True(result.Value);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+    [Fact]
+    public async Task UpdateRecord_CheckIsValue() {
+        var response = true;
+        var parameter = new CRUDTransactionDTO { Id = 1, Name = "John Doe"};
+        var request = _service.Setup( x => x.UpdateRecord(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _controller.UpdateRecord(parameter);
+            Assert.True(result.Value);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+    [Fact]
+    public async Task DeleteRecord_CheckIsValue() {
+        var response = true;
+        var parameter = 1;
+        var request = _service.Setup( x => x.DeleteRecord(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _controller.DeleteRecord(parameter);
+            Assert.True(result.Value);
+        }
+        catch (Exception) {
             throw;
         }
     }
