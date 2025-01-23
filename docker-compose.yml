@@ -4,7 +4,7 @@ services:
     ports:
       - 33066:3306
     env_file:
-      - env/db-dev.env
+      - env/docker-env/dev-mysql-db.env
     volumes:
       - mysqlcore_vol:/var/lib/mysql
     networks:
@@ -19,9 +19,9 @@ services:
     ports:
       - 5840:5840
     env_file:
-      - env/api-dev.env
-      - env/apikey-dev.env
-      - env/db-user.dev.env
+      - env/docker-env/dev-mysqlcore-api.env
+      - env/docker-env/dev-mysqlcore-apikey.env
+      - env/docker-env/dev-mysql-user.env
     restart: always
     depends_on:
       - mysqlcore.db

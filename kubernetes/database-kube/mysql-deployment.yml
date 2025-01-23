@@ -26,13 +26,8 @@ spec:
     spec:
       containers:
       - image: mysql:5.6
-      # - image: mysql:latest
         name: mysql
-        # resources:
-        #   limits:
-        #     memory: "512Mi"
         env:
-          # Use secret in real usage
         - name: MYSQL_ROOT_PASSWORD
           value: password
         ports:
