@@ -119,4 +119,4 @@ _[Ss]cripts
 
 *.env
 *secret.yml
-kube-config
+env
