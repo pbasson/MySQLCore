@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MySQLCore.Infrastructure.Entities.Tables;
+using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
 
 namespace MySQLCore.Infrastructure.Models;
 

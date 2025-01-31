@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS MySQLCore.ImageGallery (
   ImageTransactionID INT NOT NULL,
   ImagePath varchar(100) DEFAULT NULL,
 
-  FOREIGN KEY (ImageTransactionID) REFERENCES ImageTransaction(ImageTransactionID)
+  FOREIGN KEY (ImageTransactionID) REFERENCES ImageTransaction(ImageTransactionID) ON DELETE CASCADE
 );
 

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MySQLCore.Core.CoreHelpers;
 using MySQLCore.Core.Interfaces.InterfaceRepos;
 using MySQLCore.Core.Models.DTOs.ImageDTOs;
-using MySQLCore.Infrastructure.Entities.Tables;
+using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
 using MySQLCore.Infrastructure.Models;
 
 namespace MySQLCore.Infrastructure.Repos;
@@ -70,9 +70,30 @@ public class ImageTransactionRepo : IImageTransactionRepo
     {
         throw new NotImplementedException();
     }
-
-    public Task<bool> DeleteRecord(int id)
+public async Task<bool> DeleteRecord(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            ImageTransaction? existDTO = await FindRecord(id);
+            if (existDTO.NullChecker())
+            {
+                _dBContext.ImageTransaction.Re(existDTO);
+                var result = await _dBContext.SaveChangesAsync();
+                return result > 0;                
+            }
+
+            return false;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    
+    private async Task<ImageTransaction?> FindRecord(int id)
+    {
+        var result = await _dBContext.ImageTransaction.FindAsync(id);
+        return result.NullChecker() ? result : null;
     }
 }
+
