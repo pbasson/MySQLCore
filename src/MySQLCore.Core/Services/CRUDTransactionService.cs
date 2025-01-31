@@ -42,7 +42,7 @@ public class CRUDTransactionService : ICRUDTransactionService
         }
     }
 
-    public async Task<bool> CreateRecord(CRUDTransactionDTO dto)
+    public async Task<bool> CreateRecord(CreateCRUDTransactionDTO dto)
     {
         try
         {
@@ -57,7 +57,7 @@ public class CRUDTransactionService : ICRUDTransactionService
     }
 
 
-    public async Task<bool> UpdateRecord(CRUDTransactionDTO dto)
+    public async Task<bool> UpdateRecord(UpdateCRUDTransactionDTO dto)
     {
         try
         {

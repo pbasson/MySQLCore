@@ -44,7 +44,7 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<bool> CreateRecord(CRUDTransactionDTO dto)
+    public async Task<bool> CreateRecord(CreateCRUDTransactionDTO dto)
     {
         try
         {
@@ -65,15 +65,16 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<bool> UpdateRecord(CRUDTransactionDTO dto)
+    public async Task<bool> UpdateRecord(UpdateCRUDTransactionDTO dto)
     {
         try
         {
             CRUDTransaction? existDTO = await FindRecord(dto.Id);
 
-            if (existDTO.NullChecker())
+            if (existDTO != null)
             {
                 var mapped = _mapper.Map<CRUDTransaction>(dto);
+                existDTO.SetCreated(mapped);
                 _dBContext.Entry(existDTO).State = EntityState.Detached;
                 _dBContext.Entry(mapped).State = EntityState.Modified;
                 var result = await _dBContext.SaveChangesAsync();
@@ -87,7 +88,6 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
             throw;
         }
     }
-
 
     public async Task<bool> DeleteRecord(int id)
     {

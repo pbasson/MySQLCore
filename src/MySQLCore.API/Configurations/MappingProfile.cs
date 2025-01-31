@@ -13,6 +13,8 @@ public class MappingProfile : Profile
 
     private void SetMapping() {
         CreateMap<CRUDTransactionDTO, CRUDTransaction>().ReverseMap();
+        CreateMap<CreateCRUDTransactionDTO, CRUDTransaction>();
+        CreateMap<UpdateCRUDTransactionDTO, CRUDTransaction>();
     }
 
 

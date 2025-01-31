@@ -36,7 +36,7 @@ namespace MySQLCore.API.Controllers
 
         [HttpPost]
         [Route("CreateRecord")]
-        public async Task<ActionResult<bool>> CreateRecord(CRUDTransactionDTO dTO) {
+        public async Task<ActionResult<bool>> CreateRecord(CreateCRUDTransactionDTO dTO) {
             if (!ModelState.IsValid) { return BadRequest(); }
             var result = await _service.CreateRecord(dTO);
             return result;
@@ -44,7 +44,7 @@ namespace MySQLCore.API.Controllers
 
         [HttpPut]
         [Route("UpdateRecord")]
-        public async Task<ActionResult<bool>> UpdateRecord(CRUDTransactionDTO dTO) {
+        public async Task<ActionResult<bool>> UpdateRecord(UpdateCRUDTransactionDTO dTO) {
             if (!ModelState.IsValid) { return BadRequest(); }
             var result = await _service.UpdateRecord(dTO);
             return result;
