@@ -1,20 +1,20 @@
 using ElmahCore;
 using MySQLCore.Core.Interfaces.InterfaceRepos;
 using MySQLCore.Core.Interfaces.InterfaceServices;
-using MySQLCore.Core.Models.DTOs;
+using MySQLCore.Core.Models.DTOs.ImageDTOs;
 
 namespace MySQLCore.Core.Services;
 
-public class CRUDTransactionService : ICRUDTransactionService
+public class ImageTransactionService : IImageTransactionService
 {
-    private readonly ICRUDTransactionRepo _repo = default!;
+    private readonly IImageTransactionRepo _repo = default!;
 
-    public CRUDTransactionService(ICRUDTransactionRepo repo)
+    public ImageTransactionService(IImageTransactionRepo repo)
     {
         _repo = repo;
     }
 
-    public async Task<List<CRUDTransactionDTO>> GetAllRecords()
+    public async Task<List<ImageTransactionDTO>> GetAllRecords()
     {
         try
         {
@@ -28,7 +28,7 @@ public class CRUDTransactionService : ICRUDTransactionService
         }
     }
 
-    public async Task<CRUDTransactionDTO> GetRecordById(int id)
+    public async Task<ImageTransactionDTO> GetRecordById(int id)
     {
         try
         {
@@ -42,7 +42,7 @@ public class CRUDTransactionService : ICRUDTransactionService
         }
     }
 
-    public async Task<bool> CreateRecord(CreateCRUDTransactionDTO dto)
+    public async Task<bool> CreateRecord(ImageTransactionDTO dto)
     {
         try
         {
@@ -57,7 +57,7 @@ public class CRUDTransactionService : ICRUDTransactionService
     }
 
 
-    public async Task<bool> UpdateRecord(UpdateCRUDTransactionDTO dto)
+    public async Task<bool> UpdateRecord(ImageTransactionDTO dto)
     {
         try
         {

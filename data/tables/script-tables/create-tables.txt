@@ -1,0 +1,6 @@
+-- Create Database
+source /var/lib/mysql-files/data/databases/create-databases/MySQLCore-Database_Create.sql
+
+-- Create Tables: Content
+source /var/lib/mysql-files/data/tables/create-tables/CRUDTransaction-Table_Create.sql
+

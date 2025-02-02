@@ -19,11 +19,13 @@ namespace MySQLCore.API.Configurations
         private static void RegisterCoreServices(IServiceCollection services)
         {
             services.AddScoped<ICRUDTransactionService,CRUDTransactionService>();
+            services.AddScoped<IImageTransactionService,ImageTransactionService>();
         }
 
         private static void RegisterCoreRepos(IServiceCollection services)
         {
             services.AddScoped<ICRUDTransactionRepo, CRUDTransactionRepo>();
+            services.AddScoped<IImageTransactionRepo, ImageTransactionRepo>();
         }
             
     }

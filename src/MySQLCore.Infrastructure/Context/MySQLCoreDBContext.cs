@@ -1,12 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MySQLCore.Infrastructure.Entities.Tables;
+using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
 
 namespace MySQLCore.Infrastructure.Models;
 
 public class MySQLCoreDBContext(DbContextOptions<MySQLCoreDBContext> option) : DbContext(option)
 {
     public virtual DbSet<CRUDTransaction> CRUDTransaction {get; set;}
+    public virtual DbSet<ImageTransaction> ImageTransaction {get; set;}
+    public virtual DbSet<ImageGallery> ImageGallery {get; set;}
 
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

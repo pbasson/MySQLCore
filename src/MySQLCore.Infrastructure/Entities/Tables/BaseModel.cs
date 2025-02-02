@@ -6,4 +6,10 @@ public class BaseModel
     public string? CreatedBy { get; set; }
     public DateTime UpdatedDateTime { get; set; }
     public string? UpdatedBy { get; set; }
+
+
+    public void SetCreated(BaseModel model) {
+        model.CreatedBy = CreatedBy;
+        model.CreatedDateTime = CreatedDateTime;
+    }
 }
