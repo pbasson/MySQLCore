@@ -14,11 +14,11 @@ public class CRUDTransactionService : ICRUDTransactionService
         _repo = repo;
     }
 
-    public async Task<List<CRUDTransactionDTO>> GetAllRecords()
+    public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync()
     {
         try
         {
-            var result = await _repo.GetAllRecords();
+            var result = await _repo.GetAllRecordsAsync();
             return result;
         }
         catch (Exception ex)
@@ -28,11 +28,11 @@ public class CRUDTransactionService : ICRUDTransactionService
         }
     }
 
-    public async Task<CRUDTransactionDTO> GetRecordById(int id)
+    public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page)
     {
         try
         {
-            var result = await _repo.GetRecordById(id);
+            var result = await _repo.GetAllRecordsPaginationAsync(page);
             return result;
         }
         catch (Exception ex)
@@ -42,11 +42,25 @@ public class CRUDTransactionService : ICRUDTransactionService
         }
     }
 
-    public async Task<bool> CreateRecord(CreateCRUDTransactionDTO dto)
+    public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id)
     {
         try
         {
-            var result = await _repo.CreateRecord(dto);
+            var result = await _repo.GetRecordByIdAsync(id);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            ElmahExtensions.RaiseError(ex);
+            throw;
+        }
+    }
+
+    public async Task<bool> CreateRecordAsync(CreateCRUDTransactionDTO dto)
+    {
+        try
+        {
+            var result = await _repo.CreateRecordAsync(dto);
             return result;
         }
        catch (Exception ex)
@@ -57,11 +71,11 @@ public class CRUDTransactionService : ICRUDTransactionService
     }
 
 
-    public async Task<bool> UpdateRecord(UpdateCRUDTransactionDTO dto)
+    public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto)
     {
         try
         {
-            var result = await _repo.UpdateRecord(dto);
+            var result = await _repo.UpdateRecordAsync(dto);
             return result;
         }
         catch (Exception ex)
@@ -71,11 +85,11 @@ public class CRUDTransactionService : ICRUDTransactionService
         }
     }
 
-    public async Task<bool> DeleteRecord(int id)
+    public async Task<bool> DeleteRecordByIdAsync(int id)
     {
         try
         {
-            var result = await _repo.DeleteRecord(id);
+            var result = await _repo.DeleteRecordByIdAsync(id);
             return result;
         }
         catch (Exception ex)
@@ -84,4 +98,6 @@ public class CRUDTransactionService : ICRUDTransactionService
             throw;
         }
     }
+
+ 
 }

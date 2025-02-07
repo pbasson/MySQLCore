@@ -18,9 +18,9 @@ public class ImageTransactionRepo : IImageTransactionRepo
         _mapper = mapper;    
     }
 
-    public async Task<List<ImageTransactionDTO>> GetAllRecords() {
+    public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() {
         try {
-            var results = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).ToListAsync();
+            var results = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
             return _mapper.Map<List<ImageTransactionDTO>>(results);
         }
         catch (Exception) {
@@ -28,7 +28,19 @@ public class ImageTransactionRepo : IImageTransactionRepo
         }
     }
 
-    public async Task<ImageTransactionDTO> GetRecordById(int id)  {
+
+    public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
+        try {
+            var results = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
+            return _mapper.Map<List<ImageTransactionDTO>>(results);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+
+    public async Task<ImageTransactionDTO> GetRecordByIdAsync(int id)  {
         try {
             var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).FirstOrDefaultAsync(x => x.ImageTransactionID == id);
             return _mapper.Map<ImageTransactionDTO>(result);
@@ -38,7 +50,7 @@ public class ImageTransactionRepo : IImageTransactionRepo
         }
     }
 
-    public async Task<bool> CreateRecord(ImageTransactionDTO dto) {
+    public async Task<bool> CreateRecordAsync(ImageTransactionDTO dto) {
         try {
             if ( dto.NullChecker() ) {
                 var mapped = _mapper.Map<ImageTransaction>(dto);
@@ -55,7 +67,7 @@ public class ImageTransactionRepo : IImageTransactionRepo
         }
     }
 
-    public async Task<bool> UpdateRecord(ImageTransactionDTO dto) {
+    public async Task<bool> UpdateRecordAsync(ImageTransactionDTO dto) {
         try {
             ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
 
@@ -76,7 +88,7 @@ public class ImageTransactionRepo : IImageTransactionRepo
     }
 
 
-    public async Task<bool> DeleteRecord(int id)  {
+    public async Task<bool> DeleteRecordByIdAsysc(int id)  {
         try {
             ImageTransaction? existDTO = await FindRecord(id);
             if ( existDTO.NullChecker() ) {

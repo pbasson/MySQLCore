@@ -18,9 +18,9 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         _mapper = mapper;    
     }
 
-    public async Task<List<CRUDTransactionDTO>> GetAllRecords() {
+    public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() {
         try {
-            var results = await _dBContext.CRUDTransaction.ToListAsync();
+            var results = await _dBContext.CRUDTransaction.AsNoTracking().ToListAsync();
             return _mapper.Map<List<CRUDTransactionDTO>>(results);
         }
         catch (Exception) {
@@ -28,7 +28,17 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<CRUDTransactionDTO> GetRecordById(int id) {
+    public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
+        try {
+            var results = await _dBContext.CRUDTransaction.AsNoTracking().ToListAsync();
+            return _mapper.Map<List<CRUDTransactionDTO>>(results);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+    public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id) {
         try {
             var result = await _dBContext.CRUDTransaction.FirstOrDefaultAsync(x => x.Id == id);
             return _mapper.Map<CRUDTransactionDTO>(result);
@@ -38,7 +48,7 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<bool> CreateRecord(CreateCRUDTransactionDTO dto) {
+    public async Task<bool> CreateRecordAsync(CreateCRUDTransactionDTO dto) {
         try{
             if ( dto.NullChecker() ) {
                 var mapped = _mapper.Map<CRUDTransaction>(dto);
@@ -55,7 +65,7 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<bool> UpdateRecord(UpdateCRUDTransactionDTO dto) {
+    public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) {
         try {
             CRUDTransaction? existDTO = await FindRecord(dto.Id);
 
@@ -75,7 +85,7 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<bool> DeleteRecord(int id) {
+    public async Task<bool> DeleteRecordByIdAsync(int id) {
         try {
             CRUDTransaction? existDTO = await FindRecord(id);
             if (existDTO.NullChecker()) {
