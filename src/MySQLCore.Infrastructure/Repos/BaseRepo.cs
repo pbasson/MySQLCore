@@ -15,4 +15,8 @@ public class BaseRepo(MySQLCoreDBContext dBContext, IMapper mapper)
         _dBContext.Entry(mapped).State = EntityState.Modified;
     }
 
+    public async Task<bool> SaveChangesAsync() {
+        var result = await _dBContext.SaveChangesAsync();
+        return result > 0;
+    } 
 }

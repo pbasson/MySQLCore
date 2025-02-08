@@ -23,7 +23,6 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         }
     }
 
-
     public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
         try {
             var settings = new PageSettings();
@@ -35,7 +34,6 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
             throw;
         }
     }
-
 
     public async Task<ImageTransactionDTO> GetRecordByIdAsync(int id)  {
         try {
@@ -52,9 +50,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
             if ( dto.NullChecker() ) {
                 var mapped = _mapper.Map<ImageTransaction>(dto);
                 _dBContext.ImageTransaction.Add(mapped);
-                var result = await _dBContext.SaveChangesAsync();
-
-                return result > 0;
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -72,8 +68,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
                 var mapped = _mapper.Map<ImageTransaction>(dto);
                 existDTO.SetCreated(mapped);
                 UpdateEntity(existDTO, mapped);
-                var result = await _dBContext.SaveChangesAsync();
-                return result > 0;
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -83,14 +78,12 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         }
     }
 
-
     public async Task<bool> DeleteRecordByIdAsysc(int id)  {
         try {
             ImageTransaction? existDTO = await FindRecord(id);
             if ( existDTO != null ) {
                 _dBContext.ImageTransaction.Remove(existDTO);
-                var result = await _dBContext.SaveChangesAsync();
-                return result > 0;                
+                return await SaveChangesAsync();
             }
 
             return false;

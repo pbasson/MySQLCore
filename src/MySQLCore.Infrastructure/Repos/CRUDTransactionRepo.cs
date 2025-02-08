@@ -49,9 +49,7 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
             if ( dto.NullChecker() ) {
                 var mapped = _mapper.Map<CRUDTransaction>(dto);
                 _dBContext.CRUDTransaction.Add(mapped);
-                var result = await _dBContext.SaveChangesAsync();
-
-                return result > 0;
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -63,15 +61,14 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) {
         try {
-            CRUDTransaction? existDTO = await FindRecord(dto.Id);
+            CRUDTransaction? existDTO = await FindRecordByIdAsync(dto.Id);
 
             if (existDTO != null)
             {
                 var mapped = _mapper.Map<CRUDTransaction>(dto);
                 existDTO.SetCreated(mapped);
                 UpdateEntity(existDTO, mapped);
-                var result = await _dBContext.SaveChangesAsync();
-                return result > 0;
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -83,11 +80,10 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<bool> DeleteRecordByIdAsync(int id) {
         try {
-            CRUDTransaction? existDTO = await FindRecord(id);
+            CRUDTransaction? existDTO = await FindRecordByIdAsync(id);
             if (existDTO != null) {
                 _dBContext.CRUDTransaction.Remove(existDTO);
-                var result = await _dBContext.SaveChangesAsync();
-                return result > 0;                
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -97,7 +93,7 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
         }
     }
     
-    private async Task<CRUDTransaction?> FindRecord(int id) {
+    private async Task<CRUDTransaction?> FindRecordByIdAsync(int id) {
         var result = await _dBContext.CRUDTransaction.FindAsync(id);
         return result.NullChecker() ? result : null;
     }

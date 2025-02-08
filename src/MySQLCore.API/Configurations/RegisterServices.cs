@@ -71,6 +71,7 @@ public static class RegisterServices
 
         app.UseMiddleware<ApiKeyMiddleware>( );
         app.UseHttpsRedirection();
+        app.UseHsts();
         app.UseAuthorization();
         app.MapControllers();
         app.UseElmah();
