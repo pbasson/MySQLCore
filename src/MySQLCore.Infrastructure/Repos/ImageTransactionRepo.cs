@@ -8,14 +8,9 @@ using MySQLCore.Infrastructure.Models;
 
 namespace MySQLCore.Infrastructure.Repos;
 
-public class ImageTransactionRepo : IImageTransactionRepo
+public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 {
-    private readonly MySQLCoreDBContext _dBContext = default!;
-    private readonly IMapper _mapper = default!;
-
-    public ImageTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) {
-        _dBContext = dBContext;
-        _mapper = mapper;    
+    public ImageTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) : base(dBContext, mapper) {
     }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() {
@@ -76,8 +71,7 @@ public class ImageTransactionRepo : IImageTransactionRepo
             if (existDTO != null) {
                 var mapped = _mapper.Map<ImageTransaction>(dto);
                 existDTO.SetCreated(mapped);
-                _dBContext.Entry(existDTO).State = EntityState.Detached;
-                _dBContext.Entry(mapped).State = EntityState.Modified;
+                UpdateEntity(existDTO, mapped);
                 var result = await _dBContext.SaveChangesAsync();
                 return result > 0;
             }
@@ -93,7 +87,7 @@ public class ImageTransactionRepo : IImageTransactionRepo
     public async Task<bool> DeleteRecordByIdAsysc(int id)  {
         try {
             ImageTransaction? existDTO = await FindRecord(id);
-            if ( existDTO.NullChecker() ) {
+            if ( existDTO != null ) {
                 _dBContext.ImageTransaction.Remove(existDTO);
                 var result = await _dBContext.SaveChangesAsync();
                 return result > 0;                

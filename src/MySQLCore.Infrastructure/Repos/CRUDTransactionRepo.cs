@@ -8,14 +8,9 @@ using MySQLCore.Infrastructure.Models;
 
 namespace MySQLCore.Infrastructure.Repos;
 
-public class CRUDTransactionRepo : ICRUDTransactionRepo
+public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo 
 {
-    private readonly MySQLCoreDBContext _dBContext = default!;
-    private readonly IMapper _mapper = default!;
-
-    public CRUDTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) {
-        _dBContext = dBContext;
-        _mapper = mapper;    
+    public CRUDTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) : base(dBContext, mapper) {
     }
 
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() {
@@ -70,11 +65,11 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         try {
             CRUDTransaction? existDTO = await FindRecord(dto.Id);
 
-            if (existDTO != null) {
+            if (existDTO != null)
+            {
                 var mapped = _mapper.Map<CRUDTransaction>(dto);
                 existDTO.SetCreated(mapped);
-                _dBContext.Entry(existDTO).State = EntityState.Detached;
-                _dBContext.Entry(mapped).State = EntityState.Modified;
+                UpdateEntity(existDTO, mapped);
                 var result = await _dBContext.SaveChangesAsync();
                 return result > 0;
             }
@@ -89,7 +84,7 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
     public async Task<bool> DeleteRecordByIdAsync(int id) {
         try {
             CRUDTransaction? existDTO = await FindRecord(id);
-            if (existDTO.NullChecker()) {
+            if (existDTO != null) {
                 _dBContext.CRUDTransaction.Remove(existDTO);
                 var result = await _dBContext.SaveChangesAsync();
                 return result > 0;                
