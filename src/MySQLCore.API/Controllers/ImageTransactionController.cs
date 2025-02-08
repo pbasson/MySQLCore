@@ -22,6 +22,18 @@ namespace MySQLCore.API.Controllers
         }
 
         [HttpGet]
+        [Route("GetAllRecordsPaginationAsync/{page:int}")]
+        public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
+            if (page > 0)  {
+                var result = await _service.GetAllRecordsPaginationAsync(page);
+                return result.NullChecker() && result.Any() ? result : new List<ImageTransactionDTO>();
+            }
+            
+            return BadRequest(); 
+        }
+
+
+        [HttpGet]
         [Route("GetRecordById/{Id:int}")]
         public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int Id) {
             if (Id > 0)  {

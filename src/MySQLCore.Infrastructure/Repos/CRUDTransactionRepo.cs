@@ -30,7 +30,8 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
 
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
         try {
-            var results = await _dBContext.CRUDTransaction.AsNoTracking().ToListAsync();
+            var settings = new PageSettings();
+            var results = await _dBContext.CRUDTransaction.Skip( settings.SkipCount(page) ).Take(settings.PageSize).AsNoTracking().ToListAsync();
             return _mapper.Map<List<CRUDTransactionDTO>>(results);
         }
         catch (Exception) {

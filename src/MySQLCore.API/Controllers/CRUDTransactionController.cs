@@ -24,10 +24,14 @@ namespace MySQLCore.API.Controllers
         }
 
         [HttpGet]
-        [Route("GetAllRecords")]
-        public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecords() {
-            var result = await _service.GetAllRecordsAsync();
-            return result.NullChecker() && result.Any() ? result : new List<CRUDTransactionDTO>();
+        [Route("GetAllRecordsPaginationAsync/{page:int}")]
+        public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
+            if (page > 0)  {
+                var result = await _service.GetAllRecordsPaginationAsync(page);
+                return result.NullChecker() && result.Any() ? result : new List<CRUDTransactionDTO>();
+            }
+            
+            return BadRequest(); 
         }
 
         [HttpGet]

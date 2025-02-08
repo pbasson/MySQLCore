@@ -31,7 +31,9 @@ public class ImageTransactionRepo : IImageTransactionRepo
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
         try {
-            var results = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
+            var settings = new PageSettings();
+            var results = await _dBContext.ImageTransaction.Skip(settings.SkipCount(page)).Take(settings.PageSize)
+                        .Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
             return _mapper.Map<List<ImageTransactionDTO>>(results);
         }
         catch (Exception) {
