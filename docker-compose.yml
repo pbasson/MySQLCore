@@ -17,7 +17,7 @@ services:
       context: .
       dockerfile: src/MySQLCore.API/Dockerfile
     ports:
-      - 5840:5840
+      - 7840:7840
     env_file:
       - env/docker-env/dev-mysqlcore-api.env
       - env/docker-env/dev-mysqlcore-apikey.env
