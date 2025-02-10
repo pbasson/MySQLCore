@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
 # Set HTTPS URL binding
-# ENV ASPNETCORE_URLS="https://+:7840"
+ENV ASPNETCORE_URLS="https://+:7840"
 
 # Expose HTTPS port
 EXPOSE 7840
@@ -19,11 +19,6 @@ WORKDIR /src/MySQLCore.API
 RUN dotnet restore "${project}"
 RUN dotnet build "${project}" -c ${configuration} -o /app/build
 
-RUN mkdir /https/
-
-# Generate Dev Certificate
-RUN dotnet dev-certs https -ep /https/aspnetcore.pfx -p "yourpassword"
-
 # Publish application
 FROM build AS publish
 RUN dotnet publish "${project}" -c ${configuration} -o /app/publish
@@ -34,9 +29,6 @@ WORKDIR /app
 
 # Copy published application
 COPY --from=publish /app/publish .
-
-# Copy Dev Certificate from build stage
-COPY --from=build /https/aspnetcore.pfx /https/aspnetcore.pfx
 
 # Start the API
 ENTRYPOINT [ "dotnet", "MySQLCore.API.dll" ]
