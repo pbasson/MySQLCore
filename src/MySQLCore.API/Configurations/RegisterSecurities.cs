@@ -6,8 +6,8 @@ namespace MySQLCore.API.Configurations {
     {
         public static void RegisterSecurity(this WebApplicationBuilder builder)
         {
-            var certPath = builder.Configuration[AppSettings.CERTIFICATE_FILE];
-            var certPassword = builder.Configuration[AppSettings.CERTIFICATE_PASSWORD];
+            var certPath = Environment.GetEnvironmentVariable(AppSettings.CERTIFICATE_FILE) ?? builder.Configuration[AppSettings.CERTIFICATE_FILE];
+            var certPassword = Environment.GetEnvironmentVariable(AppSettings.CERTIFICATE_PASSWORD) ?? builder.Configuration[AppSettings.CERTIFICATE_PASSWORD];
 
             if (!string.IsNullOrEmpty(certPath) && !string.IsNullOrEmpty(certPassword))
             {
