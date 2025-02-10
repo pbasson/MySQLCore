@@ -8,19 +8,14 @@ using MySQLCore.Infrastructure.Models;
 
 namespace MySQLCore.Infrastructure.Repos;
 
-public class CRUDTransactionRepo : ICRUDTransactionRepo
+public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo 
 {
-    private readonly MySQLCoreDBContext _dBContext = default!;
-    private readonly IMapper _mapper = default!;
-
-    public CRUDTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) {
-        _dBContext = dBContext;
-        _mapper = mapper;    
+    public CRUDTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) : base(dBContext, mapper) {
     }
 
-    public async Task<List<CRUDTransactionDTO>> GetAllRecords() {
+    public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() {
         try {
-            var results = await _dBContext.CRUDTransaction.ToListAsync();
+            var results = await _dBContext.CRUDTransaction.AsNoTracking().ToListAsync();
             return _mapper.Map<List<CRUDTransactionDTO>>(results);
         }
         catch (Exception) {
@@ -28,7 +23,18 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<CRUDTransactionDTO> GetRecordById(int id) {
+    public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
+        try {
+            var settings = new PageSettings();
+            var results = await _dBContext.CRUDTransaction.OrderBy(x=>x.Id).Skip( settings.SkipCount(page) ).Take(settings.PageSize).AsNoTracking().ToListAsync();
+            return _mapper.Map<List<CRUDTransactionDTO>>(results);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+    public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id) {
         try {
             var result = await _dBContext.CRUDTransaction.FirstOrDefaultAsync(x => x.Id == id);
             return _mapper.Map<CRUDTransactionDTO>(result);
@@ -38,14 +44,12 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<bool> CreateRecord(CreateCRUDTransactionDTO dto) {
+    public async Task<bool> CreateRecordAsync(CreateCRUDTransactionDTO dto) {
         try{
             if ( dto.NullChecker() ) {
                 var mapped = _mapper.Map<CRUDTransaction>(dto);
                 _dBContext.CRUDTransaction.Add(mapped);
-                var result = await _dBContext.SaveChangesAsync();
-
-                return result > 0;
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -55,17 +59,16 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<bool> UpdateRecord(UpdateCRUDTransactionDTO dto) {
+    public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) {
         try {
-            CRUDTransaction? existDTO = await FindRecord(dto.Id);
+            CRUDTransaction? existDTO = await FindRecordByIdAsync(dto.Id);
 
-            if (existDTO != null) {
+            if (existDTO != null)
+            {
                 var mapped = _mapper.Map<CRUDTransaction>(dto);
                 existDTO.SetCreated(mapped);
-                _dBContext.Entry(existDTO).State = EntityState.Detached;
-                _dBContext.Entry(mapped).State = EntityState.Modified;
-                var result = await _dBContext.SaveChangesAsync();
-                return result > 0;
+                UpdateEntity(existDTO, mapped);
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -75,13 +78,12 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
 
-    public async Task<bool> DeleteRecord(int id) {
+    public async Task<bool> DeleteRecordByIdAsync(int id) {
         try {
-            CRUDTransaction? existDTO = await FindRecord(id);
-            if (existDTO.NullChecker()) {
+            CRUDTransaction? existDTO = await FindRecordByIdAsync(id);
+            if (existDTO != null) {
                 _dBContext.CRUDTransaction.Remove(existDTO);
-                var result = await _dBContext.SaveChangesAsync();
-                return result > 0;                
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -91,7 +93,7 @@ public class CRUDTransactionRepo : ICRUDTransactionRepo
         }
     }
     
-    private async Task<CRUDTransaction?> FindRecord(int id) {
+    private async Task<CRUDTransaction?> FindRecordByIdAsync(int id) {
         var result = await _dBContext.CRUDTransaction.FindAsync(id);
         return result.NullChecker() ? result : null;
     }

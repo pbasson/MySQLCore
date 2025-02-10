@@ -4,7 +4,7 @@ services:
     ports:
       - 33066:3306
     env_file:
-      - env/docker-env/dev-mysql-db.env
+      - env/docker-env/mysql-db.dev.env
     volumes:
       - mysqlcore_vol:/var/lib/mysql
     networks:
@@ -17,17 +17,19 @@ services:
       context: .
       dockerfile: src/MySQLCore.API/Dockerfile
     ports:
-      - 5840:5840
+      - 7840:7840
     env_file:
-      - env/docker-env/dev-mysqlcore-api.env
-      - env/docker-env/dev-mysqlcore-apikey.env
-      - env/docker-env/dev-mysql-user.env
+      - env/docker-env/mysql-user.dev.env
+      - env/docker-env/mysqlcore-certificate.dev.env
+      - env/docker-env/mysqlcore-api.dev.env
+      - env/docker-env/mysqlcore-apikey.dev.env
     restart: always
     depends_on:
       - mysqlcore.db
     networks:
       - mysqlcore_network
-
+    volumes:
+      - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
 volumes:
   mysqlcore_vol:
 

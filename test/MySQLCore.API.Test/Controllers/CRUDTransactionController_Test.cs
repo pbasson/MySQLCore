@@ -25,7 +25,7 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
     [Fact]
     public async Task GetAllRecords_CheckIsValue() {
         var response = _fixture.Create<List<CRUDTransactionDTO>>();
-        var request = _service.Setup(x => x.GetAllRecords() ).ReturnsAsync(response);
+        var request = _service.Setup(x => x.GetAllRecordsAsync() ).ReturnsAsync(response);
         try {
             var result = await _controller.GetAllRecords();
 
@@ -41,7 +41,7 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
     public async Task GetRecordById_CheckIsValue() {
         var response = _fixture.Create<CRUDTransactionDTO>();
         var parameter = _fixture.Create<int>();
-        var request = _service.Setup(x => x.GetRecordById(parameter)).ReturnsAsync(response);
+        var request = _service.Setup(x => x.GetRecordByIdAsync(parameter)).ReturnsAsync(response);
 
         try
         {
@@ -87,7 +87,7 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
     public async Task DeleteRecord_CheckIsValue() {
         var response = true;
         var parameter = 1;
-        var request = _service.Setup( x => x.DeleteRecord(parameter)).ReturnsAsync(response);
+        var request = _service.Setup( x => x.DeleteRecordByIdAsync(parameter)).ReturnsAsync(response);
         try {
             var result = await _controller.DeleteRecord(parameter);
             Assert.True(result.Value);

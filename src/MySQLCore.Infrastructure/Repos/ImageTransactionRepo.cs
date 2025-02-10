@@ -8,19 +8,14 @@ using MySQLCore.Infrastructure.Models;
 
 namespace MySQLCore.Infrastructure.Repos;
 
-public class ImageTransactionRepo : IImageTransactionRepo
+public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 {
-    private readonly MySQLCoreDBContext _dBContext = default!;
-    private readonly IMapper _mapper = default!;
-
-    public ImageTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) {
-        _dBContext = dBContext;
-        _mapper = mapper;    
+    public ImageTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) : base(dBContext, mapper) {
     }
 
-    public async Task<List<ImageTransactionDTO>> GetAllRecords() {
+    public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() {
         try {
-            var results = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).ToListAsync();
+            var results = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
             return _mapper.Map<List<ImageTransactionDTO>>(results);
         }
         catch (Exception) {
@@ -28,7 +23,19 @@ public class ImageTransactionRepo : IImageTransactionRepo
         }
     }
 
-    public async Task<ImageTransactionDTO> GetRecordById(int id)  {
+    public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
+        try {
+            var settings = new PageSettings();
+            var results = await _dBContext.ImageTransaction.OrderBy(x => x.ImageTransactionID).Skip(settings.SkipCount(page)).Take(settings.PageSize)
+                        .Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
+            return _mapper.Map<List<ImageTransactionDTO>>(results);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+    public async Task<ImageTransactionDTO> GetRecordByIdAsync(int id)  {
         try {
             var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).FirstOrDefaultAsync(x => x.ImageTransactionID == id);
             return _mapper.Map<ImageTransactionDTO>(result);
@@ -38,14 +45,12 @@ public class ImageTransactionRepo : IImageTransactionRepo
         }
     }
 
-    public async Task<bool> CreateRecord(ImageTransactionDTO dto) {
+    public async Task<bool> CreateRecordAsync(ImageTransactionDTO dto) {
         try {
             if ( dto.NullChecker() ) {
                 var mapped = _mapper.Map<ImageTransaction>(dto);
                 _dBContext.ImageTransaction.Add(mapped);
-                var result = await _dBContext.SaveChangesAsync();
-
-                return result > 0;
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -55,17 +60,15 @@ public class ImageTransactionRepo : IImageTransactionRepo
         }
     }
 
-    public async Task<bool> UpdateRecord(ImageTransactionDTO dto) {
+    public async Task<bool> UpdateRecordAsync(ImageTransactionDTO dto) {
         try {
             ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
 
             if (existDTO != null) {
                 var mapped = _mapper.Map<ImageTransaction>(dto);
                 existDTO.SetCreated(mapped);
-                _dBContext.Entry(existDTO).State = EntityState.Detached;
-                _dBContext.Entry(mapped).State = EntityState.Modified;
-                var result = await _dBContext.SaveChangesAsync();
-                return result > 0;
+                UpdateEntity(existDTO, mapped);
+                return await SaveChangesAsync();
             }
 
             return false;
@@ -75,14 +78,12 @@ public class ImageTransactionRepo : IImageTransactionRepo
         }
     }
 
-
-    public async Task<bool> DeleteRecord(int id)  {
+    public async Task<bool> DeleteRecordByIdAsysc(int id)  {
         try {
             ImageTransaction? existDTO = await FindRecord(id);
-            if ( existDTO.NullChecker() ) {
+            if ( existDTO != null ) {
                 _dBContext.ImageTransaction.Remove(existDTO);
-                var result = await _dBContext.SaveChangesAsync();
-                return result > 0;                
+                return await SaveChangesAsync();
             }
 
             return false;
