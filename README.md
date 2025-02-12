@@ -8,7 +8,21 @@ ASP.NET Core REST API integrated with MySQL Database.
 -----------
 ## Features
 
-Key features include CRUD operations with MySQL using Entity Framework, implementation of Onion Architecture, and deployment through multiple Docker containers (API and database).
+- CRUD operations with MySQL using Entity Framework, structured within an Onion Architecture for modular design.
+- Containerized deployment via Docker (API & database) with Kubernetes orchestration for scalability.
+- Environment variables for configuration management and a structured Git workflow.
+- Automated database handling, including creation, table management, and teardown processes.
+- Security measures implemented, including HTTPS, TLS, and API key authentication.
+
+### Controllers
+
+#### CRUDTransactionController
+
+Handles basic CRUD operations for single-table transactions.
+
+#### ImageTransactionController
+
+Manages a one-to-many table structure for storing image file paths efficiently.
 
 ### Technology
 
@@ -20,7 +34,12 @@ Key features include CRUD operations with MySQL using Entity Framework, implemen
 |---|---|
 | ASP.NET | 8.0 |
 | MySQL | 8.3 |
+| NUnit | - |
+| Elmah  | - |
 | Swagger | - |
+| Docker | - |
+| Kubernetes | - |
+| Automapper | - |
 
 -----------
 ## Usage

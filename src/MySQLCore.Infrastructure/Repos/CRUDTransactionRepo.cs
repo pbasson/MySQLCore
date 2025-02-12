@@ -15,7 +15,7 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() {
         try {
-            var results = await _dBContext.CRUDTransaction.AsNoTracking().ToListAsync();
+            var results = await _dBContext.CRUDTransaction.OrderByDescending(x => x.Id).AsNoTracking().ToListAsync();
             return _mapper.Map<List<CRUDTransactionDTO>>(results);
         }
         catch (Exception) {
