@@ -15,7 +15,8 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() {
         try {
-            var results = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
+            var results = await _dBContext.ImageTransaction.OrderByDescending(x => x.ImageTransactionID)
+                        .Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
             return _mapper.Map<List<ImageTransactionDTO>>(results);
         }
         catch (Exception) {
@@ -26,7 +27,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
         try {
             var settings = new PageSettings();
-            var results = await _dBContext.ImageTransaction.OrderBy(x => x.ImageTransactionID).Skip(settings.SkipCount(page)).Take(settings.PageSize)
+            var results = await _dBContext.ImageTransaction.OrderByDescending(x => x.ImageTransactionID).Skip(settings.SkipCount(page)).Take(settings.PageSize)
                         .Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
             return _mapper.Map<List<ImageTransactionDTO>>(results);
         }

@@ -72,14 +72,20 @@ public static class RegisterServices
     }
 
     public static void RegisterApplication(this WebApplication app) {
-        if (app.Environment.IsDevelopment()) {
+        var isDev = app.Environment.IsDevelopment();
+
+        if (isDev) {
             app.UseSwagger();
             app.UseSwaggerUI();
         }
 
-        app.UseMiddleware<ApiKeyMiddleware>( );
-        app.UseHttpsRedirection();
-        app.UseHsts();
+        if(!isDev || true)
+        {
+            app.UseHttpsRedirection();
+            app.UseHsts();
+            app.UseMiddleware<ApiKeyMiddleware>( );
+        }
+
         app.UseAuthorization();
         app.MapControllers();
         app.UseElmah();
