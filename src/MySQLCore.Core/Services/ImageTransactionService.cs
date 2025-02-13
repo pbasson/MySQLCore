@@ -57,7 +57,7 @@ public class ImageTransactionService : IImageTransactionService
         }
     }
 
-    public async Task<bool> CreateRecordAsync(ImageTransactionDTO dto)
+    public async Task<bool> CreateRecordAsync(CreateImageTransactionDTO dto)
     {
         try
         {
@@ -72,7 +72,7 @@ public class ImageTransactionService : IImageTransactionService
     }
 
 
-    public async Task<bool> UpdateRecordAsync(ImageTransactionDTO dto)
+    public async Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto)
     {
         try
         {

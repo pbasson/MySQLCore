@@ -22,8 +22,12 @@ public class MappingProfile : Profile
         #endregion 
             
         #region ImageTransaction
-        CreateMap<ImageGalleryDTO, ImageGallery>().ReverseMap();
         CreateMap<ImageTransactionDTO, ImageTransaction>().ReverseMap();
+        CreateMap<CreateImageTransactionDTO, ImageTransaction>().ReverseMap();
+        CreateMap<UpdateImageTransactionDTO, ImageTransaction>().ReverseMap();
+        
+        CreateMap<ImageGalleryDTO, ImageGallery>().ReverseMap();
+        CreateMap<CreateImageGalleryDTO, ImageGallery>().ReverseMap();
         #endregion
     }
 
