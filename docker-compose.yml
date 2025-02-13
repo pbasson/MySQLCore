@@ -5,6 +5,7 @@ services:
       - 33066:3306
     env_file:
       - env/docker-env/mysql-db.dev.env
+      - env/docker-env/mysql-user.dev.env
     volumes:
       - mysqlcore_vol:/var/lib/mysql
     networks:
