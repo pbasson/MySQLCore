@@ -27,7 +27,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
         try {
             var settings = new PageSettings();
-            var results = await _dBContext.ImageTransaction.OrderByDescending(x => x.ImageTransactionID).Skip(settings.SkipCount(page)).Take(settings.PageSize)
+            var results = await _dBContext.ImageTransaction.OrderBy(x => x.ImageTransactionID).Skip(settings.SkipCount(page)).Take(settings.PageSize)
                         .Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
             return _mapper.Map<List<ImageTransactionDTO>>(results);
         }
@@ -46,7 +46,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         }
     }
 
-    public async Task<bool> CreateRecordAsync(ImageTransactionDTO dto) {
+    public async Task<bool> CreateRecordAsync(CreateImageTransactionDTO dto) {
         try {
             if ( dto.NullChecker() ) {
                 var mapped = _mapper.Map<ImageTransaction>(dto);
@@ -61,7 +61,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         }
     }
 
-    public async Task<bool> UpdateRecordAsync(ImageTransactionDTO dto) {
+    public async Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto) {
         try {
             ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
 
@@ -69,6 +69,16 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
                 var mapped = _mapper.Map<ImageTransaction>(dto);
                 existDTO.SetCreated(mapped);
                 UpdateEntity(existDTO, mapped);
+                
+                if( existDTO.IsGallery() && mapped.IsGallery() )
+                {
+                    List<ImageGallery> RemoveList = existDTO.ImageGalleries.Where(x => !mapped.ImageGalleries.Any(z => z.ImageGalleryId == x.ImageGalleryId)).ToList();
+                    if (RemoveList.Count > 0) { _dBContext.RemoveRange(RemoveList); }
+
+                    List<ImageGallery> AddList = mapped.ImageGalleries.Where(x => x.ImageGalleryId == 0).Select(x => SetGallery(x, mapped)).ToList();
+                    if (AddList.Count > 0) { _dBContext.ImageGallery.AddRange(AddList); }
+                }
+
                 return await SaveChangesAsync();
             }
 
@@ -78,6 +88,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
             throw;
         }
     }
+
 
     public async Task<bool> DeleteRecordByIdAsysc(int id)  {
         try {
@@ -95,8 +106,14 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     }
     
     private async Task<ImageTransaction?> FindRecord(int id) {
-        var result = await _dBContext.ImageTransaction.FindAsync(id);
+        var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).FirstOrDefaultAsync(x => x.ImageTransactionID == id);
         return result.NullChecker() ? result : null;
     }
+
+    private ImageGallery SetGallery(ImageGallery x, ImageTransaction mapped)
+    {
+        return new ImageGallery { ImageGalleryId = 0, ImageTransactionID = mapped.ImageTransactionID, ImagePath = x.ImagePath };
+    }
+
 }
 
