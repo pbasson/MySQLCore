@@ -16,6 +16,8 @@ public class ImageTransaction : BaseModel
         }
         return false;
     }
+
+
 }
 
 public class ImageGallery 
@@ -28,5 +30,6 @@ public class ImageGallery
 
     public string? ImagePath { get; set; }
 
-    public virtual ImageTransaction? ImageTransaction {get; set;}
+    // public virtual ImageTransaction? ImageTransaction {get; set;}
+
 }

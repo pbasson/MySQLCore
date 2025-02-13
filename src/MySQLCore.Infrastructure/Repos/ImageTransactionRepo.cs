@@ -70,20 +70,15 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
             if (existDTO != null) {
                 var mapped = _mapper.Map<ImageTransaction>(dto);
                 existDTO.SetCreated(mapped);
-
                 UpdateEntity(existDTO, mapped);
                 
-                List<ImageGallery> RemoveList = new();
-                List<ImageGallery> AddList = new();
-                if( existDTO.IsGallery() && mapped.IsGallery() ) {
-                    RemoveList = existDTO.ImageGalleries.Where(x => !mapped.ImageGalleries.Any( z => z.ImageGalleryId == x.ImageGalleryId) ).ToList();
+                if( existDTO.IsGallery() && mapped.IsGallery() )
+                {
+                    List<ImageGallery> RemoveList = existDTO.ImageGalleries.Where(x => !mapped.ImageGalleries.Any(z => z.ImageGalleryId == x.ImageGalleryId)).ToList();
+                    if (RemoveList.Count > 0) { _dBContext.RemoveRange(RemoveList); }
 
-                    if (RemoveList.Count > 0 ) { _dBContext.RemoveRange(RemoveList); }
-
-                    AddList = mapped.ImageGalleries.Where(x => x.ImageGalleryId == 0)
-                                .Select(x => new ImageGallery{ ImageTransactionID = mapped.ImageTransactionID, ImagePath = x.ImagePath } ).ToList();
-
-                    if (AddList.Count > 0 ) { await _dBContext.ImageGallery.AddRangeAsync(AddList); }
+                    List<ImageGallery> AddList = mapped.ImageGalleries.Where(x => x.ImageGalleryId == 0).Select(x => SetGallery(x, mapped)).ToList();
+                    if (AddList.Count > 0) { _dBContext.ImageGallery.AddRange(AddList); }
                 }
 
                 return await SaveChangesAsync();
@@ -95,6 +90,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
             throw;
         }
     }
+
 
     public async Task<bool> DeleteRecordByIdAsysc(int id)  {
         try {
@@ -115,5 +111,11 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).FirstOrDefaultAsync(x => x.ImageTransactionID == id);
         return result.NullChecker() ? result : null;
     }
+
+    private ImageGallery SetGallery(ImageGallery x, ImageTransaction mapped)
+    {
+        return new ImageGallery { ImageGalleryId = 0, ImageTransactionID = mapped.ImageTransactionID, ImagePath = x.ImagePath };
+    }
+
 }
 
