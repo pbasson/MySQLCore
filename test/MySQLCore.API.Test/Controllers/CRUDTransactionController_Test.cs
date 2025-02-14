@@ -101,6 +101,21 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
     }
 
     [Fact]
+    public async Task CreateRecord_CheckIsValueFalse() {
+        var response = false;
+        var parameter = new CreateCRUDTransactionDTO ();
+        var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _controller.CreateRecord(parameter);
+            Assert.False(result.Value);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+
+    [Fact]
     public async Task UpdateRecord_CheckIsValue() {
         var response = true;
         var parameter = new UpdateCRUDTransactionDTO { Id = 1, Name = "John Doe"};
@@ -115,6 +130,20 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
     }
 
     [Fact]
+    public async Task UpdateRecord_CheckIsValueFalse() {
+        var response = false;
+        var parameter = new UpdateCRUDTransactionDTO ();
+        var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _controller.UpdateRecord(parameter);
+            Assert.False(result.Value);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+    [Fact]
     public async Task DeleteRecord_CheckIsValue() {
         var response = true;
         var parameter = 1;
@@ -122,6 +151,20 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
         try {
             var result = await _controller.DeleteRecord(parameter);
             Assert.True(result.Value);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+    [Fact]
+    public async Task DeleteRecord_CheckIsValueFalse() {
+        var response = false;
+        var parameter = 0;
+        var request = _service.Setup( x => x.DeleteRecordByIdAsync(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _controller.DeleteRecord(parameter);
+            Assert.False(result.Value);
         }
         catch (Exception) {
             throw;
