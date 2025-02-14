@@ -79,13 +79,13 @@ public static class RegisterServices
             app.UseSwaggerUI();
         }
 
-        if(!isDev || true)
+        if(!isDev)
         {
             app.UseHttpsRedirection();
             app.UseHsts();
-            app.UseMiddleware<ApiKeyMiddleware>( );
         }
 
+        app.UseMiddleware<ApiKeyMiddleware>( );
         app.UseAuthorization();
         app.MapControllers();
         app.UseElmah();
