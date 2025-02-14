@@ -20,28 +20,26 @@ namespace MySQLCore.API.Controllers
         [Route("GetAllRecords")]
         public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecords() {
             var result = await _service.GetAllRecordsAsync();
-            return result.NullChecker() && result.Any() ? result : new List<CRUDTransactionDTO>();
+            return result.NullChecker() && result.Count > 0 ? result : new List<CRUDTransactionDTO>();
         }
 
         [HttpGet]
         [Route("GetAllRecordsPaginationAsync/{page:int}")]
         public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
-            if (page > 0)  {
+            if ( page.ZeroCheck() )  {
                 var result = await _service.GetAllRecordsPaginationAsync(page);
-                return result.NullChecker() && result.Any() ? result : new List<CRUDTransactionDTO>();
+                return result.NullChecker() && result.Count > 0 ? result : new List<CRUDTransactionDTO>();
             }
-            
             return BadRequest(); 
         }
 
         [HttpGet]
         [Route("GetRecordById/{Id:int}")]
         public async Task<ActionResult<CRUDTransactionDTO>> GetRecordById(int Id) {
-            if (Id > 0)  {
+            if ( Id.ZeroCheck() )  {
                 var result = await _service.GetRecordByIdAsync(Id);
                 return result.NullChecker() ? result : new CRUDTransactionDTO();
             }
-            
             return BadRequest(); 
         }
 
@@ -64,11 +62,10 @@ namespace MySQLCore.API.Controllers
         [HttpDelete]
         [Route("DeleteRecord")]
         public async Task<ActionResult<bool>> DeleteRecord(int id) {
-            if (id > 0) {
+            if (id.ZeroCheck()) {
                 var result = await _service.DeleteRecordByIdAsync(id);
                 return result;
             }
-            
             return BadRequest();
         }
     }
