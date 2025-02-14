@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using MySQLCore.API.Configurations;
 using MySQLCore.Core.CoreHelpers;
 using MySQLCore.Core.Interfaces.InterfaceServices;
 using MySQLCore.Core.Models.DTOs;
