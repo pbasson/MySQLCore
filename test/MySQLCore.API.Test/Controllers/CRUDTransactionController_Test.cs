@@ -36,6 +36,21 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
             throw;
         }
     }
+    
+    [Fact]
+    public async Task GetAllRecords_CheckValueEmpty() {
+        var response = new List<CRUDTransactionDTO>();
+        var request = _service.Setup(x => x.GetAllRecordsAsync() ).ReturnsAsync(response);
+        try {
+            var result = await _controller.GetAllRecords();
+
+            Assert.NotNull(result);
+            Assert.Empty(result.Value);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
 
     [Fact]
     public async Task GetRecordById_CheckIsValue() {
@@ -43,14 +58,30 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
         var parameter = _fixture.Create<int>();
         var request = _service.Setup(x => x.GetRecordByIdAsync(parameter)).ReturnsAsync(response);
 
-        try
-        {
+        try {
             var result = await _controller.GetRecordById(parameter);
 
             Assert.NotNull(result);
+            Assert.NotNull(result.Value);
         }
-        catch (Exception)
-        {
+        catch (Exception) {
+            throw;
+        }
+    }
+
+    [Fact]
+    public async Task GetRecordById_CheckValueEmpty() {
+        var response = new CRUDTransactionDTO();
+        var parameter = 0;
+        var request = _service.Setup(x => x.GetRecordByIdAsync(parameter)).ReturnsAsync(response);
+
+        try {
+            var result = await _controller.GetRecordById(parameter);
+
+            Assert.NotNull(result);
+            Assert.Null(result.Value);
+        }
+        catch (Exception) {
             throw;
         }
     }
@@ -58,8 +89,8 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
     [Fact]
     public async Task CreateRecord_CheckIsValue() {
         var response = true;
-        var parameter = new CRUDTransactionDTO { Name = "John Doe"};
-        var request = _service.Setup( x => x.CreateRecord(parameter)).ReturnsAsync(response);
+        var parameter = new CreateCRUDTransactionDTO { Name = "John Doe"};
+        var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
         try {
             var result = await _controller.CreateRecord(parameter);
             Assert.True(result.Value);
@@ -72,8 +103,8 @@ public class CRUDTransactionController_Test : ICRUDTransactionController_Test
     [Fact]
     public async Task UpdateRecord_CheckIsValue() {
         var response = true;
-        var parameter = new CRUDTransactionDTO { Id = 1, Name = "John Doe"};
-        var request = _service.Setup( x => x.UpdateRecord(parameter)).ReturnsAsync(response);
+        var parameter = new UpdateCRUDTransactionDTO { Id = 1, Name = "John Doe"};
+        var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
         try {
             var result = await _controller.UpdateRecord(parameter);
             Assert.True(result.Value);
