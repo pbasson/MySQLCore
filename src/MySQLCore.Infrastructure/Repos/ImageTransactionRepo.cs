@@ -63,23 +63,26 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto) {
         try {
-            ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
-
-            if (existDTO != null) {
-                var mapped = _mapper.Map<ImageTransaction>(dto);
-                existDTO.SetCreated(mapped);
-                UpdateEntity(existDTO, mapped);
+            if (dto != null)
+            {
+                ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
                 
-                if( existDTO.IsGallery() && mapped.IsGallery() )
-                {
-                    List<ImageGallery> RemoveList = existDTO.ImageGalleries.Where(x => !mapped.ImageGalleries.Any(z => z.ImageGalleryId == x.ImageGalleryId)).ToList();
-                    if (RemoveList.Count > 0) { _dBContext.RemoveRange(RemoveList); }
+                if (existDTO != null) {
+                    var mapped = _mapper.Map<ImageTransaction>(dto);
+                    existDTO.SetCreated(mapped);
+                    UpdateEntity(existDTO, mapped);
+                    
+                    if( existDTO.IsGallery() && mapped.IsGallery() )
+                    {
+                        List<ImageGallery> RemoveList = existDTO.ImageGalleries.Where(x => !mapped.ImageGalleries.Any(z => z.ImageGalleryId == x.ImageGalleryId)).ToList();
+                        if (RemoveList.Count > 0) { _dBContext.RemoveRange(RemoveList); }
 
-                    List<ImageGallery> AddList = mapped.ImageGalleries.Where(x => x.ImageGalleryId == 0).Select(x => SetGallery(x, mapped)).ToList();
-                    if (AddList.Count > 0) { _dBContext.ImageGallery.AddRange(AddList); }
+                        List<ImageGallery> AddList = mapped.ImageGalleries.Where(x => x.ImageGalleryId == 0).Select(x => SetGallery(x, mapped)).ToList();
+                        if (AddList.Count > 0) { _dBContext.ImageGallery.AddRange(AddList); }
+                    }
+
+                    return await SaveChangesAsync();
                 }
-
-                return await SaveChangesAsync();
             }
 
             return false;
