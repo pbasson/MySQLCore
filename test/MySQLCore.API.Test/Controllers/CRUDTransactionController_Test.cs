@@ -1,10 +1,8 @@
+using Microsoft.Extensions.Logging;
 using MySQLCore.API.Controllers;
 using MySQLCore.Core.Interfaces.InterfaceControllers.Test;
 using MySQLCore.Core.Interfaces.InterfaceServices;
 using MySQLCore.Core.Models.DTOs;
-using AutoFixture;
-using Microsoft.Extensions.Logging;
-using Moq;
 using MySQLCore.Core.Test.Helpers;
 
 namespace MySQLCore.API.Test.Controllers;

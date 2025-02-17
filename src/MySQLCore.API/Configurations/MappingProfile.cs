@@ -17,8 +17,8 @@ public class MappingProfile : Profile
 
         #region CRUDTransaction
         CreateMap<CRUDTransactionDTO, CRUDTransaction>().ReverseMap();
-        CreateMap<CreateCRUDTransactionDTO, CRUDTransaction>();
-        CreateMap<UpdateCRUDTransactionDTO, CRUDTransaction>();
+        CreateMap<CreateCRUDTransactionDTO, CRUDTransaction>().ReverseMap();
+        CreateMap<UpdateCRUDTransactionDTO, CRUDTransaction>().ReverseMap();
         #endregion 
             
         #region ImageTransaction

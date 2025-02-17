@@ -1,4 +1,4 @@
-using AutoFixture;
+using MySQLCore.Core.Models.DTOs;
 using MySQLCore.Infrastructure.Entities.Tables;
 using MySQLCore.Infrastructure.Repos;
 
@@ -18,25 +18,29 @@ public class CRUDTransactionRepo_Test : BaseRepo_Test
     public async Task GetAllRecords_CheckIsValue()
     {
         var fixture = _fixture.Create<List<CRUDTransaction>>();
-        _dBContext.AddRange(fixture);
-        _dBContext.SaveChanges();
-        try {
+        base.AddRange(fixture);
+        
+        try
+        {
             var result = await _repo.GetAllRecordsAsync();
 
             Assert.NotNull(result);
             Assert.NotEmpty(result);
         }
-        catch (Exception) {
+        catch (Exception)
+        {
             throw;
         }
     }
+
+
 
     [Fact]
     public async Task GetAllRecords_CheckValueEmpty()
     {
         var fixture = new List<CRUDTransaction>();
-        _dBContext.AddRange(fixture);
-        _dBContext.SaveChanges();
+        base.AddRange(fixture);
+
         try {
             var result = await _repo.GetAllRecordsAsync();
 
@@ -48,51 +52,91 @@ public class CRUDTransactionRepo_Test : BaseRepo_Test
         }
     }
 
-//     [Fact]
-//     public Task GetRecordById_CheckIsValue()
-//     {
-//         throw new NotImplementedException();
-//     }
+    [Fact]
+    public async Task GetRecordById_CheckIsValue()
+    {
+        var response = _fixture.Create<CRUDTransaction>();
+        Add(response);
 
-//     [Fact]
-//     public Task GetRecordById_CheckValueEmpty()
-//     {
-//         throw new NotImplementedException();
-//     }
+        var parameter = response.Id;
 
-//     [Fact]
-//     public Task CreateRecord_CheckIsValue()
-//     {
-//         throw new NotImplementedException();
-//     }
+        try
+        {
+            var result = await _repo.GetRecordByIdAsync(parameter);
 
-//     [Fact]
-//     public Task CreateRecord_CheckIsValueFalse()
-//     {
-//         throw new NotImplementedException();
-//     }
+            Assert.NotNull(result);
+            Assert.NotEqual(0, result.Id);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 
-//     [Fact]
-//     public Task UpdateRecord_CheckIsValue()
-//     {
-//         throw new NotImplementedException();
-//     }
+    [Fact]
+    public async Task GetRecordById_CheckValueEmpty() {
+        var response = new CRUDTransaction();
+        Add(response);
+        var parameter = 0;
 
-//     [Fact]
-//     public Task UpdateRecord_CheckIsValueFalse()
-//     {
-//         throw new NotImplementedException();
-//     }
-    
-//     [Fact]
-//     public Task DeleteRecord_CheckIsValue()
-//     {
-//         throw new NotImplementedException();
-//     }
+        try {
+            var result = await _repo.GetRecordByIdAsync(parameter);
 
-//     [Fact]
-//     public Task DeleteRecord_CheckIsValueFalse()
-//     {
-//         throw new NotImplementedException();
-//     }
+            Assert.Null(result);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+        [Fact]
+        public async Task CreateRecord_CheckIsValue()
+        {
+            var parameter = new CRUDTransaction { Name = "John Doe"};
+            Add(parameter);
+            
+            try {
+                var result = await _repo.CreateRecordAsync(_mapper.Map<CreateCRUDTransactionDTO>(parameter));
+                Assert.True(result);
+            }
+            catch (Exception) {
+                throw;
+            }
+        }
+
+        [Fact]
+        public async Task CreateRecord_CheckIsValueFalse()
+        {
+            try {
+                var result = await _repo.CreateRecordAsync(null);
+                Assert.False(result);
+            }
+            catch (Exception) {
+                throw;
+            }
+        }
+
+    //     [Fact]
+    //     public Task UpdateRecord_CheckIsValue()
+    //     {
+    //         throw new NotImplementedException();
+    //     }
+
+    //     [Fact]
+    //     public Task UpdateRecord_CheckIsValueFalse()
+    //     {
+    //         throw new NotImplementedException();
+    //     }
+
+    //     [Fact]
+    //     public Task DeleteRecord_CheckIsValue()
+    //     {
+    //         throw new NotImplementedException();
+    //     }
+
+    //     [Fact]
+    //     public Task DeleteRecord_CheckIsValueFalse()
+    //     {
+    //         throw new NotImplementedException();
+    //     }
 }

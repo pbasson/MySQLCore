@@ -21,5 +21,17 @@ namespace MySQLCore.Infrastructure.Test.Repositories {
             _dBContext.Database.EnsureDeleted();
             _dBContext.Dispose();
         }
+
+        public void Add<T>(T response) where T : class
+        {
+            _dBContext.Add(response);
+            _dBContext.SaveChanges();
+        }
+
+        public void AddRange<T>(List<T> fixture) where T : class 
+        {
+            _dBContext.AddRange(fixture);
+            _dBContext.SaveChanges();
+        }
     }
 }

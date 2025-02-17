@@ -1,5 +1,3 @@
-using AutoFixture;
-
 namespace MySQLCore.Core.Test.Helpers {
     
     public class Base_Test

@@ -1,5 +1,3 @@
-using AutoFixture;
-using Moq;
 using MySQLCore.Core.Interfaces.InterfaceControllers.Test;
 using MySQLCore.Core.Interfaces.InterfaceRepos;
 using MySQLCore.Core.Models.DTOs;
