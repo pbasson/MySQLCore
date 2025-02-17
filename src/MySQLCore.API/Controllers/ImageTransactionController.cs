@@ -10,7 +10,7 @@ namespace MySQLCore.API.Controllers
     public class ImageTransactionController : BaseController
     {
         private readonly IImageTransactionService _service;
-        public ImageTransactionController(IImageTransactionService service, ILogger<CRUDTransactionController> logger) : base(logger) {
+        public ImageTransactionController(IImageTransactionService service, ILogger<ImageTransactionController> logger) : base(logger) {
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 

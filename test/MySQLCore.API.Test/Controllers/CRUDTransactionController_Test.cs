@@ -49,6 +49,40 @@ public class CRUDTransactionController_Test : Base_Test, ICRUDTransactionControl
     }
 
     [Fact]
+    public async Task GetAllRecordsPagination_CheckIsValue() {
+        var response = _fixture.Create<List<CRUDTransactionDTO>>();
+        var parameter = _fixture.Create<int>();
+        var request = _service.Setup(x => x.GetAllRecordsPaginationAsync(parameter)).ReturnsAsync(response);
+
+        try {
+            var result = await _controller.GetAllRecordsPaginationAsync(parameter);
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.Value);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+    
+    [Fact]
+    public async Task GetAllRecordsPagination_CheckValueEmpty() {
+        var response = new List<CRUDTransactionDTO>();
+        var parameter = 0;
+        var request = _service.Setup(x => x.GetAllRecordsPaginationAsync(parameter)).ReturnsAsync(response);
+
+        try {
+            var result = await _controller.GetAllRecordsPaginationAsync(parameter);
+
+            Assert.NotNull(result);
+            Assert.Null(result.Value);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
+
+    [Fact]
     public async Task GetRecordById_CheckIsValue() {
         var response = _fixture.Create<CRUDTransactionDTO>();
         var parameter = _fixture.Create<int>();
