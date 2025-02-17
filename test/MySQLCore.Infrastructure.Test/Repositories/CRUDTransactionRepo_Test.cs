@@ -92,11 +92,11 @@ public class CRUDTransactionRepo_Test : BaseRepo_Test
         [Fact]
         public async Task CreateRecord_CheckIsValue()
         {
-            var parameter = new CRUDTransaction { Name = "John Doe"};
-            Add(parameter);
+            var payload = new CRUDTransaction { Name = "John Doe"};
+            Add(payload);
             
             try {
-                var result = await _repo.CreateRecordAsync(_mapper.Map<CreateCRUDTransactionDTO>(parameter));
+                var result = await _repo.CreateRecordAsync(_mapper.Map<CreateCRUDTransactionDTO>(payload));
                 Assert.True(result);
             }
             catch (Exception) {
@@ -116,27 +116,59 @@ public class CRUDTransactionRepo_Test : BaseRepo_Test
             }
         }
 
-    //     [Fact]
-    //     public Task UpdateRecord_CheckIsValue()
-    //     {
-    //         throw new NotImplementedException();
-    //     }
+        [Fact]
+        public async Task UpdateRecord_CheckIsValue()
+        {
+            var payload = new CRUDTransaction { Name = "John Doe"};
+            Add(payload);
 
-    //     [Fact]
-    //     public Task UpdateRecord_CheckIsValueFalse()
-    //     {
-    //         throw new NotImplementedException();
-    //     }
+            var parameter = new UpdateCRUDTransactionDTO { Id = payload.Id, Name = "Tony Joe"};
+            
+            try {
+                var result = await _repo.UpdateRecordAsync(parameter);
+                Assert.True(result);
+            }
+            catch (Exception) {
+                throw;
+            }
+        }
 
-    //     [Fact]
-    //     public Task DeleteRecord_CheckIsValue()
-    //     {
-    //         throw new NotImplementedException();
-    //     }
+        [Fact]
+        public async Task UpdateRecord_CheckIsValueFalse()
+        {
+            try {
+                var result = await _repo.UpdateRecordAsync(null);
+                Assert.False(result);
+            }
+            catch (Exception) {
+                throw;
+            }
+        }
 
-    //     [Fact]
-    //     public Task DeleteRecord_CheckIsValueFalse()
-    //     {
-    //         throw new NotImplementedException();
-    //     }
+        [Fact]
+        public async Task DeleteRecord_CheckIsValue()
+        {
+            var payload = new CRUDTransaction { Name = "John Doe"};
+            Add(payload);
+
+            try {
+                var result = await _repo.DeleteRecordByIdAsync(payload.Id);
+                Assert.True( result );
+            }
+            catch (Exception) {
+                throw;
+            }
+        }
+
+        [Fact]
+        public async Task DeleteRecord_CheckIsValueFalse()
+        {
+            try {
+                var result = await _repo.DeleteRecordByIdAsync(0);
+                Assert.False( result );
+            }
+            catch (Exception) {
+                throw;
+            }
+        }
 }
