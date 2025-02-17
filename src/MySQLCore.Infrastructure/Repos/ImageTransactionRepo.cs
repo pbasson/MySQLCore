@@ -90,7 +90,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     }
 
 
-    public async Task<bool> DeleteRecordByIdAsysc(int id)  {
+    public async Task<bool> DeleteRecordByIdAsync(int id)  {
         try {
             ImageTransaction? existDTO = await FindRecord(id);
             if ( existDTO != null ) {

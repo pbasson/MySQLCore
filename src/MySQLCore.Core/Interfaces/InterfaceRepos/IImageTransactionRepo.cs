@@ -9,5 +9,5 @@ public interface IImageTransactionRepo
     Task<ImageTransactionDTO> GetRecordByIdAsync(int id);
     Task<bool> CreateRecordAsync(CreateImageTransactionDTO dto);
     Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto);
-    Task<bool> DeleteRecordByIdAsysc(int id);
+    Task<bool> DeleteRecordByIdAsync(int id);
 }
