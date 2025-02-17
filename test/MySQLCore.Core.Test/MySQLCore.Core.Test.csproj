@@ -24,4 +24,8 @@
     <PackageReference Include="Moq" Version="4.20.72" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../../src/MySQLCore.Core/MySQLCore.Core.csproj" />
+  </ItemGroup>
+
 </Project>
