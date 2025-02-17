@@ -5,12 +5,12 @@ using MySQLCore.Core.Models.DTOs;
 using AutoFixture;
 using Microsoft.Extensions.Logging;
 using Moq;
+using MySQLCore.Core.Test.Helpers;
 
 namespace MySQLCore.API.Test.Controllers;
 
-public class CRUDTransactionController_Test : ICRUDTransactionController_Test
+public class CRUDTransactionController_Test : Base_Test, ICRUDTransactionController_Test
 {
-    private readonly IFixture _fixture = new Fixture();
     private readonly Mock<ICRUDTransactionService> _service = new Mock<ICRUDTransactionService>();
     private readonly CRUDTransactionController _controller;
     private readonly ILogger<CRUDTransactionController> _logger = default!;

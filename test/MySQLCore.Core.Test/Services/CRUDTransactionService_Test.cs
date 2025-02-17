@@ -1,15 +1,15 @@
 using AutoFixture;
 using Moq;
+using MySQLCore.Core.Interfaces.InterfaceControllers.Test;
 using MySQLCore.Core.Interfaces.InterfaceRepos;
 using MySQLCore.Core.Models.DTOs;
 using MySQLCore.Core.Services;
+using MySQLCore.Core.Test.Helpers;
 
 namespace MySQLCore.Core.Test.Services;
 
-public class CRUDTransactionService_Test 
-// : ICRUDTransactionController_Test
+public class CRUDTransactionService_Test : Base_Test, ICRUDTransactionController_Test
 {
-    private readonly IFixture _fixture = new Fixture();
     private readonly Mock<ICRUDTransactionRepo> _repo = new();
     private readonly CRUDTransactionService _service;
 
@@ -86,69 +86,93 @@ public class CRUDTransactionService_Test
         }
     }
 
-    // [Fact]
-    // public Task CreateRecord_CheckIsValue()
-    // {
-    //     try {
-            
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+    [Fact]
+    public async Task CreateRecord_CheckIsValue()
+    {
+        var response = true;
+        var parameter = new CreateCRUDTransactionDTO { Name = "John Doe"};
+        var request = _repo.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _service.CreateRecordAsync(parameter);
+            Assert.True(result);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
 
-    // [Fact]
-    // public Task CreateRecord_CheckIsValueFalse()
-    // {
-    //     try {
-            
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+    [Fact]
+    public async Task CreateRecord_CheckIsValueFalse()
+    {
+        var response = false;
+        var parameter = new CreateCRUDTransactionDTO ();
+        var request = _repo.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _service.CreateRecordAsync(parameter);
+            Assert.False(result);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
 
-    // [Fact]
-    // public Task UpdateRecord_CheckIsValue()
-    // {
-    //     try {
-            
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+    [Fact]
+    public async Task UpdateRecord_CheckIsValue()
+    {
+        var response = true;
+        var parameter = new UpdateCRUDTransactionDTO { Id = 1, Name = "John Doe"};
+        var request = _repo.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _service.UpdateRecordAsync(parameter);
+            Assert.True(result);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
 
-    // [Fact]
-    // public Task UpdateRecord_CheckIsValueFalse()
-    // {
-    //     try {
-            
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+    [Fact]
+    public async Task UpdateRecord_CheckIsValueFalse()
+    {
+        var response = false;
+        var parameter = new UpdateCRUDTransactionDTO ();
+        var request = _repo.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _service.UpdateRecordAsync(parameter);
+            Assert.False(result);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
 
-    // [Fact]
-    // public Task DeleteRecord_CheckIsValue()
-    // {
-    //     try {
-            
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+    [Fact]
+    public async Task DeleteRecord_CheckIsValue()
+    {
+        var response = true;
+        var parameter = 1;
+        var request = _repo.Setup( x => x.DeleteRecordByIdAsync(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _service.DeleteRecordByIdAsync(parameter);
+            Assert.True(result );
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
 
-    // [Fact]
-    // public Task DeleteRecord_CheckIsValueFalse()
-    // {
-    //     try {
-            
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+    [Fact]
+    public async Task DeleteRecord_CheckIsValueFalse()
+    {
+        var response = false;
+        var parameter = 0;
+        var request = _repo.Setup( x => x.DeleteRecordByIdAsync(parameter)).ReturnsAsync(response);
+        try {
+            var result = await _service.DeleteRecordByIdAsync(parameter);
+            Assert.False(result);
+        }
+        catch (Exception) {
+            throw;
+        }
+    }
 }
