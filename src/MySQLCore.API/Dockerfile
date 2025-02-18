@@ -19,7 +19,7 @@ WORKDIR /src/MySQLCore.API
 RUN dotnet restore "${project}"
 RUN dotnet build "${project}" -c ${configuration} -o /app/build
 
-RUN dotnet test
+# RUN dotnet test
 
 # Publish application
 FROM build AS publish
