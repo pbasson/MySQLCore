@@ -25,8 +25,8 @@ spec:
         app: mysql
     spec:
       containers:
-      - image: mysql:5.6
-        name: mysql
+      - name: mysql
+        image: mysql:5.6
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: password
@@ -36,6 +36,13 @@ spec:
         volumeMounts:
         - name: mysql-persistent-storage
           mountPath: /var/lib/mysql
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
       volumes:
       - name: mysql-persistent-storage
         persistentVolumeClaim:
