@@ -1,7 +1,12 @@
 
 
-kubectl apply -f ./kubernetes/backend-kube/backend-deployment.yml
+kubectl apply -f ./env/kubernetes-env/mysqlcore-configmap.dev.yml
+kubectl delete -f ./env/kubernetes-env/mysqlcore-configmap.dev.yml
 
+kubectl apply -f ./env/kubernetes-env/mysqlcore-secret.dev.yml
+kubectl delete -f ./env/kubernetes-env/mysqlcore-secret.dev.yml
+
+kubectl apply -f ./kubernetes/backend-kube/backend-deployment.yml
 kubectl delete -f ./kubernetes/backend-kube/backend-deployment.yml
 
 kubectl delete -f ./kubernetes/backend-kube/backend-deployment.yml && kubectl apply -f ./kubernetes/backend-kube/backend-deployment.yml

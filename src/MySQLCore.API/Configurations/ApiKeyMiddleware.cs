@@ -17,12 +17,12 @@ public class ApiKeyMiddleware
             var getApiKey = context.RequestServices.GetRequiredService<IConfiguration>().GetValue<string>(ApiKeyHeader);
 
             if (!context.Request.Headers.TryGetValue(ApiKeyHeader, out var extractedApiKey)) {
-                await ErrorStatus(context, 401, API_Variables.APIKeyNotFound);
+                await ErrorStatus(context, 401, API_Variables.APIKey_NotFound);
                 return;
             }
 
             if (getApiKey != null && !getApiKey.Equals(extractedApiKey)) {
-                await ErrorStatus(context, 403, API_Variables.UnauthorizedClient);
+                await ErrorStatus(context, 403, API_Variables.APIKey_Invalid);
                 return;
             }
 
