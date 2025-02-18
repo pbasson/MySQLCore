@@ -61,14 +61,17 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) {
         try {
-            CRUDTransaction? existDTO = await FindRecordByIdAsync(dto.Id);
-
-            if (existDTO != null)
+            if (dto != null)
             {
-                var mapped = _mapper.Map<CRUDTransaction>(dto);
-                existDTO.SetCreated(mapped);
-                UpdateEntity(existDTO, mapped);
-                return await SaveChangesAsync();
+                CRUDTransaction? existDTO = await FindRecordByIdAsync(dto.Id);
+
+                if (existDTO != null)
+                {
+                    var mapped = _mapper.Map<CRUDTransaction>(dto);
+                    existDTO.SetCreated(mapped);
+                    UpdateEntity(existDTO, mapped);
+                    return await SaveChangesAsync();
+                }
             }
 
             return false;

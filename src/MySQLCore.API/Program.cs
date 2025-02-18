@@ -2,7 +2,10 @@ using MySQLCore.API.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.RegisterService(builder.Configuration);
-builder.RegisterSecurity();
+
+if (!builder.Environment.IsDevelopment() ) {
+    builder.RegisterSecurity();
+}
 
 var app = builder.Build();
 app.RegisterApplication();

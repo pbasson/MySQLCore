@@ -90,7 +90,7 @@ public class ImageTransactionService : IImageTransactionService
     {
         try
         {
-            var result = await _repo.DeleteRecordByIdAsysc(id);
+            var result = await _repo.DeleteRecordByIdAsync(id);
             return result;
         }
         catch (Exception ex)

@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/MySQLCore.API/MySQLCore.API.csproj" />
+    <ProjectReference Include="../MySQLCore.Core.Test/MySQLCore.Core.Test.csproj" />
   </ItemGroup>
 
 </Project>

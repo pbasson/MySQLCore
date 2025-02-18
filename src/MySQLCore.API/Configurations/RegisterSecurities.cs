@@ -13,10 +13,7 @@ namespace MySQLCore.API.Configurations {
             {
                 var certificate = new X509Certificate2(certPath, certPassword);
 
-                builder.WebHost.ConfigureKestrel(options =>
-                {
-                    options.ListenAnyIP(7840, listenOptions => { listenOptions.UseHttps(certificate); });
-                });
+                builder.WebHost.ConfigureKestrel(options => { options.ListenAnyIP(7840, listenOptions => { listenOptions.UseHttps(certificate); }); });
                 Console.WriteLine(API_Variables.CertificateLoaded);
             }
             else { Console.WriteLine(API_Variables.CertificateMissing); }
