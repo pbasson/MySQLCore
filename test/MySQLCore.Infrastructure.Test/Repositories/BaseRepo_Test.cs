@@ -10,10 +10,9 @@ namespace MySQLCore.Infrastructure.Test.Repositories {
         public readonly IMapper _mapper; 
 
         public BaseRepo_Test() {
-            var option = new DbContextOptionsBuilder<MySQLCoreDBContext>()
-                        .UseInMemoryDatabase(databaseName: "MySQLCore" ).Options;
-
+            var option = new DbContextOptionsBuilder<MySQLCoreDBContext>().UseInMemoryDatabase(databaseName: "MySQLCore" ).Options;
             _dBContext = new MySQLCoreDBContext(option);
+
             _mapper = new MapperConfiguration( x => { x.AddProfile(new MappingProfile() ); } ).CreateMapper();
         }
 
@@ -33,5 +32,6 @@ namespace MySQLCore.Infrastructure.Test.Repositories {
             _dBContext.AddRange(fixture);
             _dBContext.SaveChanges();
         }
+
     }
 }
