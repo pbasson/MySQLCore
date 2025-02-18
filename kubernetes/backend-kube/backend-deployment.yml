@@ -7,8 +7,8 @@ spec:
     app: mysqlcore-app
   type: LoadBalancer
   ports:
-    - port: 5840
-      targetPort: 5840
+    - port: 7840
+      targetPort: 7840
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: mysqlcore-node
-        image: preetbasson/mysqlcore-api
+        image: preetbasson/mysqlcore-api:latest
         resources:
           limits:
             memory: "128Mi"
@@ -36,35 +36,35 @@ spec:
         - name: ASPNETCORE_ENVIRONMENT
           valueFrom:
             configMapKeyRef:
-              name: dev-configmap
+              name: mysqlcore-configmap-dev
               key: core_environment 
         - name: DB_HOST
           valueFrom:
             configMapKeyRef:
-              name: dev-configmap
+              name: mysqlcore-configmap-dev
               key: db_host 
         - name: DB_PORT
           valueFrom:
             configMapKeyRef:
-              name: dev-configmap
+              name: mysqlcore-configmap-dev
               key: db_port 
         - name: MYSQL_DATABASE
           valueFrom:
             configMapKeyRef:
-              name: dev-configmap
+              name: mysqlcore-configmap-dev
               key: mysql_database 
         - name: MYSQL_ROOT_USER
           valueFrom:
             configMapKeyRef:
-              name: dev-configmap
+              name: mysqlcore-configmap-dev
               key: mysql_root_user 
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             configMapKeyRef:
-              name: dev-configmap
+              name: mysqlcore-configmap-dev
               key: mysql_root_password 
         - name: X-API-KEY
           valueFrom:
             configMapKeyRef:
-              name: dev-configmap
+              name: mysqlcore-configmap-dev
               key: x_api_key 

@@ -3,7 +3,8 @@ namespace MySQLCore.Core.CoreHelpers;
 
 public static class API_Variables
 {
-    public static string APIKeyNotFound { get; set; } = "Api Key Not Found!";
+    public static string APIKey_NotFound { get; set; } = "API Key Not Found!";
+    public static string APIKey_Invalid { get; set; } = "API Key Is Not Valid";
     public static string UnauthorizedClient { get; set; } = "Unauthorized Client";
     public static string CertificateLoaded { get; set; } = "✅ HTTPS Certificate loaded successfully!";
     public static string CertificateMissing { get; set; } = "⚠️ Certificate path or password is missing. Running without HTTPS.";
