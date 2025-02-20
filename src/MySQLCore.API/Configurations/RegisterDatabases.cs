@@ -20,8 +20,7 @@ public static class RegisterDatabases
 
         services.AddDbContext<MySQLCoreDBContext>( db => {
             db.UseMySql(setDB,ServerVersion.AutoDetect(setDB),
-            db => db.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorNumbersToAdd: null));
+            db => db.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null));
         });
 
     }
