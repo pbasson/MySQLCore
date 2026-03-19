@@ -17,7 +17,7 @@ public static class RegisterServices
         services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
         services.AddEndpointsApiExplorer();
 
-        #region Register 
+        #region Register Services
         RegisterSwagger(services);
         RegisterMapping(services);
         RegisterLogs(services, configuration);
@@ -35,9 +35,14 @@ public static class RegisterServices
         return services;
     }
 
+
     private static void RegisterLogs(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddElmah<XmlFileErrorLog>(x => x.LogPath = configuration.GetValue<string>("ElmahPath"));
+        services.AddElmah<XmlFileErrorLog>(option => 
+        {
+            option.LogPath = configuration.GetValue<string>("ElmahPath") ;
+            option.Path = "/elmahlog";
+        });
     }
 
     private static void RegisterMapping(IServiceCollection services)
@@ -45,6 +50,7 @@ public static class RegisterServices
         var mappingConfig = new MapperConfiguration(map => map.AddProfile(new MappingProfile()));
         services.AddSingleton(mappingConfig.CreateMapper());
     }
+
 
     private static void RegisterSwagger(IServiceCollection services)
     {
@@ -79,16 +85,16 @@ public static class RegisterServices
             app.UseSwaggerUI();
         }
 
-        if(!isDev)
-        {
-            app.UseHttpsRedirection();
-            app.UseHsts();
-        }
+        // if(!isDev)
+        // {
+        //     app.UseHttpsRedirection();
+        //     app.UseHsts();
+        // }
 
+        app.UseElmah();
         app.UseMiddleware<ApiKeyMiddleware>( );
         app.UseAuthorization();
         app.MapControllers();
-        app.UseElmah();
 
     }
 }

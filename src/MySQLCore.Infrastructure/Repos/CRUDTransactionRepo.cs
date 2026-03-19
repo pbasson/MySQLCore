@@ -1,4 +1,5 @@
 using AutoMapper;
+using ElmahCore;
 using Microsoft.EntityFrameworkCore;
 using MySQLCore.Core.CoreHelpers;
 using MySQLCore.Core.Interfaces.InterfaceRepos;
@@ -14,90 +15,62 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
     }
 
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() {
-        try {
-            var results = await _dBContext.CRUDTransaction.OrderByDescending(x => x.Id).AsNoTracking().ToListAsync();
-            return _mapper.Map<List<CRUDTransactionDTO>>(results);
-        }
-        catch (Exception) {
-            throw;
-        }
+        var results = await _dBContext.CRUDTransaction.OrderByDescending(x => x.Id).AsNoTracking().ToListAsync();
+        return _mapper.Map<List<CRUDTransactionDTO>>(results);
     }
 
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
-        try {
-            var settings = new PageSettings();
-            var results = await _dBContext.CRUDTransaction.OrderBy(x=>x.Id).Skip( settings.SkipCount(page) ).Take(settings.PageSize).AsNoTracking().ToListAsync();
-            return _mapper.Map<List<CRUDTransactionDTO>>(results);
-        }
-        catch (Exception) {
-            throw;
-        }
+        var settings = new PageSettings();
+        var results = await _dBContext.CRUDTransaction.OrderBy(x=>x.Id).Skip( settings.SkipCount(page) ).Take(settings.PageSize).AsNoTracking().ToListAsync();
+        return _mapper.Map<List<CRUDTransactionDTO>>(results);
     }
 
     public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id) {
-        try {
-            var result = await _dBContext.CRUDTransaction.FirstOrDefaultAsync(x => x.Id == id);
-            return _mapper.Map<CRUDTransactionDTO>(result);
-        }
-        catch (Exception) {
-            throw;
-        }
+        var result = await _dBContext.CRUDTransaction.FirstOrDefaultAsync(x => x.Id == id);
+        return _mapper.Map<CRUDTransactionDTO>(result);
     }
 
     public async Task<bool> CreateRecordAsync(CreateCRUDTransactionDTO dto) {
-        try{
-            if ( dto.NullChecker() ) {
-                var mapped = _mapper.Map<CRUDTransaction>(dto);
-                _dBContext.CRUDTransaction.Add(mapped);
-                return await SaveChangesAsync();
-            }
-
-            return false;
+        if(dto.IsNull() ) { return false; }
+        else if ( dto.IsNotNull() ) {
+            var mapped = _mapper.Map<CRUDTransaction>(dto);
+            _dBContext.CRUDTransaction.Add(mapped);
+            return await SaveChangesAsync();
         }
-        catch (Exception) {
-            throw;
-        }
+        return false;
     }
 
     public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) {
-        try {
-            if (dto != null)
+        if(dto.IsNull() ) { return false; }
+        else if (dto.IsNotNull())
+        {
+            CRUDTransaction? existDTO = await FindRecordByIdAsync(dto.Id);
+            if(existDTO.IsNull() ) { return false; }
+            else if (existDTO != null)
             {
-                CRUDTransaction? existDTO = await FindRecordByIdAsync(dto.Id);
-
-                if (existDTO != null)
-                {
-                    var mapped = _mapper.Map<CRUDTransaction>(dto);
-                    existDTO.SetCreated(mapped);
-                    UpdateEntity(existDTO, mapped);
-                    return await SaveChangesAsync();
-                }
+                var mapped = _mapper.Map<CRUDTransaction>(dto);
+                existDTO.SetCreated(mapped);
+                UpdateEntity(existDTO, mapped);
+                return await SaveChangesAsync();
             }
+        }
 
-            return false;
-        }
-        catch (Exception) {
-            throw;
-        }
+        return false;
     }
 
     public async Task<bool> DeleteRecordByIdAsync(int id) {
-        try {
-            CRUDTransaction? existDTO = await FindRecordByIdAsync(id);
-            if (existDTO != null) {
-                _dBContext.CRUDTransaction.Remove(existDTO);
-                return await SaveChangesAsync();
-            }
+        CRUDTransaction? existDTO = await FindRecordByIdAsync(id);
+        if(existDTO.IsNull() ) { return false; }
+        else if (existDTO != null) {
+            _dBContext.CRUDTransaction.Remove(existDTO);
+            return await SaveChangesAsync();
+        }
 
-            return false;
-        }
-        catch (Exception) {
-            throw;
-        }
+        return false;
     }
     
     private async Task<CRUDTransaction?> FindRecordByIdAsync(int id) {
         var result = await _dBContext.CRUDTransaction.FindAsync(id);
-        return result.NullChecker() ? result : null;
+        return result.IsNotNull() ? result : null;
     }
 }

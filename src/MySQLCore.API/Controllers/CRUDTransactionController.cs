@@ -19,7 +19,7 @@ namespace MySQLCore.API.Controllers
         [Route("GetAllRecords")]
         public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecords() {
             var result = await _service.GetAllRecordsAsync();
-            return result.NullChecker() && result.Count > 0 ? result : new List<CRUDTransactionDTO>();
+            return result.IsNotNull() && result.Count > 0 ? result : new List<CRUDTransactionDTO>();
         }
 
         [HttpGet]
@@ -27,7 +27,7 @@ namespace MySQLCore.API.Controllers
         public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
             if ( page.ZeroCheck() )  {
                 var result = await _service.GetAllRecordsPaginationAsync(page);
-                return result.NullChecker() && result.Count > 0 ? result : new List<CRUDTransactionDTO>();
+                return result.IsNotNull() && result.Count > 0 ? result : new List<CRUDTransactionDTO>();
             }
             return BadRequest(); 
         }
@@ -37,7 +37,7 @@ namespace MySQLCore.API.Controllers
         public async Task<ActionResult<CRUDTransactionDTO>> GetRecordById(int Id) {
             if ( Id.ZeroCheck() )  {
                 var result = await _service.GetRecordByIdAsync(Id);
-                return result.NullChecker() ? result : new CRUDTransactionDTO();
+                return result.IsNotNull() ? result : new CRUDTransactionDTO();
             }
             return BadRequest(); 
         }

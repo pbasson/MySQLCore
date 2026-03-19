@@ -18,7 +18,7 @@ namespace MySQLCore.API.Controllers
         [Route("GetAllRecords")]
         public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecords() {
             var result = await _service.GetAllRecordsAsync();
-            return result.NullChecker() && result.Count > 0 ? result : new List<ImageTransactionDTO>();
+            return result.IsNotNull() && result.Count > 0 ? result : new List<ImageTransactionDTO>();
         }
 
         [HttpGet]
@@ -26,7 +26,7 @@ namespace MySQLCore.API.Controllers
         public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
             if (page.ZeroCheck())  {
                 var result = await _service.GetAllRecordsPaginationAsync(page);
-                return result.NullChecker() && result.Count > 0 ? result : new List<ImageTransactionDTO>();
+                return result.IsNotNull() && result.Count > 0 ? result : new List<ImageTransactionDTO>();
             }
             
             return BadRequest(); 
@@ -38,7 +38,7 @@ namespace MySQLCore.API.Controllers
         public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int Id) {
             if (Id.ZeroCheck())  {
                 var result = await _service.GetRecordByIdAsync(Id);
-                return result.NullChecker() ? result : new ImageTransactionDTO();
+                return result.IsNotNull() ? result : new ImageTransactionDTO();
             }
             
             return BadRequest(); 

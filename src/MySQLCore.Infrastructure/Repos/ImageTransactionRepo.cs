@@ -48,7 +48,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<bool> CreateRecordAsync(CreateImageTransactionDTO dto) {
         try {
-            if ( dto.NullChecker() ) {
+            if ( dto.IsNotNull() ) {
                 var mapped = _mapper.Map<ImageTransaction>(dto);
                 _dBContext.ImageTransaction.Add(mapped);
                 return await SaveChangesAsync();
@@ -110,7 +110,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     
     private async Task<ImageTransaction?> FindRecord(int id) {
         var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).FirstOrDefaultAsync(x => x.ImageTransactionID == id);
-        return result.NullChecker() ? result : null;
+        return result.IsNotNull() ? result : null;
     }
 
     private ImageGallery SetGallery(ImageGallery x, ImageTransaction mapped)
