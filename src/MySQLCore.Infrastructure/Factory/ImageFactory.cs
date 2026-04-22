@@ -2,7 +2,7 @@ namespace MySQLCore.Infrastructure.Factory;
 
 public class ImageFactory
 {
-    public ImageTransaction Create(ImageTransactionDTO dto) => new()
+    public ImageTransaction ToEntity(ImageTransactionDTO dto) => new()
     {
         ImageTransactionID = dto.ImageTransactionID,
         ImageType = dto.ImageType,
@@ -10,36 +10,44 @@ public class ImageFactory
         CreatedDateTime = dto.CreatedDateTime,
         UpdatedBy = dto.UpdatedBy,
         UpdatedDateTime = dto.UpdatedDateTime,
-        ImageGalleries = dto.ImageGalleries?.Select(x => new ImageFactory().Create(x)).ToList() ?? []
+        ImageGalleries = dto.ImageGalleries?.Select(x => ToEntity(x)).ToList() ?? []
     };
 
-    public ImageGallery Create(ImageGalleryDTO dto) => new()
+    public ImageGallery ToEntity(ImageGalleryDTO dto) => new()
     {
         ImageGalleryId = dto.ImageGalleryId,
         ImageTransactionID = dto.ImageTransactionID,
         ImagePath = dto.ImagePath,
     };
 
-    public ImageTransaction Create(CreateImageTransactionDTO dto) => new()
+    public ImageTransaction ToEntity(CreateImageTransactionDTO dto) => new()
     {
         ImageType = dto.ImageType,
-        ImageGalleries = dto.ImageGalleries?.Select(x => new ImageFactory().Create(x)).ToList() ?? []
+        ImageGalleries = dto.ImageGalleries?.Select(x => ToEntity(x)).ToList() ?? []
     };
 
-    public ImageGallery Create(CreateImageGalleryDTO dto) => new()
+    public ImageGallery ToEntity(CreateImageGalleryDTO dto) => new()
     {
         ImagePath = dto.ImagePath,
     };
 
-    public ImageTransaction Create(UpdateImageTransactionDTO dto) => new()
+    public ImageGallery ToEntity(int id, string? imagePath) => new()
     {
-        ImageTransactionID = dto.ImageTransactionID,
-        ImageType = dto.ImageType,
-        ImageGalleries = dto.ImageGalleries?.Select(x => new ImageFactory().Create(x)).ToList() ?? []
+        ImageGalleryId = 0,
+        ImageTransactionID = id,
+        ImagePath = imagePath,
     };
 
 
-    public ImageTransactionDTO Mapped(ImageTransaction dto) => new()
+    public ImageTransaction ToEntity(UpdateImageTransactionDTO dto) => new()
+    {
+        ImageTransactionID = dto.ImageTransactionID,
+        ImageType = dto.ImageType,
+        ImageGalleries = dto.ImageGalleries?.Select(x => ToEntity(x)).ToList() ?? []
+    };
+
+
+    public ImageTransactionDTO ToMapped(ImageTransaction dto) => new()
     {
         ImageTransactionID = dto.ImageTransactionID,
         ImageType = dto.ImageType,
@@ -47,10 +55,10 @@ public class ImageFactory
         CreatedDateTime = dto.CreatedDateTime,
         UpdatedBy = dto.UpdatedBy,
         UpdatedDateTime = dto.UpdatedDateTime,
-        ImageGalleries = dto.ImageGalleries?.Select(x => new ImageFactory().Mapped(x)).ToList() ?? []
+        ImageGalleries = dto.ImageGalleries?.Select(x => ToMapped(x)).ToList() ?? []
     };
 
-    public ImageGalleryDTO Mapped(ImageGallery dto) => new()
+    public ImageGalleryDTO ToMapped(ImageGallery dto) => new()
     {
         ImageGalleryId = dto.ImageGalleryId,
         ImageTransactionID = dto.ImageTransactionID,
