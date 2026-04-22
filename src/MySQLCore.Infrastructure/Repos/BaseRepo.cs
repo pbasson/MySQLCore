@@ -1,7 +1,3 @@
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using MySQLCore.Infrastructure.Models;
-
 namespace MySQLCore.Infrastructure.Repos;
 
 public class BaseRepo(MySQLCoreDBContext dBContext, IMapper mapper)

@@ -1,4 +1,4 @@
-using MySQLCore.Core.Interfaces.InterfaceRepos;
+using MySQLCore.Core.Interfaces.Repos;
 using MySQLCore.Core.Models.DTOs.ImageDTOs;
 using MySQLCore.Core.Services;
 using MySQLCore.Core.Test.Helpers;

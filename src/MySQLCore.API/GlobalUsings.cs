@@ -1,0 +1,13 @@
+global using Microsoft.AspNetCore.Mvc;
+global using MySQLCore.API.Configurations;
+global using MySQLCore.Core.Constants;
+global using MySQLCore.Core.Interfaces.Repos;
+global using MySQLCore.Core.Interfaces.Services;
+global using MySQLCore.Core.Models.DTOs;
+global using MySQLCore.Core.Models.DTOs.ImageDTOs;
+global using MySQLCore.Core.Services;
+global using MySQLCore.Core.Utilities;
+global using MySQLCore.Infrastructure.Entities.Tables;
+global using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
+global using MySQLCore.Infrastructure.Models;
+global using MySQLCore.Infrastructure.Repos;

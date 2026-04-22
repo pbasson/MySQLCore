@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace MySQLCore.Infrastructure.Entities.Tables;
 
 public class CRUDTransaction : BaseModel

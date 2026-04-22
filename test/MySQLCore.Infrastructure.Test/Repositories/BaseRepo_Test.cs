@@ -2,7 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MySQLCore.API.Configurations;
 using MySQLCore.Core.Test.Helpers;
-using MySQLCore.Infrastructure.Models;
+using MySQLCore.Infrastructure.Context;
 
 namespace MySQLCore.Infrastructure.Test.Repositories {
     public class BaseRepo_Test : Base_Test, IDisposable {

@@ -1,8 +1,3 @@
-using ElmahCore;
-using MySQLCore.Core.Interfaces.InterfaceRepos;
-using MySQLCore.Core.Interfaces.InterfaceServices;
-using MySQLCore.Core.Models.DTOs.ImageDTOs;
-
 namespace MySQLCore.Core.Services;
 
 public class ImageTransactionService : IImageTransactionService

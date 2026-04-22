@@ -1,8 +1,8 @@
-using MySQLCore.Core.Interfaces.InterfaceControllers.Test;
-using MySQLCore.Core.Interfaces.InterfaceRepos;
+using MySQLCore.Core.Interfaces.Repos;
 using MySQLCore.Core.Models.DTOs;
 using MySQLCore.Core.Services;
 using MySQLCore.Core.Test.Helpers;
+using MySQLCore.Core.Test.Interfaces.Controllers;
 
 namespace MySQLCore.Core.Test.Services;
 

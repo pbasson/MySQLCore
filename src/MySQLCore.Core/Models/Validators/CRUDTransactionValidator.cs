@@ -1,6 +1,3 @@
-using MySQLCore.Core.Models.DTOs;
-using FluentValidation;
-
 namespace MySQLCore.Core.Models.Validators;
 
 public class CRUDTransactionValidator : AbstractValidator<CRUDTransactionDTO>

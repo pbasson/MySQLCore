@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace MySQLCore.Infrastructure.Entities.Tables.ImageTables;
 
 public class ImageTransaction : BaseModel

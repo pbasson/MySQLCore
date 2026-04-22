@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using MySQLCore.Core.CoreHelpers;
-using MySQLCore.Infrastructure.Models;
+using MySQLCore.Infrastructure.Context;
 
 namespace MySQLCore.API.Configurations;
 

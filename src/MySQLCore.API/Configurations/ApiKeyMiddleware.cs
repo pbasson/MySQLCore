@@ -1,5 +1,4 @@
 using ElmahCore;
-using MySQLCore.Core.CoreHelpers;
 
 namespace MySQLCore.API.Configurations;
 
@@ -17,12 +16,12 @@ public class ApiKeyMiddleware
             var getApiKey = context.RequestServices.GetRequiredService<IConfiguration>().GetValue<string>(ApiKeyHeader);
 
             if (!context.Request.Headers.TryGetValue(ApiKeyHeader, out var extractedApiKey)) {
-                await ErrorStatus(context, 401, API_Variables.APIKey_NotFound);
+                await ErrorStatus(context, 401, APIConstants.APIKey_NotFound);
                 return;
             }
 
             if (getApiKey != null && !getApiKey.Equals(extractedApiKey)) {
-                await ErrorStatus(context, 403, API_Variables.APIKey_Invalid);
+                await ErrorStatus(context, 403, APIConstants.APIKey_Invalid);
                 return;
             }
 

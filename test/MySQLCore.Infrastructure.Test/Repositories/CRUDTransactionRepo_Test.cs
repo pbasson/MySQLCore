@@ -1,5 +1,5 @@
-using MySQLCore.Core.Interfaces.InterfaceControllers.Test;
 using MySQLCore.Core.Models.DTOs;
+using MySQLCore.Core.Test.Interfaces.Controllers;
 using MySQLCore.Infrastructure.Entities.Tables;
 using MySQLCore.Infrastructure.Repos;
 

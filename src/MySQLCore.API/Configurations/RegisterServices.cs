@@ -3,7 +3,6 @@ using AutoMapper;
 using ElmahCore;
 using ElmahCore.Mvc;
 using Microsoft.OpenApi.Models;
-using MySQLCore.Core.CoreHelpers;
 
 namespace MySQLCore.API.Configurations;
 
@@ -31,7 +30,7 @@ public static class RegisterServices
         services.RegisterDatabase(configuration);
         #endregion
 
-
+        services.AddHostedService<Worker>();
         return services;
     }
 

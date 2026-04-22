@@ -1,14 +1,12 @@
-using ElmahCore;
-using MySQLCore.Core.Interfaces.InterfaceRepos;
-using MySQLCore.Core.Interfaces.InterfaceServices;
-using MySQLCore.Core.Models.DTOs;
-
 namespace MySQLCore.Core.Services;
 
 public class CRUDTransactionService(ICRUDTransactionRepo repo) : ICRUDTransactionService
 {
     private readonly ICRUDTransactionRepo _repo = repo;
 
+    /// <summary>
+    /// Get All Records 
+    /// </summary>
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync()
     {
         try

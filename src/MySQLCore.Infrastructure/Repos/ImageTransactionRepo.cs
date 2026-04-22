@@ -1,11 +1,3 @@
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using MySQLCore.Core.CoreHelpers;
-using MySQLCore.Core.Interfaces.InterfaceRepos;
-using MySQLCore.Core.Models.DTOs.ImageDTOs;
-using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
-using MySQLCore.Infrastructure.Models;
-
 namespace MySQLCore.Infrastructure.Repos;
 
 public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo

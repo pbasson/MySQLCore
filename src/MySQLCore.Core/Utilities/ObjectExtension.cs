@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.CoreHelpers;
+namespace MySQLCore.Core.Utilities;
 
 public static class ObjectExtension
 {

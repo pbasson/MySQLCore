@@ -1,12 +1,3 @@
-using AutoMapper;
-using ElmahCore;
-using Microsoft.EntityFrameworkCore;
-using MySQLCore.Core.CoreHelpers;
-using MySQLCore.Core.Interfaces.InterfaceRepos;
-using MySQLCore.Core.Models.DTOs;
-using MySQLCore.Infrastructure.Entities.Tables;
-using MySQLCore.Infrastructure.Models;
-
 namespace MySQLCore.Infrastructure.Repos;
 
 public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo 

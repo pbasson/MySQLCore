@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 using MySQLCore.API.Controllers;
-using MySQLCore.Core.Interfaces.InterfaceControllers.Test;
-using MySQLCore.Core.Interfaces.InterfaceServices;
+using MySQLCore.Core.Interfaces.Services;
 using MySQLCore.Core.Models.DTOs;
 using MySQLCore.Core.Test.Helpers;
+using MySQLCore.Core.Test.Interfaces.Controllers;
 
 namespace MySQLCore.API.Test.Controllers;
 

@@ -1,5 +1,4 @@
 using System.Security.Cryptography.X509Certificates;
-using MySQLCore.Core.CoreHelpers;
 
 namespace MySQLCore.API.Configurations {
     public static class RegisterSecurities
@@ -14,9 +13,9 @@ namespace MySQLCore.API.Configurations {
                 var certificate = new X509Certificate2(certPath, certPassword);
 
                 builder.WebHost.ConfigureKestrel(options => { options.ListenAnyIP(7840, listenOptions => { listenOptions.UseHttps(certificate); }); });
-                Console.WriteLine(API_Variables.CertificateLoaded);
+                Console.WriteLine(APIConstants.CertificateLoaded);
             }
-            else { Console.WriteLine(API_Variables.CertificateMissing); }
+            else { Console.WriteLine(APIConstants.CertificateMissing); }
         }
     }
 }

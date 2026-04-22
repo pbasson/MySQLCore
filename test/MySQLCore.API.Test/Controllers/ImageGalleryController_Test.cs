@@ -2,7 +2,7 @@ using Castle.Core.Logging;
 using Microsoft.Extensions.Logging;
 using Moq;
 using MySQLCore.API.Controllers;
-using MySQLCore.Core.Interfaces.InterfaceServices;
+using MySQLCore.Core.Interfaces.Services;
 using MySQLCore.Core.Models.DTOs.ImageDTOs;
 using MySQLCore.Core.Test.Helpers;
 

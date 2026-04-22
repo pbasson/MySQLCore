@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using MySQLCore.Core.CoreHelpers;
 
 namespace MySQLCore.API.Configurations
 {
@@ -10,14 +9,14 @@ namespace MySQLCore.API.Configurations
         {
             if (!context.HttpContext.Request.Headers.TryGetValue(AppSettings.API_KEY, out var apiKeyVal))
             {
-                await ErrorStatus(context, 401, API_Variables.APIKey_NotFound);
+                await ErrorStatus(context, 401, APIConstants.APIKey_NotFound);
             }
 
             var appSettings = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
             var apiKey = appSettings.GetValue<string>(AppSettings.API_KEY);
             if (apiKey != null && !apiKey.Equals(apiKeyVal))
             {
-                await ErrorStatus(context, 403, API_Variables.APIKey_Invalid);
+                await ErrorStatus(context, 403, APIConstants.APIKey_Invalid);
             }
         }
 

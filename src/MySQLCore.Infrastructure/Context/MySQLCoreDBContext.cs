@@ -1,9 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using MySQLCore.Infrastructure.Entities.Tables;
-using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
-
-namespace MySQLCore.Infrastructure.Models;
+namespace MySQLCore.Infrastructure.Context;
 
 public class MySQLCoreDBContext(DbContextOptions<MySQLCoreDBContext> option) : DbContext(option)
 {
