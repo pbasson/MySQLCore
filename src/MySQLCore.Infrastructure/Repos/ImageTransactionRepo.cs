@@ -1,56 +1,40 @@
+using MySQLCore.Infrastructure.Factory;
+
 namespace MySQLCore.Infrastructure.Repos;
 
 public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 {
-    public ImageTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) : base(dBContext, mapper) {
+    public ImageTransactionRepo(MySQLCoreDBContext dBContext): base(dBContext) {
     }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() {
-        try {
-            var results = await _dBContext.ImageTransaction.OrderByDescending(x => x.ImageTransactionID)
-                        .Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
-            return _mapper.Map<List<ImageTransactionDTO>>(results);
-        }
-        catch (Exception) {
-            throw;
-        }
+        var results = await _dBContext.ImageTransaction.OrderByDescending(x => x.ImageTransactionID)
+            .Include(x => x.ImageGalleries).AsNoTracking()
+            .Select(x => new ImageFactory().Mapped(x)).ToListAsync();
+        return results ?? [];
     }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
-        try {
-            var settings = new PageSettings();
-            var results = await _dBContext.ImageTransaction.OrderBy(x => x.ImageTransactionID).Skip(settings.SkipCount(page)).Take(settings.PageSize)
-                        .Include(x => x.ImageGalleries).AsNoTracking().ToListAsync();
-            return _mapper.Map<List<ImageTransactionDTO>>(results);
-        }
-        catch (Exception) {
-            throw;
-        }
+        var settings = new PageSettings();
+        var results = await _dBContext.ImageTransaction.OrderBy(x => x.ImageTransactionID).Skip(settings.SkipCount(page))
+            .Take(settings.PageSize).Include(x => x.ImageGalleries).AsNoTracking()
+            .Select(x => new ImageFactory().Mapped(x)).ToListAsync();
+        return results ?? [];
     }
 
     public async Task<ImageTransactionDTO> GetRecordByIdAsync(int id)  {
-        try {
-            var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).FirstOrDefaultAsync(x => x.ImageTransactionID == id);
-            return _mapper.Map<ImageTransactionDTO>(result);
-        }
-        catch (Exception) {
-            throw;
-        }
+        var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries).FirstOrDefaultAsync(x => x.ImageTransactionID == id);
+        return result != null ? new ImageFactory().Mapped(result) : new();
     }
 
     public async Task<bool> CreateRecordAsync(CreateImageTransactionDTO dto) {
-        try {
-            if ( dto.IsNotNull() ) {
-                var mapped = _mapper.Map<ImageTransaction>(dto);
-                _dBContext.ImageTransaction.Add(mapped);
-                return await SaveChangesAsync();
-            }
+        if ( dto.IsNotNull() ) {
+            var mapped = new ImageFactory().Create(dto);
+            _dBContext.ImageTransaction.Add(mapped);
+            return await SaveChangesAsync();
+        }
 
-            return false;
-        }
-        catch (Exception) {
-            throw;
-        }
+        return false;
     }
 
     public async Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto) {
@@ -60,16 +44,16 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
                 ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
                 
                 if (existDTO != null) {
-                    var mapped = _mapper.Map<ImageTransaction>(dto);
+                    var mapped = new ImageFactory().Create(dto);
                     existDTO.SetCreated(mapped);
                     UpdateEntity(existDTO, mapped);
                     
                     if( existDTO.IsGallery() && mapped.IsGallery() )
                     {
-                        List<ImageGallery> RemoveList = existDTO.ImageGalleries.Where(x => !mapped.ImageGalleries.Any(z => z.ImageGalleryId == x.ImageGalleryId)).ToList();
+                        List<ImageGallery> RemoveList = existDTO.ImageGalleries!.Where(x => !mapped.ImageGalleries!.Any(z => z.ImageGalleryId == x.ImageGalleryId)).ToList();
                         if (RemoveList.Count > 0) { _dBContext.RemoveRange(RemoveList); }
 
-                        List<ImageGallery> AddList = mapped.ImageGalleries.Where(x => x.ImageGalleryId == 0).Select(x => SetGallery(x, mapped)).ToList();
+                        List<ImageGallery> AddList = mapped.ImageGalleries!.Where(x => x.ImageGalleryId == 0).Select(x => SetGallery(x, mapped)).ToList();
                         if (AddList.Count > 0) { _dBContext.ImageGallery.AddRange(AddList); }
                     }
 

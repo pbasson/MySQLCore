@@ -9,5 +9,4 @@ global using MySQLCore.Core.Services;
 global using MySQLCore.Core.Utilities;
 global using MySQLCore.Infrastructure.Entities.Tables;
 global using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
-global using MySQLCore.Infrastructure.Models;
 global using MySQLCore.Infrastructure.Repos;

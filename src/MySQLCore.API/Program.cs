@@ -1,5 +1,5 @@
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.RegisterService(builder.Configuration);
+builder.Services.RegisterConfiguration(builder.Configuration);
 
 // if (!builder.Environment.IsDevelopment() ) {
 //     builder.RegisterSecurity();

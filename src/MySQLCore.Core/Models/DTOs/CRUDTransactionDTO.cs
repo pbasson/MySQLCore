@@ -6,6 +6,23 @@ public class CRUDTransactionDTO : BaseDTO
 {
     public int Id { get; set; }
     public string? Name { get; set; }
+
+    public CRUDTransactionDTO() { }
+
+}
+
+public static class CRUDTransactionDTOFactory 
+{
+    public static CRUDTransactionDTO Create(int id, string? name, string? createdBy, DateTime createDateTime, string? updatedBy, DateTime updateDateTime) => new()
+    {
+        Id = id,
+        Name = name,
+        CreatedBy = createdBy,
+        CreatedDateTime = createDateTime,
+        UpdatedBy = updatedBy,
+        UpdatedDateTime = updateDateTime,
+    };
+
 }
 
 public class CreateCRUDTransactionDTO

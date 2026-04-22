@@ -1,14 +1,13 @@
 using System.Text.Json.Serialization;
-using AutoMapper;
 using ElmahCore;
 using ElmahCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 namespace MySQLCore.API.Configurations;
 
-public static class RegisterServices
+public static class RegisterConfigurations
 {
-    public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection RegisterConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
@@ -18,7 +17,7 @@ public static class RegisterServices
 
         #region Register Services
         RegisterSwagger(services);
-        RegisterMapping(services);
+        // RegisterMapping(services);
         RegisterLogs(services, configuration);
         #endregion
 
@@ -44,11 +43,11 @@ public static class RegisterServices
         });
     }
 
-    private static void RegisterMapping(IServiceCollection services)
-    {
-        var mappingConfig = new MapperConfiguration(map => map.AddProfile(new MappingProfile()));
-        services.AddSingleton(mappingConfig.CreateMapper());
-    }
+    // private static void RegisterMapping(IServiceCollection services)
+    // {
+    //     var mappingConfig = new MapperConfiguration(map => map.AddProfile(new MappingProfile()));
+    //     services.AddSingleton(mappingConfig.CreateMapper());
+    // }
 
 
     private static void RegisterSwagger(IServiceCollection services)

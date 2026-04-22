@@ -1,30 +1,36 @@
+using MySQLCore.Infrastructure.Factory;
+
 namespace MySQLCore.Infrastructure.Repos;
 
 public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo 
 {
-    public CRUDTransactionRepo(MySQLCoreDBContext dBContext, IMapper mapper) : base(dBContext, mapper) {
+    public CRUDTransactionRepo(MySQLCoreDBContext dBContext) : base(dBContext) {
     }
 
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() {
-        var results = await _dBContext.CRUDTransaction.OrderByDescending(x => x.Id).AsNoTracking().ToListAsync();
-        return _mapper.Map<List<CRUDTransactionDTO>>(results);
+        var results = await _dBContext.CRUDTransaction.OrderByDescending(x => x.Id).AsNoTracking()
+        .Select(x => CRUDTransactionDTOFactory.Create( x.Id, x.Name, x.CreatedBy, x.CreatedDateTime, x.UpdatedBy, x.UpdatedDateTime ))
+        .ToListAsync();
+        return results ?? [];
     }
 
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
         var settings = new PageSettings();
-        var results = await _dBContext.CRUDTransaction.OrderBy(x=>x.Id).Skip( settings.SkipCount(page) ).Take(settings.PageSize).AsNoTracking().ToListAsync();
-        return _mapper.Map<List<CRUDTransactionDTO>>(results);
+        var results = await _dBContext.CRUDTransaction.OrderBy(x=>x.Id).Skip( settings.SkipCount(page) ).Take(settings.PageSize).AsNoTracking()
+        .Select(x => CRUDTransactionDTOFactory.Create( x.Id, x.Name, x.CreatedBy, x.CreatedDateTime, x.UpdatedBy, x.UpdatedDateTime ))
+        .ToListAsync();
+        return results ?? [];
     }
 
     public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id) {
         var result = await _dBContext.CRUDTransaction.FirstOrDefaultAsync(x => x.Id == id);
-        return _mapper.Map<CRUDTransactionDTO>(result);
+        return result != null ? new CRUDFactory().Mapped(result) : new();
     }
 
     public async Task<bool> CreateRecordAsync(CreateCRUDTransactionDTO dto) {
         if(dto.IsNull() ) { return false; }
         else if ( dto.IsNotNull() ) {
-            var mapped = _mapper.Map<CRUDTransaction>(dto);
+            var mapped = new CRUDFactory().Create(dto);
             _dBContext.CRUDTransaction.Add(mapped);
             return await SaveChangesAsync();
         }
@@ -39,7 +45,7 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
             if(existDTO.IsNull() ) { return false; }
             else if (existDTO != null)
             {
-                var mapped = _mapper.Map<CRUDTransaction>(dto);
+                var mapped = new CRUDFactory().Create(dto);
                 existDTO.SetCreated(mapped);
                 UpdateEntity(existDTO, mapped);
                 return await SaveChangesAsync();
