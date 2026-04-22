@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using MySQLCore.Infrastructure.Context;
-
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterDatabases
@@ -8,14 +5,12 @@ public static class RegisterDatabases
     public static IServiceCollection RegisterDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         SetDBConnection(services, configuration);
-
         return services;        
     }
 
-
-    private static void SetDBConnection(IServiceCollection services, IConfiguration configuration){
+    private static void SetDBConnection(IServiceCollection services, IConfiguration configuration)
+    {
         var setDB = SetConnectionString(configuration);
-        // Console.WriteLine(setDB);
 
         services.AddDbContext<MySQLCoreDBContext>( db => {
             db.UseMySql(setDB,ServerVersion.AutoDetect(setDB),
@@ -23,7 +18,6 @@ public static class RegisterDatabases
         });
 
     }
-
 
     private static string SetConnectionString(IConfiguration _configuration)
     {

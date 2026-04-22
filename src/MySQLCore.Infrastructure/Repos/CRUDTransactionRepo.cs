@@ -1,5 +1,3 @@
-using MySQLCore.Infrastructure.Factory;
-
 namespace MySQLCore.Infrastructure.Repos;
 
 public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo 
@@ -31,7 +29,7 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
     public async Task<bool> CreateRecordAsync(CreateCRUDTransactionDTO dto) 
     {
         if(dto.IsNull() ) { return false; }
-        
+
         var mapped = new CRUDFactory().ToEntity(dto);
         _dBContext.CRUDTransaction.Add(mapped);
         return await SaveChangesAsync();
@@ -41,13 +39,13 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
     {
         if(dto.IsNull() ) { return false; }
 
-        CRUDTransaction? existDTO = await FindRecordByIdAsync(dto.Id);
-        if(existDTO.IsNull() ) { return false; }
-        else if (existDTO != null)
+        CRUDTransaction? existModel = await FindRecordByIdAsync(dto.Id);
+        if(existModel.IsNull() ) { return false; }
+        else if (existModel != null)
         {
             var mapped = new CRUDFactory().ToEntity(dto);
-            existDTO.SetCreated(mapped);
-            UpdateEntity(existDTO, mapped);
+            existModel.SetCreated(mapped);
+            UpdateEntity(existModel, mapped);
             return await SaveChangesAsync();
         }
 
@@ -56,10 +54,10 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<bool> DeleteRecordByIdAsync(int id) 
     {
-        CRUDTransaction? existDTO = await FindRecordByIdAsync(id);
-        if(existDTO.IsNull() ) { return false; }
-        else if (existDTO != null) {
-            _dBContext.CRUDTransaction.Remove(existDTO);
+        CRUDTransaction? existModel = await FindRecordByIdAsync(id);
+        if(existModel.IsNull() ) { return false; }
+        else if (existModel != null) {
+            _dBContext.CRUDTransaction.Remove(existModel);
             return await SaveChangesAsync();
         }
 

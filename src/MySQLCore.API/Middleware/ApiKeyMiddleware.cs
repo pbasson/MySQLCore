@@ -1,6 +1,4 @@
-using ElmahCore;
-
-namespace MySQLCore.API.Configurations;
+namespace MySQLCore.API.Middleware;
 
 public class ApiKeyMiddleware
 {

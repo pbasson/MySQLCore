@@ -1,8 +1,8 @@
 namespace MySQLCore.API.Configurations;
 
-public static class RegisterDataServices {
+public static class RegisterServices {
 
-    public static IServiceCollection RegisterDataService(this IServiceCollection services)
+    public static IServiceCollection RegisterService(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
         RegisterCoreServices(services);
