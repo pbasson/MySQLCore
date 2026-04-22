@@ -4,58 +4,58 @@ namespace MySQLCore.Infrastructure.Repos;
 
 public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo 
 {
-    public CRUDTransactionRepo(MySQLCoreDBContext dBContext) : base(dBContext) {
-    }
+    private readonly CRUDFactory _factory = new();
+    public CRUDTransactionRepo(MySQLCoreDBContext dBContext) : base(dBContext) { }
 
-    public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() {
+    public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() 
+    {
         var results = await _dBContext.CRUDTransaction.OrderByDescending(x => x.Id).AsNoTracking()
-        .Select(x => CRUDTransactionDTOFactory.Create( x.Id, x.Name, x.CreatedBy, x.CreatedDateTime, x.UpdatedBy, x.UpdatedDateTime ))
-        .ToListAsync();
+            .Select(x => _factory.ToMapped(x)).ToListAsync();
         return results ?? [];
     }
 
-    public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page) {
+    public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page) 
+    {
         var settings = new PageSettings();
-        var results = await _dBContext.CRUDTransaction.OrderBy(x=>x.Id).Skip( settings.SkipCount(page) ).Take(settings.PageSize).AsNoTracking()
-        .Select(x => CRUDTransactionDTOFactory.Create( x.Id, x.Name, x.CreatedBy, x.CreatedDateTime, x.UpdatedBy, x.UpdatedDateTime ))
-        .ToListAsync();
+        var results = await _dBContext.CRUDTransaction.OrderBy(x=>x.Id).Skip(settings.SkipCount(page))
+            .Take(settings.PageSize).AsNoTracking().Select(x => _factory.ToMapped(x)).ToListAsync();
         return results ?? [];
     }
 
-    public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id) {
+    public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id) 
+    {
         var result = await _dBContext.CRUDTransaction.FirstOrDefaultAsync(x => x.Id == id);
-        return result != null ? new CRUDFactory().Mapped(result) : new();
+        return result != null ? new CRUDFactory().ToMapped(result) : new();
     }
 
-    public async Task<bool> CreateRecordAsync(CreateCRUDTransactionDTO dto) {
+    public async Task<bool> CreateRecordAsync(CreateCRUDTransactionDTO dto) 
+    {
         if(dto.IsNull() ) { return false; }
-        else if ( dto.IsNotNull() ) {
-            var mapped = new CRUDFactory().Create(dto);
-            _dBContext.CRUDTransaction.Add(mapped);
+        
+        var mapped = new CRUDFactory().ToEntity(dto);
+        _dBContext.CRUDTransaction.Add(mapped);
+        return await SaveChangesAsync();
+    }
+
+    public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) 
+    {
+        if(dto.IsNull() ) { return false; }
+
+        CRUDTransaction? existDTO = await FindRecordByIdAsync(dto.Id);
+        if(existDTO.IsNull() ) { return false; }
+        else if (existDTO != null)
+        {
+            var mapped = new CRUDFactory().ToEntity(dto);
+            existDTO.SetCreated(mapped);
+            UpdateEntity(existDTO, mapped);
             return await SaveChangesAsync();
         }
-        return false;
-    }
-
-    public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) {
-        if(dto.IsNull() ) { return false; }
-        else if (dto.IsNotNull())
-        {
-            CRUDTransaction? existDTO = await FindRecordByIdAsync(dto.Id);
-            if(existDTO.IsNull() ) { return false; }
-            else if (existDTO != null)
-            {
-                var mapped = new CRUDFactory().Create(dto);
-                existDTO.SetCreated(mapped);
-                UpdateEntity(existDTO, mapped);
-                return await SaveChangesAsync();
-            }
-        }
 
         return false;
     }
 
-    public async Task<bool> DeleteRecordByIdAsync(int id) {
+    public async Task<bool> DeleteRecordByIdAsync(int id) 
+    {
         CRUDTransaction? existDTO = await FindRecordByIdAsync(id);
         if(existDTO.IsNull() ) { return false; }
         else if (existDTO != null) {

@@ -2,7 +2,7 @@ namespace MySQLCore.Infrastructure.Factory;
 
 public class CRUDFactory
 {
-    public CRUDTransaction Create(CRUDTransactionDTO dto)
+    public CRUDTransaction ToEntity(CRUDTransactionDTO dto)
     {
         return new CRUDTransaction()
         {
@@ -15,7 +15,7 @@ public class CRUDFactory
         };
     }  
 
-    public CRUDTransaction Create(CreateCRUDTransactionDTO dto)
+    public CRUDTransaction ToEntity(CreateCRUDTransactionDTO dto)
     {
         return new CRUDTransaction()
         {
@@ -23,7 +23,7 @@ public class CRUDFactory
         };
     }  
 
-    public CRUDTransaction Create(UpdateCRUDTransactionDTO dto)
+    public CRUDTransaction ToEntity(UpdateCRUDTransactionDTO dto)
     {
         return new CRUDTransaction()
         {
@@ -32,7 +32,7 @@ public class CRUDFactory
         };
     } 
 
-    public CRUDTransactionDTO Mapped(CRUDTransaction dto)
+    public CRUDTransactionDTO ToMapped(CRUDTransaction dto)
     {
         return new CRUDTransactionDTO()
         {
