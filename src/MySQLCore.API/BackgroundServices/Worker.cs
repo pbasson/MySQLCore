@@ -1,4 +1,4 @@
-namespace MySQLCore.API.Configurations;
+namespace MySQLCore.API.BackgroundServices;
 
 public class Worker : BackgroundService
 {

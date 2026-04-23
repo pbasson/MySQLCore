@@ -1,3 +1,5 @@
+using MySQLCore.API.BackgroundServices;
+
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterConfigurations
@@ -23,7 +25,9 @@ public static class RegisterConfigurations
         services.RegisterDatabase(configuration);
         #endregion
 
-        services.AddHostedService<Worker>();
+        #region Register Background Services
+        // services.RegisterBackgroundServices();
+        #endregion
         return services;
     }
 
@@ -56,5 +60,11 @@ public static class RegisterConfigurations
                 });
             }
         );
+    }
+
+
+    private static void RegisterBackgroundServices(this IServiceCollection services)
+    {
+        services.AddHostedService<Worker>();
     }
 }
