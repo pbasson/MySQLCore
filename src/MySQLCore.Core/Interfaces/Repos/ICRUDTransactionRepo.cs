@@ -1,6 +1,4 @@
-using MySQLCore.Core.Models.DTOs;
-
-namespace MySQLCore.Core.Interfaces.InterfaceRepos;
+namespace MySQLCore.Core.Interfaces.Repos;
 
 public interface ICRUDTransactionRepo
 {

@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace MySQLCore.API.Controllers
 {
     [Route("api/[controller]")]

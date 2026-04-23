@@ -1,13 +1,6 @@
-using Microsoft.Extensions.Logging;
-using MySQLCore.API.Controllers;
-using MySQLCore.Core.Interfaces.InterfaceControllers.Test;
-using MySQLCore.Core.Interfaces.InterfaceServices;
-using MySQLCore.Core.Models.DTOs;
-using MySQLCore.Core.Test.Helpers;
-
 namespace MySQLCore.API.Test.Controllers;
 
-public class CRUDTransactionController_Test : Base_Test, ICRUDTransactionController_Test
+public class CRUDTransactionController_Test : Base_Test
 {
     private readonly Mock<ICRUDTransactionService> _service = new Mock<ICRUDTransactionService>();
     private readonly CRUDTransactionController _controller;
@@ -22,30 +15,22 @@ public class CRUDTransactionController_Test : Base_Test, ICRUDTransactionControl
     public async Task GetAllRecords_CheckIsValue() {
         var response = _fixture.Create<List<CRUDTransactionDTO>>();
         var request = _service.Setup(x => x.GetAllRecordsAsync() ).ReturnsAsync(response);
-        try {
-            var result = await _controller.GetAllRecords();
+        var result = await _controller.GetAllRecords();
 
-            Assert.NotNull(result);
-            Assert.NotEmpty(result.Value);
-        }
-        catch (Exception) {
-            throw;
-        }
+        Assert.NotNull(result);
+        Assert.NotNull(result.Value);
+        Assert.NotEmpty(result.Value);
     }
     
     [Fact]
     public async Task GetAllRecords_CheckValueEmpty() {
         var response = new List<CRUDTransactionDTO>();
         var request = _service.Setup(x => x.GetAllRecordsAsync() ).ReturnsAsync(response);
-        try {
-            var result = await _controller.GetAllRecords();
+        var result = await _controller.GetAllRecords();
 
-            Assert.NotNull(result);
-            Assert.Empty(result.Value);
-        }
-        catch (Exception) {
-            throw;
-        }
+        Assert.NotNull(result);
+        Assert.NotNull(result.Value);
+        Assert.Empty(result.Value);
     }
 
     [Fact]
@@ -54,15 +39,11 @@ public class CRUDTransactionController_Test : Base_Test, ICRUDTransactionControl
         var parameter = _fixture.Create<int>();
         var request = _service.Setup(x => x.GetAllRecordsPaginationAsync(parameter)).ReturnsAsync(response);
 
-        try {
-            var result = await _controller.GetAllRecordsPaginationAsync(parameter);
+        var result = await _controller.GetAllRecordsPaginationAsync(parameter);
 
-            Assert.NotNull(result);
-            Assert.NotNull(result.Value);
-        }
-        catch (Exception) {
-            throw;
-        }
+        Assert.NotNull(result);
+        Assert.NotNull(result.Value);
+        Assert.Empty(result.Value);
     }
     
     [Fact]
@@ -71,15 +52,10 @@ public class CRUDTransactionController_Test : Base_Test, ICRUDTransactionControl
         var parameter = 0;
         var request = _service.Setup(x => x.GetAllRecordsPaginationAsync(parameter)).ReturnsAsync(response);
 
-        try {
-            var result = await _controller.GetAllRecordsPaginationAsync(parameter);
+        var result = await _controller.GetAllRecordsPaginationAsync(parameter);
 
-            Assert.NotNull(result);
-            Assert.Null(result.Value);
-        }
-        catch (Exception) {
-            throw;
-        }
+        Assert.NotNull(result);
+        Assert.Null(result.Value);
     }
 
     [Fact]

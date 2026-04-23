@@ -1,13 +1,9 @@
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using MySQLCore.Infrastructure.Models;
-
 namespace MySQLCore.Infrastructure.Repos;
 
-public class BaseRepo(MySQLCoreDBContext dBContext, IMapper mapper)
+public class BaseRepo(MySQLCoreDBContext dBContext)
 {
     public readonly MySQLCoreDBContext _dBContext = dBContext;
-    public readonly IMapper _mapper = mapper;
+    // public readonly IMapper _mapper = mapper;
 
     public void UpdateEntity(object existDTO, object mapped)
     {

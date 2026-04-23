@@ -1,10 +1,12 @@
-global using AutoFixture;
+global using System.ComponentModel.DataAnnotations;
+global using System.ComponentModel.DataAnnotations.Schema;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.ChangeTracking;
+global using MySQLCore.Core.Interfaces.Repos;
 global using MySQLCore.Core.Models.DTOs;
 global using MySQLCore.Core.Models.DTOs.ImageDTOs;
-global using MySQLCore.Core.Test.Helpers;
+global using MySQLCore.Core.Utilities;
 global using MySQLCore.Infrastructure.Context;
 global using MySQLCore.Infrastructure.Entities.Tables;
 global using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
-global using MySQLCore.Infrastructure.Repos;
-global using Xunit;
+global using MySQLCore.Infrastructure.Factory;

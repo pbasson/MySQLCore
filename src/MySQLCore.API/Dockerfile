@@ -2,10 +2,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
 # Set HTTPS URL binding
-ENV ASPNETCORE_URLS="http://+:7840"
+ENV ASPNETCORE_URLS="http://+:5820"
 
 # Expose HTTPS port
-EXPOSE 7840
+EXPOSE 5820
 
 # Build and publish application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build

@@ -1,7 +1,6 @@
+namespace MySQLCore.Core.Constants;
 
-namespace MySQLCore.Core.CoreHelpers;
-
-public static class API_Variables
+public static class APIConstants
 {
     public static string APIKey_NotFound { get; set; } = "API Key Not Found!";
     public static string APIKey_Invalid { get; set; } = "API Key Is Not Valid";

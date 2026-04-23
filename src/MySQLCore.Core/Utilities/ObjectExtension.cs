@@ -1,10 +1,16 @@
-namespace MySQLCore.Core.CoreHelpers;
+namespace MySQLCore.Core.Utilities;
 
 public static class ObjectExtension
 {
-    public static bool NullChecker(this object? ob)
+    public static bool IsNotNull(this object? ob)
     {
         if (ob != null) { return true; }
+        return false;
+    }
+
+    public static bool IsNull(this object? ob)
+    {
+        if (ob == null) { return true; }
         return false;
     }
 

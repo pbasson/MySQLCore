@@ -1,6 +1,6 @@
 using MySQLCore.Core.Models.DTOs;
 
-namespace MySQLCore.Core.Interfaces.InterfaceServices;
+namespace MySQLCore.Core.Interfaces.Services;
 
 public interface ICRUDTransactionService
 {

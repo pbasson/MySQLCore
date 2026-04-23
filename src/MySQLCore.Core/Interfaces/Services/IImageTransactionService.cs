@@ -1,8 +1,8 @@
 using MySQLCore.Core.Models.DTOs.ImageDTOs;
 
-namespace MySQLCore.Core.Interfaces.InterfaceRepos;
+namespace MySQLCore.Core.Interfaces.Services;
 
-public interface IImageTransactionRepo
+public interface IImageTransactionService
 {
     Task<List<ImageTransactionDTO>> GetAllRecordsAsync();
     Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page);

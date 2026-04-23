@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Interfaces.InterfaceControllers.Test
+namespace MySQLCore.Core.Test.Interfaces.Controllers
 {
     public interface ICRUDTransactionController_Test
     {

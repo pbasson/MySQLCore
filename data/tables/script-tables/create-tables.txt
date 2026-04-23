@@ -4,3 +4,6 @@ source /var/lib/mysql-files/data/databases/create-databases/MySQLCore-Database_C
 -- Create Tables: Content
 source /var/lib/mysql-files/data/tables/create-tables/CRUDTransaction-Table_Create.sql
 
+source /var/lib/mysql-files/data/tables/create-tables/ImageTransaction-Table_Create.sql
+source /var/lib/mysql-files/data/tables/create-tables/ImageGallery-Table_Create.sql
+

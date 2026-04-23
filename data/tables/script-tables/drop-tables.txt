@@ -1,7 +1,8 @@
 -- Drop Database
-source /var/lib/mysql-files/data/databases/drop-database/MySQLCore-Database_Drop.sql
+source /var/lib/mysql-files/data/databases/drop-databases/MySQLCore-Database_Drop.sql
 
 -- Drop Tables
 source /var/lib/mysql-files/data/tables/drop-tables/CRUDTransaction-Table_Drop.sql
+source /var/lib/mysql-files/data/tables/drop-tables/ImageTransaction-Table_Drop.sql
 
 

@@ -7,30 +7,30 @@ services:
       - env/docker-env/mysql-db.dev.env
       - env/docker-env/mysql-user.dev.env
     volumes:
-      - mysqlcore_vol:/var/lib/mysql
+      - /home/preet/Projects/Projects-Y/DatabaseStorage/Test:/var/lib/mysql
+      # - mysqlcore_vol:/var/lib/mysql
     networks:
       - mysqlcore_network
     
   mysqlcore.api:
-    # image: preetbasson/mysqlcore-api:latest
     image: mysqlcore-api:latest
     build:
       context: .
       dockerfile: src/MySQLCore.API/Dockerfile
     ports:
-      - 7840:7840
+      - 5820:5820
     env_file:
       - env/docker-env/mysql-user.dev.env
-      - env/docker-env/mysqlcore-certificate.dev.env
-      - env/docker-env/mysqlcore-api.dev.env
-      - env/docker-env/mysqlcore-apikey.dev.env
+      - env/docker-env/app-cert.dev.env
+      - env/docker-env/app-settings.dev.env
+      - env/docker-env/app-apikey.dev.env
     restart: always
     depends_on:
       - mysqlcore.db
     networks:
       - mysqlcore_network
-    volumes:
-      - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
+    # volumes:
+      # - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
 volumes:
   mysqlcore_vol:
 

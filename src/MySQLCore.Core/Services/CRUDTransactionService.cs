@@ -1,19 +1,12 @@
-using ElmahCore;
-using MySQLCore.Core.Interfaces.InterfaceRepos;
-using MySQLCore.Core.Interfaces.InterfaceServices;
-using MySQLCore.Core.Models.DTOs;
-
 namespace MySQLCore.Core.Services;
 
-public class CRUDTransactionService : ICRUDTransactionService
+public class CRUDTransactionService(ICRUDTransactionRepo repo) : ICRUDTransactionService
 {
-    private readonly ICRUDTransactionRepo _repo = default!;
+    private readonly ICRUDTransactionRepo _repo = repo;
 
-    public CRUDTransactionService(ICRUDTransactionRepo repo)
-    {
-        _repo = repo;
-    }
-
+    /// <summary>
+    /// Get All Records 
+    /// </summary>
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync()
     {
         try
@@ -24,7 +17,7 @@ public class CRUDTransactionService : ICRUDTransactionService
         catch (Exception ex)
         {
             ElmahExtensions.RaiseError(ex);
-            throw;
+            return [];
         }
     }
 
@@ -38,7 +31,7 @@ public class CRUDTransactionService : ICRUDTransactionService
         catch (Exception ex)
         {
             ElmahExtensions.RaiseError(ex);
-            throw;
+            return [];
         }
     }
 
@@ -52,7 +45,7 @@ public class CRUDTransactionService : ICRUDTransactionService
         catch (Exception ex)
         {
             ElmahExtensions.RaiseError(ex);
-            throw;
+            return new();
         }
     }
 
@@ -66,7 +59,7 @@ public class CRUDTransactionService : ICRUDTransactionService
        catch (Exception ex)
         {
             ElmahExtensions.RaiseError(ex);
-            throw;
+            return false;
         }
     }
 
@@ -81,7 +74,7 @@ public class CRUDTransactionService : ICRUDTransactionService
         catch (Exception ex)
         {
             ElmahExtensions.RaiseError(ex);
-            throw;
+            return false;
         }
     }
 
@@ -95,7 +88,7 @@ public class CRUDTransactionService : ICRUDTransactionService
         catch (Exception ex)
         {
             ElmahExtensions.RaiseError(ex);
-            throw;
+            return false;
         }
     }
 

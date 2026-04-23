@@ -1,3 +1,9 @@
-global using Xunit;
 global using AutoFixture;
 global using Moq;
+global using MySQLCore.Core.Interfaces.Repos;
+global using MySQLCore.Core.Models.DTOs;
+global using MySQLCore.Core.Models.DTOs.ImageDTOs;
+global using MySQLCore.Core.Services;
+global using MySQLCore.Core.Test.Helpers;
+global using MySQLCore.Core.Test.Interfaces.Controllers;
+global using Xunit;

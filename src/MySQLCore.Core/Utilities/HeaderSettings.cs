@@ -1,5 +1,4 @@
-
-namespace MySQLCore.Core.CoreHelpers;
+namespace MySQLCore.Core.Utilities;
 
 public class HeaderSettings
 {
