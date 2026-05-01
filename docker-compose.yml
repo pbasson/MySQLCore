@@ -31,6 +31,15 @@ services:
       - mysqlcore_network
     # volumes:
       # - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - mysqlcore_network
+
 volumes:
   mysqlcore_vol:
 
