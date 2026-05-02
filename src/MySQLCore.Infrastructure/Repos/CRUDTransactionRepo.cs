@@ -30,38 +30,64 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
     {
         if(dto.IsNull() ) { return false; }
 
-        var mapped = new CRUDFactory().ToEntity(dto);
-        _dBContext.CRUDTransaction.Add(mapped);
-        return await SaveChangesAsync();
+        await _semaphore.WaitAsync();
+
+        try
+        {
+            var mapped = new CRUDFactory().ToEntity(dto);
+            _dBContext.CRUDTransaction.Add(mapped);
+            return await SaveChangesAsync();
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) 
     {
         if(dto.IsNull() ) { return false; }
+        await _semaphore.WaitAsync();
 
-        CRUDTransaction? existModel = await FindRecordByIdAsync(dto.Id);
-        if(existModel.IsNull() ) { return false; }
-        else if (existModel != null)
+        try
         {
-            var mapped = new CRUDFactory().ToEntity(dto);
-            existModel.SetCreated(mapped);
-            UpdateEntity(existModel, mapped);
-            return await SaveChangesAsync();
+            CRUDTransaction? existModel = await FindRecordByIdAsync(dto.Id);
+            if(existModel.IsNull() ) { return false; }
+            else if (existModel != null)
+            {
+                var mapped = new CRUDFactory().ToEntity(dto);
+                existModel.SetCreated(mapped);
+                UpdateEntity(existModel, mapped);
+                return await SaveChangesAsync();
+            }
+            return false;
+        
         }
-
-        return false;
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<bool> DeleteRecordByIdAsync(int id) 
     {
-        CRUDTransaction? existModel = await FindRecordByIdAsync(id);
-        if(existModel.IsNull() ) { return false; }
-        else if (existModel != null) {
-            _dBContext.CRUDTransaction.Remove(existModel);
-            return await SaveChangesAsync();
-        }
+        await _semaphore.WaitAsync();
 
-        return false;
+        try
+        {
+            CRUDTransaction? existModel = await FindRecordByIdAsync(id);
+            if(existModel.IsNull() ) { return false; }
+            else if (existModel != null) {
+                _dBContext.CRUDTransaction.Remove(existModel);
+                return await SaveChangesAsync();
+            }
+
+            return false;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
     
     private async Task<CRUDTransaction?> FindRecordByIdAsync(int id) {
