@@ -14,7 +14,7 @@ public static class ObjectExtension
         return false;
     }
 
-    public static bool ZeroCheck(this int ob)
+    public static bool IsZero(this int ob)
     {
         if (ob > 0) { return true; }
         return false;

@@ -51,6 +51,7 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
         try
         {
+            await Task.Delay(1000); // Simulating long running operation, to test semaphore locking.
             CRUDTransaction? existModel = await FindRecordByIdAsync(dto.Id);
             if(existModel.IsNull() ) { return false; }
             else if (existModel != null)
