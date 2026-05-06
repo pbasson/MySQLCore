@@ -12,6 +12,16 @@ services:
     networks:
       - mysqlcore_network
     
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file:
+      - env/docker-env/rabbitmq-settings.dev.env
+    networks:
+      - mysqlcore_network
+
   mysqlcore.api:
     image: mysqlcore-api:latest
     build:
@@ -24,21 +34,16 @@ services:
       - env/docker-env/app-cert.dev.env
       - env/docker-env/app-settings.dev.env
       - env/docker-env/app-apikey.dev.env
+      - env/docker-env/rabbitmq-settings.dev.env
     restart: always
     depends_on:
       - mysqlcore.db
+      - rabbitmq
     networks:
       - mysqlcore_network
     # volumes:
       # - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
 
-  rabbitmq:
-    image: rabbitmq:4-management
-    ports:
-      - 5672:5672
-      - 15672:15672
-    networks:
-      - mysqlcore_network
 
 volumes:
   mysqlcore_vol:

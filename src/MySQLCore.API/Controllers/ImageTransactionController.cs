@@ -41,7 +41,7 @@ public class ImageTransactionController : BaseController
 
     [HttpPost]
     [Route("CreateRecord")]
-    public async Task<ActionResult<bool>> CreateRecord(CreateImageTransactionDTO dTO) {
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageTransactionDTO dTO) {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.CreateRecordAsync(dTO);
         return result;

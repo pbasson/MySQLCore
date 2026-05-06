@@ -1,5 +1,6 @@
 global using System.ComponentModel.DataAnnotations;
 global using System.Net;
+global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using ElmahCore;
@@ -18,3 +19,5 @@ global using MySQLCore.Core.Services;
 global using MySQLCore.Core.Utilities;
 global using MySQLCore.Infrastructure.Context;
 global using MySQLCore.Infrastructure.Repos;
+global using RabbitMQ.Client;
+global using RabbitMQ.Client.Events;

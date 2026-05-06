@@ -1,7 +1,11 @@
 global using System.ComponentModel.DataAnnotations;
 global using System.ComponentModel.DataAnnotations.Schema;
+global using System.Text;
+global using System.Text.Json;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.ChangeTracking;
+global using MySQLCore.Core.Constants;
+global using MySQLCore.Core.Interfaces.Messager;
 global using MySQLCore.Core.Interfaces.Repos;
 global using MySQLCore.Core.Models.DTOs;
 global using MySQLCore.Core.Models.DTOs.ImageDTOs;
@@ -10,3 +14,4 @@ global using MySQLCore.Infrastructure.Context;
 global using MySQLCore.Infrastructure.Entities.Tables;
 global using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
 global using MySQLCore.Infrastructure.Factory;
+global using RabbitMQ.Client;
