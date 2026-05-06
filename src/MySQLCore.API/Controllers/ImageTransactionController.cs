@@ -19,7 +19,7 @@ public class ImageTransactionController : BaseController
     [HttpGet]
     [Route("GetAllRecordsPaginationAsync/{page:int}")]
     public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
-        if (page.IsZero())  {
+        if (page.IsNotZero())  {
             var result = await _service.GetAllRecordsPaginationAsync(page);
             return result.IsNotNull() && result.Count > 0 ? result : new List<ImageTransactionDTO>();
         }
@@ -31,7 +31,7 @@ public class ImageTransactionController : BaseController
     [HttpGet]
     [Route("GetRecordById/{Id:int}")]
     public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int Id) {
-        if (Id.IsZero())  {
+        if (Id.IsNotZero())  {
             var result = await _service.GetRecordByIdAsync(Id);
             return result.IsNotNull() ? result : new ImageTransactionDTO();
         }
@@ -58,7 +58,7 @@ public class ImageTransactionController : BaseController
     [HttpDelete]
     [Route("DeleteRecord")]
     public async Task<ActionResult<bool>> DeleteRecord(int id) {
-        if (id.IsZero()) {
+        if (id.IsNotZero()) {
             var result = await _service.DeleteRecordByIdAsync(id);
             return result;
         }
