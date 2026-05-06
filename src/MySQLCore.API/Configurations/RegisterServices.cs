@@ -19,13 +19,13 @@ public static class RegisterServices {
         services.AddScoped<ICRUDTransactionService,CRUDTransactionService>();
         services.AddScoped<IImageTransactionService,ImageTransactionService>();
         services.AddScoped<IMessagePublisher,RabbitMQPublisher>();
-        
     }
 
     private static void RegisterCoreRepos(IServiceCollection services)
     {
         services.AddScoped<ICRUDTransactionRepo, CRUDTransactionRepo>();
         services.AddScoped<IImageTransactionRepo, ImageTransactionRepo>();
+        services.AddScoped<IProcessedMessageRepo, ProcessedMessageRepo>();
     }
         
 }

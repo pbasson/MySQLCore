@@ -1,11 +1,12 @@
 namespace MySQLCore.Core.Enums;
 
-public enum ServiceResultType
+public enum MessagerResultType
 {
+    NoAction,
     Success,
     NotFound,
     Conflict,
     Failed
 }
 
-public record ServiceResult( ServiceResultType Type, string Message );
+public record ServiceResult( MessagerResultType Type, string Message );

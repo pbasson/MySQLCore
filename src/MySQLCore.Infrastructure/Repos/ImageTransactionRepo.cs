@@ -32,20 +32,20 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto) 
     {
-        if ( dto.IsNull() ) { return new TransferDTO(0, "DTO is null"); }
+        if ( dto.IsNull() ) { return new TransferDTO(0, "DTO is null", MessagerResultType.Failed); }
 
         var mapped = _factory.ToEntity(dto);
         _dBContext.ImageTransaction.Add(mapped);
         var result = await SaveChangesAsync();
         
-        if(!result) { return new TransferDTO(0, "Save Changes Not Executed"); }
+        if(!result) { return new TransferDTO(0, "Save Changes Not Executed", MessagerResultType.Failed); }
 
-        return new TransferDTO(mapped.ImageTransactionID); 
+        return new TransferDTO(mapped.ImageTransactionID, string.Empty, MessagerResultType.Success); 
     }
 
     public async Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto) 
     {
-        if ( dto.IsNull() ) { return new TransferDTO(0, "DTO is null"); }
+        if ( dto.IsNull() ) { return new TransferDTO(0, "DTO is null", MessagerResultType.Failed); }
     
         ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
         
@@ -68,11 +68,11 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
                 var result = await SaveChangesAsync();
         
-                if(!result) { return new TransferDTO(0, "Save Changes Not Executed"); }
+                if(!result) { return new TransferDTO(0, "Save Changes Not Executed", MessagerResultType.Failed); }
 
-                return new TransferDTO(mapped.ImageTransactionID); 
+                return new TransferDTO(mapped.ImageTransactionID, string.Empty, MessagerResultType.Success); 
         }
-        return new TransferDTO(0, "Entity Does Not Exist"); 
+        return new TransferDTO(0, "Entity Does Not Exist", MessagerResultType.Failed); 
     }
 
     public async Task<bool> DeleteRecordByIdAsync(int id)  

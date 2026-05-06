@@ -5,6 +5,7 @@ public class MySQLCoreDBContext(DbContextOptions<MySQLCoreDBContext> option) : D
     public virtual DbSet<CRUDTransaction> CRUDTransaction {get; set;}
     public virtual DbSet<ImageTransaction> ImageTransaction {get; set;}
     public virtual DbSet<ImageGallery> ImageGallery {get; set;}
+    public virtual DbSet<ProcessedMessage> ProcessedMessage {get; set;}
 
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
