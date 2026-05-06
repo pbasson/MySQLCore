@@ -43,9 +43,9 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         return new TransferDTO(mapped.ImageTransactionID); 
     }
 
-    public async Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto) 
+    public async Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto) 
     {
-        if (dto.IsNull()) { return false; }
+        if ( dto.IsNull() ) { return new TransferDTO(0, "DTO is null"); }
     
         ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
         
@@ -66,9 +66,13 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
                 if (AddList.Count > 0) { _dBContext.ImageGallery.AddRange(AddList); }
             }
 
-            return await SaveChangesAsync();
+                var result = await SaveChangesAsync();
+        
+                if(!result) { return new TransferDTO(0, "Save Changes Not Executed"); }
+
+                return new TransferDTO(mapped.ImageTransactionID); 
         }
-        return false;
+        return new TransferDTO(0, "Entity Does Not Exist"); 
     }
 
     public async Task<bool> DeleteRecordByIdAsync(int id)  

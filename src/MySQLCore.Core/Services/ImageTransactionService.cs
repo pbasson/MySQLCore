@@ -42,9 +42,13 @@ public class ImageTransactionService : IImageTransactionService
         return result;
     }
 
-    public async Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto)
+    public async Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto)
     {
         var result = await _repo.UpdateRecordAsync(dto);
+        if(!result.Success) { return result; }
+
+        await CreateImageAsync(result.Id, dto.ImageType!);
+
         return result;
     }
 

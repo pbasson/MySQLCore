@@ -49,7 +49,7 @@ public class ImageTransactionController : BaseController
 
     [HttpPut]
     [Route("UpdateRecord")]
-    public async Task<ActionResult<bool>> UpdateRecord(UpdateImageTransactionDTO dTO) {
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageTransactionDTO dTO) {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.UpdateRecordAsync(dTO);
         return result;

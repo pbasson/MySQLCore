@@ -8,6 +8,6 @@ public interface IImageTransactionRepo
     Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page);
     Task<ImageTransactionDTO> GetRecordByIdAsync(int id);
     Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto);
-    Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto);
+    Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto);
     Task<bool> DeleteRecordByIdAsync(int id);
 }
