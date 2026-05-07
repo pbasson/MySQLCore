@@ -1,11 +1,11 @@
 namespace MySQLCore.Infrastructure.Messager;
 
-public class ProcessMessagePublisher
+public class ProcessMessageService
 {
-    private readonly ILogger<ProcessMessagePublisher> _logger;
+    private readonly ILogger<ProcessMessageService> _logger;
     private readonly IProcessedMessageRepo _repo;
 
-    public ProcessMessagePublisher(ILogger<ProcessMessagePublisher> logger, IProcessedMessageRepo repo)
+    public ProcessMessageService(ILogger<ProcessMessageService> logger, IProcessedMessageRepo repo)
     {
         _logger = logger;
         _repo = repo;
@@ -22,9 +22,7 @@ public class ProcessMessagePublisher
         _logger.LogInformation( "Processing image. MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}",
              message.MessageId, message.ImageId, message.FileName);
 
-
         // actual processing here
-
 
         await _repo.AddAsync(message.MessageId);
     }

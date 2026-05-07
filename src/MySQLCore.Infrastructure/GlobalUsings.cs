@@ -17,5 +17,4 @@ global using MySQLCore.Infrastructure.Context;
 global using MySQLCore.Infrastructure.Entities.Tables;
 global using MySQLCore.Infrastructure.Entities.Tables.ImageTables;
 global using MySQLCore.Infrastructure.Factory;
-global using MySQLCore.Infrastructure.Repos;
 global using RabbitMQ.Client;

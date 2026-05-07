@@ -1,6 +1,3 @@
-using MySQLCore.Core.Interfaces.Messager;
-using MySQLCore.Infrastructure.Messager;
-
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterServices {
@@ -19,7 +16,7 @@ public static class RegisterServices {
         services.AddScoped<ICRUDTransactionService,CRUDTransactionService>();
         services.AddScoped<IImageTransactionService,ImageTransactionService>();
         services.AddScoped<IMessagePublisher,RabbitMQPublisher>();
-        services.AddScoped<ProcessMessagePublisher>();
+        services.AddScoped<ProcessMessageService>();
     }
 
     private static void RegisterCoreRepos(IServiceCollection services)
@@ -28,5 +25,4 @@ public static class RegisterServices {
         services.AddScoped<IImageTransactionRepo, ImageTransactionRepo>();
         services.AddScoped<IProcessedMessageRepo, ProcessedMessageRepo>();
     }
-        
 }

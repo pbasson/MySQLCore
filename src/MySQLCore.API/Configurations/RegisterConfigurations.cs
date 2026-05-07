@@ -1,5 +1,3 @@
-using MySQLCore.API.BackgroundServices;
-
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterConfigurations

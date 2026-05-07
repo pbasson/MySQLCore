@@ -1,6 +1,3 @@
-using MySQLCore.Core.Messager;
-using MySQLCore.Infrastructure.Messager;
-
 namespace MySQLCore.API.BackgroundServices;
 
 public class ImageProcessingWorker : BackgroundService
@@ -28,22 +25,36 @@ public class ImageProcessingWorker : BackgroundService
 
         consumer.ReceivedAsync += async (sender, eventArgs) =>
         {
-            var body = eventArgs.Body.ToArray();
-            var json = Encoding.UTF8.GetString(body);
-
-            var message = JsonSerializer.Deserialize<ImageCreatedMessage>(json);
-
-            if (message != null)
+            try
             {
+                var body = eventArgs.Body.ToArray();
+                var json = Encoding.UTF8.GetString(body);
+
+                var message = JsonSerializer.Deserialize<ImageCreatedMessage>(json);
+
+                if (message == null)
+                {   
+                    _logger.LogWarning("Invalid image message received. Payload: {Payload}", json);
+                    await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+
+                    return;
+                }
+
                 _logger.LogInformation( "Received image message. MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}",
                     message.MessageId, message.ImageId, message.FileName);
 
                 using var scope = _scopeFactory.CreateScope();
 
-                var processService = scope.ServiceProvider.GetRequiredService<ProcessMessagePublisher>();
+                var processService = scope.ServiceProvider.GetRequiredService<ProcessMessageService>();
                 await processService.ProcessAsync(message);
 
                 await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Message processing failed");
+
+                await channel.BasicNackAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, requeue: true, cancellationToken: stoppingToken);
             }
         };
 
