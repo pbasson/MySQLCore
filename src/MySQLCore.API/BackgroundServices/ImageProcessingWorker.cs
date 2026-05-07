@@ -1,14 +1,17 @@
 using MySQLCore.Core.Messager;
+using MySQLCore.Infrastructure.Messager;
 
 namespace MySQLCore.API.BackgroundServices;
 
 public class ImageProcessingWorker : BackgroundService
 {
     private readonly ILogger<ImageProcessingWorker> _logger;
-
-    public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger)
+    private readonly IServiceScopeFactory _scopeFactory;
+    
+    public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
+        _scopeFactory = scopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -19,12 +22,7 @@ public class ImageProcessingWorker : BackgroundService
         var connection = await CreateConnectionWithRetryAsync(factory, stoppingToken);
         var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
-        await channel.QueueDeclareAsync(
-            queue: "image-processing-queue",
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            cancellationToken: stoppingToken);
+        await channel.QueueDeclareAsync( queue: MessagerConstants.IMAGE_QUEUE, durable: true, exclusive: false, autoDelete: false, cancellationToken: stoppingToken);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
 
@@ -35,26 +33,21 @@ public class ImageProcessingWorker : BackgroundService
 
             var message = JsonSerializer.Deserialize<ImageCreatedMessage>(json);
 
-            if (message is not null)
+            if (message != null)
             {
-                _logger.LogInformation(
-                    "Received image message. MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}",
-                    message.MessageId,
-                    message.ImageId,
-                    message.FileName);
-            }
+                _logger.LogInformation( "Received image message. MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}",
+                    message.MessageId, message.ImageId, message.FileName);
 
-            await channel.BasicAckAsync(
-                deliveryTag: eventArgs.DeliveryTag,
-                multiple: false,
-                cancellationToken: stoppingToken);
+                using var scope = _scopeFactory.CreateScope();
+
+                var processService = scope.ServiceProvider.GetRequiredService<ProcessMessagePublisher>();
+                await processService.ProcessAsync(message);
+
+                await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+            }
         };
 
-        await channel.BasicConsumeAsync(
-            queue: MessagerConstants.IMAGE_QUEUE,
-            autoAck: false,
-            consumer: consumer,
-            cancellationToken: stoppingToken);
+        await channel.BasicConsumeAsync( queue: MessagerConstants.IMAGE_QUEUE, autoAck: false, consumer: consumer, cancellationToken: stoppingToken);
     }
 
     private async Task<IConnection> CreateConnectionWithRetryAsync( ConnectionFactory factory, CancellationToken stoppingToken)

@@ -1,9 +1,15 @@
-
 namespace MySQLCore.Infrastructure.Messager;
 
 public class RabbitMQPublisher : IMessagePublisher
 {
-    public async Task PublishAsync<TMessage>(string queueName, TMessage message)
+    private readonly ILogger<RabbitMQPublisher> _logger;
+
+    public RabbitMQPublisher(ILogger<RabbitMQPublisher> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task PublishAsync<TMessage>(string queueName, TMessage message) where TMessage : IMessage
     {
         /// This Sets up the connect to the RabbitMQ for Queuing processing
         var factory = new ConnectionFactory { HostName = MessagerConstants.RabbitMQService(), UserName = "guest", Password = "password001" };
@@ -17,5 +23,6 @@ public class RabbitMQPublisher : IMessagePublisher
         var body = Encoding.UTF8.GetBytes(json);
 
         await channel.BasicPublishAsync( exchange: string.Empty, routingKey: queueName, body: body);
+        _logger.LogInformation("Message published to queue {QueueName}", queueName);
     }
 }

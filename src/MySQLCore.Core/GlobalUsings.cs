@@ -1,5 +1,5 @@
-global using ElmahCore;
 global using FluentValidation;
+global using Microsoft.Extensions.Logging;
 global using MySQLCore.Core.Constants;
 global using MySQLCore.Core.Interfaces.Messager;
 global using MySQLCore.Core.Interfaces.Repos;

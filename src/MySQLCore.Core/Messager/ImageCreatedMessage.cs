@@ -1,6 +1,6 @@
 namespace MySQLCore.Core.Messager;
 
-public class ImageCreatedMessage
+public class ImageCreatedMessage : IMessage
 {
     public Guid MessageId { get; set; } = Guid.NewGuid();
     public int ImageId { get; set; }

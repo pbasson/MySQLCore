@@ -1,20 +1,16 @@
-using Microsoft.Extensions.Logging;
-
 namespace MySQLCore.Core.Services;
 
 public class ImageTransactionService : IImageTransactionService
 {
+    private readonly ILogger<ImageTransactionService> _logger = default!;
     private readonly IImageTransactionRepo _repo = default!;
     private readonly IMessagePublisher _publisher;
-    private readonly IProcessedMessageRepo _processedMessageRepo;
-    private readonly ILogger<ImageTransactionService> _logger = default!;
 
-    public ImageTransactionService(ILogger<ImageTransactionService> logger, IImageTransactionRepo repo, IMessagePublisher publisher, IProcessedMessageRepo processedMessageRepo)
+    public ImageTransactionService(ILogger<ImageTransactionService> logger, IImageTransactionRepo repo, IMessagePublisher publisher)
     {
         _logger = logger;
         _repo = repo;
         _publisher = publisher;
-        _processedMessageRepo = processedMessageRepo;
     }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync()
@@ -29,7 +25,6 @@ public class ImageTransactionService : IImageTransactionService
         return result;
     }
 
-
     public async Task<ImageTransactionDTO> GetRecordByIdAsync(int id)
     {
         var result = await _repo.GetRecordByIdAsync(id);
@@ -42,8 +37,8 @@ public class ImageTransactionService : IImageTransactionService
 
         if(!result.Success) { return result; }
 
+        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType! ));
 
-        await ImageProcessAsync(result.Id, dto.ImageType!);
         return result;
     }
 
@@ -52,7 +47,7 @@ public class ImageTransactionService : IImageTransactionService
         var result = await _repo.UpdateRecordAsync(dto);
         if(!result.Success) { return result; }
 
-        await ImageProcessAsync(result.Id, dto.ImageType!);
+        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType! ));
 
         return result;
     }
@@ -62,24 +57,5 @@ public class ImageTransactionService : IImageTransactionService
         var result = await _repo.DeleteRecordByIdAsync(id);
         return result;
     }
-
-    private async Task ImageProcessAsync(int imageId, string fileName)
-    {
-        var message = new ImageCreatedMessage( imageId, fileName );
-        await ProcessAsync(message);
-    }
-
-    public async Task ProcessAsync(ImageCreatedMessage message)
-{
-    if (await _processedMessageRepo.ExistsAsync(message.MessageId))
-    {
-        _logger.LogInformation("Duplicate message ignored: {MessageId}", message.MessageId);
-        return;
-    }
-
-    await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, message);
-
-    await _processedMessageRepo.AddAsync(message.MessageId);
-}
 
 }

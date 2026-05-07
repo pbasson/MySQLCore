@@ -3,6 +3,7 @@ namespace MySQLCore.Infrastructure.Repos;
 public class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
 {
     public ProcessedMessageRepo(MySQLCoreDBContext dbContext) : base(dbContext) { }
+    
     public async Task AddAsync(Guid messageId)
     {
         _dBContext.ProcessedMessage.Add(new (messageId ) );
