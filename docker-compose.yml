@@ -22,6 +22,18 @@ services:
     networks:
       - mysqlcore_network
 
+  seq:
+    image: datalust/seq:latest
+    ports:
+      - "5341:80"
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    volumes:
+      - /home/preet/Projects/Projects-Y/Logs/Seq:/data
+    networks:
+      - mysqlcore_network
+
   mysqlcore.api:
     image: mysqlcore-api:latest
     build:
@@ -39,11 +51,12 @@ services:
     depends_on:
       - mysqlcore.db
       - rabbitmq
+      - seq
     networks:
       - mysqlcore_network
-    # volumes:
+    volumes:
+      - /home/preet/Projects/Projects-Y/Logs/MySQLCore:/Logs
       # - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
-
 
 volumes:
   mysqlcore_vol:

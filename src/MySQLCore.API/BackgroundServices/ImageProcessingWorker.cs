@@ -27,6 +27,8 @@ public class ImageProcessingWorker : BackgroundService
 
         var consumer = new AsyncEventingBasicConsumer(channel);
 
+        _logger.LogInformation( "Received image message. Status: {status}", nameof(ProcessMessageStatus.Pending));
+
         consumer.ReceivedAsync += async (sender, eventArgs) =>
         {
             ImageCreatedMessage? message = null;
@@ -39,29 +41,29 @@ public class ImageProcessingWorker : BackgroundService
                 message = JsonSerializer.Deserialize<ImageCreatedMessage>(json);
 
                 if (message == null)
-                {   
-                    _logger.LogWarning("Invalid image message received. Payload: {Payload}", json);
-                    await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+                {
+                    _logger.LogWarning("Invalid image message received. Status: {status} Payload: {Payload}", nameof(ProcessMessageStatus.Failed), json);
+                    await BasicAckAsync(eventArgs, channel, stoppingToken);
 
                     return;
                 }
 
-                _logger.LogInformation( "Received image message. MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}",
-                    message.MessageId, message.ImageId, message.FileName);
+                _logger.LogInformation( "Received image message. Status: {status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}",
+                    nameof(ProcessMessageStatus.Processing), message.MessageId, message.ImageId, message.FileName);
 
                 using var scope = _scopeFactory.CreateScope();
 
                 var processService = scope.ServiceProvider.GetRequiredService<ProcessMessageService>();
                 await processService.ProcessAsync(message);
 
-                await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+                await BasicAckAsync(eventArgs, channel, stoppingToken);
 
-                _logger.LogInformation( "Message acknowledged. MessageId: {MessageId}", message.MessageId);
+                _logger.LogInformation( "Message acknowledged. Status: {status}, MessageId: {MessageId}", nameof(ProcessMessageStatus.Processed),  message.MessageId);
             }
             catch (Exception ex)
             {
-                _logger.LogError( ex, "Message processing failed. MessageId: {MessageId}, DeliveryTag: {DeliveryTag}", 
-                    message?.MessageId, eventArgs.DeliveryTag);
+                _logger.LogError( ex, "Message processing failed. Status: {status}, MessageId: {MessageId}, DeliveryTag: {DeliveryTag}", 
+                    nameof(ProcessMessageStatus.Failed), message?.MessageId, eventArgs.DeliveryTag);
 
                 var retryCount = GetRetryCount(eventArgs);
 
@@ -70,7 +72,7 @@ public class ImageProcessingWorker : BackgroundService
                     _logger.LogError("Message moved to DLQ after {RetryCount} retries", retryCount);
 
                     await channel.BasicPublishAsync( exchange: string.Empty, routingKey: _settings.DeadLetterQueueName, body: eventArgs.Body, cancellationToken: stoppingToken);
-                    await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+                    await BasicAckAsync(eventArgs, channel, stoppingToken);
 
                     return;
                 }
@@ -80,11 +82,16 @@ public class ImageProcessingWorker : BackgroundService
                 await channel.BasicPublishAsync( exchange: string.Empty, routingKey: MessagerConstants.IMAGE_QUEUE,
                     mandatory: false, basicProperties: properties, body: eventArgs.Body, cancellationToken: stoppingToken);
 
-                await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+                await BasicAckAsync(eventArgs, channel, stoppingToken);
             }
         };
 
         await channel.BasicConsumeAsync( queue: MessagerConstants.IMAGE_QUEUE, autoAck: false, consumer: consumer, cancellationToken: stoppingToken);
+    }
+
+    private async Task BasicAckAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
+    {
+        await channel.BasicAckAsync(deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
     }
 
     private async Task<IConnection> CreateConnectionWithRetryAsync( ConnectionFactory factory, CancellationToken stoppingToken)

@@ -7,6 +7,15 @@ public static class RegisterConfigurations
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
+        Log.Logger = new LoggerConfiguration().MinimumLevel.Information().WriteTo.Console()
+            .WriteTo.File(
+                path: "/Logs/mysqlcore-log-.txt",
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 7)
+            .WriteTo.Seq("http://seq")
+            .CreateLogger();
+
+
         services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
         services.AddEndpointsApiExplorer();
 
@@ -28,8 +37,18 @@ public static class RegisterConfigurations
         #region Register Background Services
         services.RegisterBackgroundServices();
         #endregion
+
+
         return services;
     }
+
+    public static ConfigureHostBuilder RegisterHost(this ConfigureHostBuilder configure)
+    {
+        configure.UseSerilog();
+
+        return configure;
+    }
+
 
     private static void RegisterLogs(IServiceCollection services, IConfiguration configuration)
     {
@@ -64,4 +83,6 @@ public static class RegisterConfigurations
         // services.AddHostedService<Worker>();
         services.AddHostedService<ImageProcessingWorker>();
     }
+
+
 }
