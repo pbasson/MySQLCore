@@ -24,6 +24,6 @@ public class ProcessMessageService
 
         // actual processing here
 
-        await _repo.AddAsync(message.MessageId);
+        await _repo.AddAsync(new ProcessedMessageTransfer().GetTransfer(message.MessageId, nameof(ImageCreatedMessage), nameof(ImageTransaction), message.ImageId));
     }
 }

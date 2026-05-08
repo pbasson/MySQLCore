@@ -4,9 +4,9 @@ public class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
 {
     public ProcessedMessageRepo(MySQLCoreDBContext dbContext) : base(dbContext) { }
     
-    public async Task AddAsync(Guid messageId)
+    public async Task AddAsync(ProcessedMessage message)
     {
-        _dBContext.ProcessedMessage.Add(new (messageId ) );
+        _dBContext.ProcessedMessage.Add(message);
         await SaveChangesAsync();
     }
 

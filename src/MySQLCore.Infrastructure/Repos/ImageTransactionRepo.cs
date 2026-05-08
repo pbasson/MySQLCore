@@ -32,20 +32,20 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto) 
     {
-        if ( dto.IsNull() ) { return new TransferDTO(0, "DTO is null", MessagerResultType.Failed); }
+        if ( dto.IsNull() ) { return new TransferDTO(0, "DTO is null", ServiceResultType.Failed); }
 
         var mapped = _factory.ToEntity(dto);
         _dBContext.ImageTransaction.Add(mapped);
         var result = await SaveChangesAsync();
         
-        if(!result) { return new TransferDTO(0, "Save Changes Not Executed", MessagerResultType.Failed); }
+        if(!result) { return new TransferDTO(0, "Save Changes Not Executed", ServiceResultType.Failed); }
 
-        return new TransferDTO(mapped.ImageTransactionID, string.Empty, MessagerResultType.Success); 
+        return new TransferDTO(mapped.ImageTransactionID, string.Empty, ServiceResultType.Success); 
     }
 
     public async Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto) 
     {
-        if ( dto.IsNull() ) { return new TransferDTO(0, "DTO is null", MessagerResultType.Failed); }
+        if ( dto.IsNull() ) { return new TransferDTO(0, "DTO is null", ServiceResultType.Failed); }
     
         ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
         
@@ -68,11 +68,11 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
                 var result = await SaveChangesAsync();
         
-                if(!result) { return new TransferDTO(0, "Save Changes Not Executed", MessagerResultType.Failed); }
+                if(!result) { return new TransferDTO(0, "Save Changes Not Executed", ServiceResultType.Failed); }
 
-                return new TransferDTO(mapped.ImageTransactionID, string.Empty, MessagerResultType.Success); 
+                return new TransferDTO(mapped.ImageTransactionID, string.Empty, ServiceResultType.Success); 
         }
-        return new TransferDTO(0, "Entity Does Not Exist", MessagerResultType.Failed); 
+        return new TransferDTO(0, "Entity Does Not Exist", ServiceResultType.Failed); 
     }
 
     public async Task<bool> DeleteRecordByIdAsync(int id)  

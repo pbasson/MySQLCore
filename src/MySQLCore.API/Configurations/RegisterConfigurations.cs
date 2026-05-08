@@ -10,6 +10,8 @@ public static class RegisterConfigurations
         services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
         services.AddEndpointsApiExplorer();
 
+        services.Configure<RabbitMQSettings>(configuration.GetSection("RabbitMQ"));
+
         #region Register Services
         RegisterSwagger(services);
         RegisterLogs(services, configuration);

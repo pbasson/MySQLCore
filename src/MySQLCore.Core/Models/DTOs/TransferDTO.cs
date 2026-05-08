@@ -10,9 +10,9 @@ public class TransferDTO
     public string Message { get; set; }
     public bool Success => Id > 0;
 
-    public MessagerResultType type = MessagerResultType.NoAction;
+    public ServiceResultType type = ServiceResultType.NoAction;
 
-    public TransferDTO(int id, string message = "", MessagerResultType type = MessagerResultType.NoAction)
+    public TransferDTO(int id, string message = "", ServiceResultType type = ServiceResultType.NoAction)
     {
         var basicError = "Entity Not Created";
         var failure = !string.IsNullOrEmpty(message) ?  message : basicError ;

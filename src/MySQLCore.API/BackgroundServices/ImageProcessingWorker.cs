@@ -1,21 +1,25 @@
+using Microsoft.Extensions.Options;
+
 namespace MySQLCore.API.BackgroundServices;
 
 public class ImageProcessingWorker : BackgroundService
 {
     private readonly ILogger<ImageProcessingWorker> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly RabbitMQSettings _settings;
+    private const string RetryHeader = "x-retry-count";
     
-    public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger, IServiceScopeFactory scopeFactory)
+    public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger, IServiceScopeFactory scopeFactory, IOptions<RabbitMQSettings> options)
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
+        _settings = options.Value;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // var factory = new ConnectionFactory { HostName = MessagerConstants.RabbitMQService() };
-        var factory = new ConnectionFactory { HostName = MessagerConstants.RabbitMQService(), UserName = "guest", Password = "password001" };
-
+        var factory = new ConnectionFactory { HostName = MessagerConstants.RabbitMQService(), UserName = _settings.UserName, Password = _settings.Password };
         var connection = await CreateConnectionWithRetryAsync(factory, stoppingToken);
         var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
@@ -25,12 +29,14 @@ public class ImageProcessingWorker : BackgroundService
 
         consumer.ReceivedAsync += async (sender, eventArgs) =>
         {
+            ImageCreatedMessage? message = null;
+
             try
             {
                 var body = eventArgs.Body.ToArray();
                 var json = Encoding.UTF8.GetString(body);
 
-                var message = JsonSerializer.Deserialize<ImageCreatedMessage>(json);
+                message = JsonSerializer.Deserialize<ImageCreatedMessage>(json);
 
                 if (message == null)
                 {   
@@ -49,12 +55,32 @@ public class ImageProcessingWorker : BackgroundService
                 await processService.ProcessAsync(message);
 
                 await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+
+                _logger.LogInformation( "Message acknowledged. MessageId: {MessageId}", message.MessageId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Message processing failed");
+                _logger.LogError( ex, "Message processing failed. MessageId: {MessageId}, DeliveryTag: {DeliveryTag}", 
+                    message?.MessageId, eventArgs.DeliveryTag);
 
-                await channel.BasicNackAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, requeue: true, cancellationToken: stoppingToken);
+                var retryCount = GetRetryCount(eventArgs);
+
+                if (retryCount >= _settings.MaxRetryCount)
+                {
+                    _logger.LogError("Message moved to DLQ after {RetryCount} retries", retryCount);
+
+                    await channel.BasicPublishAsync( exchange: string.Empty, routingKey: _settings.DeadLetterQueueName, body: eventArgs.Body, cancellationToken: stoppingToken);
+                    await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+
+                    return;
+                }
+
+                var properties = new BasicProperties { Headers = new Dictionary<string, object?> { [RetryHeader] = retryCount + 1 }, Persistent = true };
+
+                await channel.BasicPublishAsync( exchange: string.Empty, routingKey: MessagerConstants.IMAGE_QUEUE,
+                    mandatory: false, basicProperties: properties, body: eventArgs.Body, cancellationToken: stoppingToken);
+
+                await channel.BasicAckAsync( deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
             }
         };
 
@@ -67,8 +93,9 @@ public class ImageProcessingWorker : BackgroundService
         {
             try
             {
-                Console.WriteLine("Started Shit");
-                return await factory.CreateConnectionAsync(stoppingToken);
+                var getConnection = await factory.CreateConnectionAsync(stoppingToken);
+                _logger.LogInformation( "RabbitMQ Connection Established");
+                return getConnection; 
             }
             catch (Exception ex)
             {
@@ -79,5 +106,26 @@ public class ImageProcessingWorker : BackgroundService
         }
 
         throw new OperationCanceledException();
+    }
+
+    private static int GetRetryCount(BasicDeliverEventArgs eventArgs)
+    {
+        if (eventArgs.BasicProperties?.Headers == null)
+        {
+            return 0;
+        }
+
+        if (!eventArgs.BasicProperties.Headers.TryGetValue(RetryHeader, out var value))
+        {
+            return 0;
+        }
+
+        return value switch
+        {
+            byte[] bytes when int.TryParse(Encoding.UTF8.GetString(bytes), out var result) => result,
+            int number => number,
+            long number => (int)number,
+            _ => 0
+        };
     }
 }
