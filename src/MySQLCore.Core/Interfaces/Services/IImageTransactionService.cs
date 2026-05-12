@@ -7,7 +7,7 @@ public interface IImageTransactionService
     Task<List<ImageTransactionDTO>> GetAllRecordsAsync();
     Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page);
     Task<ImageTransactionDTO> GetRecordByIdAsync(int id);
-    Task<bool> CreateRecordAsync(CreateImageTransactionDTO dto);
-    Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto);
+    Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto);
+    Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto);
     Task<bool> DeleteRecordByIdAsync(int id);
 }

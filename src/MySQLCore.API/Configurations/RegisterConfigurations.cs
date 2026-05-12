@@ -1,5 +1,3 @@
-using MySQLCore.API.BackgroundServices;
-
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterConfigurations
@@ -9,8 +7,19 @@ public static class RegisterConfigurations
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
+        Log.Logger = new LoggerConfiguration().MinimumLevel.Information().WriteTo.Console()
+            .WriteTo.File(
+                path: "/Logs/mysqlcore-log-.txt",
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 7)
+            .WriteTo.Seq("http://seq")
+            .CreateLogger();
+
+
         services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
         services.AddEndpointsApiExplorer();
+
+        services.Configure<RabbitMQSettings>(configuration.GetSection("RabbitMQ"));
 
         #region Register Services
         RegisterSwagger(services);
@@ -26,10 +35,20 @@ public static class RegisterConfigurations
         #endregion
 
         #region Register Background Services
-        // services.RegisterBackgroundServices();
+        services.RegisterBackgroundServices();
         #endregion
+
+
         return services;
     }
+
+    public static ConfigureHostBuilder RegisterHost(this ConfigureHostBuilder configure)
+    {
+        configure.UseSerilog();
+
+        return configure;
+    }
+
 
     private static void RegisterLogs(IServiceCollection services, IConfiguration configuration)
     {
@@ -50,21 +69,20 @@ public static class RegisterConfigurations
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.ApiKey
             });   
-            x.AddSecurityRequirement(new OpenApiSecurityRequirement() { {
-                        new OpenApiSecurityScheme {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = AppSettings.API_KEY },
-                            In= ParameterLocation.Header
-                        },
-                        new List<string>()
-                    }
-                });
+            x.AddSecurityRequirement(new () { { new () { 
+                Reference = new () { Type = ReferenceType.SecurityScheme, Id = AppSettings.API_KEY },
+                In = ParameterLocation.Header }, []
+                }
+            });
             }
         );
     }
 
-
     private static void RegisterBackgroundServices(this IServiceCollection services)
     {
-        services.AddHostedService<Worker>();
+        // services.AddHostedService<Worker>();
+        services.AddHostedService<ImageProcessingWorker>();
     }
+
+
 }

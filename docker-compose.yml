@@ -12,6 +12,28 @@ services:
     networks:
       - mysqlcore_network
     
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file:
+      - env/docker-env/rabbitmq-middleware.dev.env
+    networks:
+      - mysqlcore_network
+
+  seq:
+    image: datalust/seq:latest
+    ports:
+      - "5341:80"
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    volumes:
+      - /home/preet/Projects/Projects-Y/Logs/Seq:/data
+    networks:
+      - mysqlcore_network
+
   mysqlcore.api:
     image: mysqlcore-api:latest
     build:
@@ -24,13 +46,18 @@ services:
       - env/docker-env/app-cert.dev.env
       - env/docker-env/app-settings.dev.env
       - env/docker-env/app-apikey.dev.env
+      - env/docker-env/rabbitmq-settings.dev.env
     restart: always
     depends_on:
       - mysqlcore.db
+      - rabbitmq
+      - seq
     networks:
       - mysqlcore_network
-    # volumes:
+    volumes:
+      - /home/preet/Projects/Projects-Y/Logs/MySQLCore:/Logs
       # - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
+
 volumes:
   mysqlcore_vol:
 

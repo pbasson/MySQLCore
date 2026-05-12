@@ -20,9 +20,9 @@ public class CRUDTransactionController : BaseController
     [HttpGet]
     [Route("GetAllRecordsPaginationAsync/{page:int}")]
     public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
-        if ( page.ZeroCheck() )  {
+        if ( page.IsNotZero() )  {
             var result = await _service.GetAllRecordsPaginationAsync(page);
-            return result.IsNotNull() && result.Count > 0 ? result : new List<CRUDTransactionDTO>();
+            return result.IsNotNull() && result.Count > 0 ? result : [];
         }
         return BadRequest(); 
     }
@@ -30,9 +30,9 @@ public class CRUDTransactionController : BaseController
     [HttpGet]
     [Route("GetRecordById/{Id:int}")]
     public async Task<ActionResult<CRUDTransactionDTO>> GetRecordById(int Id) {
-        if ( Id.ZeroCheck() )  {
+        if ( Id.IsNotZero() )  {
             var result = await _service.GetRecordByIdAsync(Id);
-            return result.IsNotNull() ? result : new CRUDTransactionDTO();
+            return result.IsNotNull() ? result : new();
         }
         return BadRequest(); 
     }
@@ -56,7 +56,7 @@ public class CRUDTransactionController : BaseController
     [HttpDelete]
     [Route("DeleteRecord")]
     public async Task<ActionResult<bool>> DeleteRecord(int id) {
-        if (id.ZeroCheck()) {
+        if (id.IsNotZero()) {
             var result = await _service.DeleteRecordByIdAsync(id);
             return result;
         }

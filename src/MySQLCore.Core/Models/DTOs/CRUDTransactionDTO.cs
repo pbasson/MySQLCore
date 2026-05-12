@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MySQLCore.Core.Models.DTOs;
 
-public class CRUDTransactionDTO : BaseDTO
+public class CRUDTransactionDTO : BaseDTO, IEntity
 {
     public int Id { get; set; }
     public string? Name { get; set; }
@@ -17,7 +17,8 @@ public class CreateCRUDTransactionDTO
     public string Name { get; set; } = "";
 }
 
-public class UpdateCRUDTransactionDTO {
+public class UpdateCRUDTransactionDTO : IEntity 
+{
     [Required]
     public int Id { get; set; }
     

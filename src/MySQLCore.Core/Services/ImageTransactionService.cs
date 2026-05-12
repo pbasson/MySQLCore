@@ -2,96 +2,60 @@ namespace MySQLCore.Core.Services;
 
 public class ImageTransactionService : IImageTransactionService
 {
+    private readonly ILogger<ImageTransactionService> _logger = default!;
     private readonly IImageTransactionRepo _repo = default!;
+    private readonly IMessagePublisher _publisher;
 
-    public ImageTransactionService(IImageTransactionRepo repo)
+    public ImageTransactionService(ILogger<ImageTransactionService> logger, IImageTransactionRepo repo, IMessagePublisher publisher)
     {
+        _logger = logger;
         _repo = repo;
+        _publisher = publisher;
     }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync()
     {
-        try
-        {
-            var result = await _repo.GetAllRecordsAsync();
-            return result;
-        }
-        catch (Exception ex)
-        {
-            ElmahExtensions.RaiseError(ex);
-            throw;
-        }
+        var result = await _repo.GetAllRecordsAsync();
+        return result;
     }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page)
     {
-        try
-        {
-            var result = await _repo.GetAllRecordsPaginationAsync(page);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            ElmahExtensions.RaiseError(ex);
-            throw;
-        }
+        var result = await _repo.GetAllRecordsPaginationAsync(page);
+        return result;
     }
-
 
     public async Task<ImageTransactionDTO> GetRecordByIdAsync(int id)
     {
-        try
-        {
-            var result = await _repo.GetRecordByIdAsync(id);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            ElmahExtensions.RaiseError(ex);
-            throw;
-        }
+        var result = await _repo.GetRecordByIdAsync(id);
+        return result;
     }
 
-    public async Task<bool> CreateRecordAsync(CreateImageTransactionDTO dto)
+    public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto)
     {
-        try
-        {
-            var result = await _repo.CreateRecordAsync(dto);
-            return result;
-        }
-       catch (Exception ex)
-        {
-            ElmahExtensions.RaiseError(ex);
-            throw;
-        }
+        var result = await _repo.CreateRecordAsync(dto);
+
+        if(!result.Success) { return result; }
+
+        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType! ));
+
+        return result;
     }
 
-
-    public async Task<bool> UpdateRecordAsync(UpdateImageTransactionDTO dto)
+    public async Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto)
     {
-        try
-        {
-            var result = await _repo.UpdateRecordAsync(dto);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            ElmahExtensions.RaiseError(ex);
-            throw;
-        }
+        var result = await _repo.UpdateRecordAsync(dto);
+        if(!result.Success) { return result; }
+
+        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType! ));
+
+        return result;
     }
 
     public async Task<bool> DeleteRecordByIdAsync(int id)
     {
-        try
-        {
-            var result = await _repo.DeleteRecordByIdAsync(id);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            ElmahExtensions.RaiseError(ex);
-            throw;
-        }
+        var result = await _repo.DeleteRecordByIdAsync(id);
+        return result;
     }
+
 }

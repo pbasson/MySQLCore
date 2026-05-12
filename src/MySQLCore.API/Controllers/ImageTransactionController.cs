@@ -19,7 +19,7 @@ public class ImageTransactionController : BaseController
     [HttpGet]
     [Route("GetAllRecordsPaginationAsync/{page:int}")]
     public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
-        if (page.ZeroCheck())  {
+        if (page.IsNotZero())  {
             var result = await _service.GetAllRecordsPaginationAsync(page);
             return result.IsNotNull() && result.Count > 0 ? result : new List<ImageTransactionDTO>();
         }
@@ -31,7 +31,7 @@ public class ImageTransactionController : BaseController
     [HttpGet]
     [Route("GetRecordById/{Id:int}")]
     public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int Id) {
-        if (Id.ZeroCheck())  {
+        if (Id.IsNotZero())  {
             var result = await _service.GetRecordByIdAsync(Id);
             return result.IsNotNull() ? result : new ImageTransactionDTO();
         }
@@ -41,7 +41,7 @@ public class ImageTransactionController : BaseController
 
     [HttpPost]
     [Route("CreateRecord")]
-    public async Task<ActionResult<bool>> CreateRecord(CreateImageTransactionDTO dTO) {
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageTransactionDTO dTO) {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.CreateRecordAsync(dTO);
         return result;
@@ -49,7 +49,7 @@ public class ImageTransactionController : BaseController
 
     [HttpPut]
     [Route("UpdateRecord")]
-    public async Task<ActionResult<bool>> UpdateRecord(UpdateImageTransactionDTO dTO) {
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageTransactionDTO dTO) {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.UpdateRecordAsync(dTO);
         return result;
@@ -58,7 +58,7 @@ public class ImageTransactionController : BaseController
     [HttpDelete]
     [Route("DeleteRecord")]
     public async Task<ActionResult<bool>> DeleteRecord(int id) {
-        if (id.ZeroCheck()) {
+        if (id.IsNotZero()) {
             var result = await _service.DeleteRecordByIdAsync(id);
             return result;
         }
