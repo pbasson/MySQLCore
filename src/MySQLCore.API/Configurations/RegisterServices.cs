@@ -17,6 +17,7 @@ public static class RegisterServices {
         services.AddScoped<IImageTransactionService,ImageTransactionService>();
         services.AddScoped<IMessagePublisher,RabbitMQPublisher>();
         services.AddScoped<ProcessMessageService>();
+        services.AddSingleton<RabbitMQConnectionService>();
     }
 
     private static void RegisterCoreRepos(IServiceCollection services)

@@ -6,14 +6,15 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 {
     private readonly IServiceScopeFactory _scopeFactory;
     
-    public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger, IServiceScopeFactory scopeFactory, IOptions<RabbitMQSettings> options) : base(logger, options)
+    public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger, IServiceScopeFactory scopeFactory, IOptions<RabbitMQSettings> options, RabbitMQConnectionService connectionService)
+     : base(logger, options, connectionService)
     {
         _scopeFactory = scopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        IChannel channel = await CreateConnection(stoppingToken);
+        IChannel channel = await _connectionService.CreateConnection(stoppingToken);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
 

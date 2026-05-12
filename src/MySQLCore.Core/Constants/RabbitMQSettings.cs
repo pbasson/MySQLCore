@@ -10,5 +10,5 @@ public class RabbitMQSettings
     public string DeadLetterQueueName { get; set; } = string.Empty;
 
     public int MaxRetryCount { get; set; } = 3;
-    public string RetryHeader = "x-retry-count";
+    public readonly string RetryHeader = "x-retry-count";
 }

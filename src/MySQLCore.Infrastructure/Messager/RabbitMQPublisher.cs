@@ -3,26 +3,21 @@ namespace MySQLCore.Infrastructure.Messager;
 public class RabbitMQPublisher : IMessagePublisher
 {
     private readonly ILogger<RabbitMQPublisher> _logger;
-
-    public RabbitMQPublisher(ILogger<RabbitMQPublisher> logger)
+    private readonly RabbitMQConnectionService _connectionService;
+    public RabbitMQPublisher(ILogger<RabbitMQPublisher> logger, RabbitMQConnectionService connectionService)
     {
         _logger = logger;
+        _connectionService = connectionService;
     }
 
     public async Task PublishAsync<TMessage>(string queueName, TMessage message) where TMessage : IMessage
     {
-        /// This Sets up the connect to the RabbitMQ for Queuing processing
-        var factory = new ConnectionFactory { HostName = MessagerConstants.RabbitMQService(), UserName = "guest", Password = "password001" };
-        await using var connection = await factory.CreateConnectionAsync();
-        await using var channel = await connection.CreateChannelAsync();
-
-        await channel.QueueDeclareAsync( queue: queueName, durable: true, exclusive: false, autoDelete: false);
+        var channel = await _connectionService.CreateConnection(CancellationToken.None);
 
         /// RabbitMQ only accepts Bytes hence payload must be serialized JSON to get bytes
-        var json = JsonSerializer.Serialize(message);
-        var body = Encoding.UTF8.GetBytes(json);
+        byte[] body = _connectionService.SerializeMessage(message);
 
-        await channel.BasicPublishAsync( exchange: string.Empty, routingKey: queueName, body: body);
-        _logger.LogInformation("Message published to queue {QueueName}", queueName);
+        await channel.BasicPublishAsync(exchange: string.Empty, routingKey: queueName, body: body);
+        _logger.LogInformation("Message {status}: {QueueName}", nameof(ProcessMessageStatus.Pending), queueName);
     }
 }
