@@ -1,11 +1,16 @@
+namespace MySQLCore.Core.Enums;
+
 public enum ProcessMessageStatus
 {
     Pending = 1,
-    Processing = 2,
-    Processed = 3,
-    Acknowledged = 4,
-    Failed = 5,
-    Invalid = 6,
-    DeadLetter = 7,
-    IgnoredDuplicate = 8
+    Published = 2,
+    Received = 3,
+    Processing = 4,
+    Processed = 5,
+    Acknowledged = 6,
+    Completed = 7,
+    Failed = 8,
+    Invalid = 9,
+    DeadLetter = 10,
+    IgnoredDuplicate = 11
 }

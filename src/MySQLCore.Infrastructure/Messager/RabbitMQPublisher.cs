@@ -18,6 +18,6 @@ public class RabbitMQPublisher : IMessagePublisher
         byte[] body = _connectionService.SerializeMessage(message);
 
         await channel.BasicPublishAsync(exchange: string.Empty, routingKey: queueName, body: body);
-        _logger.LogInformation("Message {status}: {QueueName}", nameof(ProcessMessageStatus.Pending), queueName);
+        _logger.LogInformation("{QueueName} Message Status: {status} ", queueName, nameof(ProcessMessageStatus.Published));
     }
 }

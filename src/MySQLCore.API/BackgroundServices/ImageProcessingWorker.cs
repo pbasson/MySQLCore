@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Options;
-
 namespace MySQLCore.API.BackgroundServices;
 
 public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
@@ -18,7 +16,7 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
         var consumer = new AsyncEventingBasicConsumer(channel);
 
-        _logger.LogInformation("{messager} Message Status: {status}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Pending));
+        _logger.LogInformation("{messager} Message Status: {status}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Received));
 
         consumer.ReceivedAsync += async (sender, eventArgs) =>
         {

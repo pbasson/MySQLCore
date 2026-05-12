@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Options;
-
 namespace MySQLCore.API.BackgroundServices;
 
 public class BaseWorker<TMessage> : BackgroundService where TMessage: IMessage 
