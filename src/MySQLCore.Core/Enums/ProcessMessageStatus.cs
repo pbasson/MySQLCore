@@ -3,7 +3,9 @@ public enum ProcessMessageStatus
     Pending = 1,
     Processing = 2,
     Processed = 3,
-    Failed = 4,
-    DeadLetter = 5,
-    IgnoredDuplicate = 6
+    Acknowledged = 4,
+    Failed = 5,
+    Invalid = 6,
+    DeadLetter = 7,
+    IgnoredDuplicate = 8
 }
