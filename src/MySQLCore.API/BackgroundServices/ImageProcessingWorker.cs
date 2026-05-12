@@ -17,7 +17,7 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
         var consumer = new AsyncEventingBasicConsumer(channel);
 
-        _logger.LogInformation("Message Status: {status}", nameof(ProcessMessageStatus.Pending));
+        _logger.LogInformation("{messager} Message Status: {status}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Pending));
 
         consumer.ReceivedAsync += async (sender, eventArgs) =>
         {
@@ -46,7 +46,7 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
     private async Task ProcessMessage( ImageCreatedMessage message, BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
     {
-        _logger.LogInformation( "Message Status: {Status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}",
+        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", nameof(ImageCreatedMessage),
             nameof(ProcessMessageStatus.Processing), message.MessageId, message.ImageId, message.FileName);
 
         using var scope = _scopeFactory.CreateScope();
@@ -54,23 +54,21 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         var processService = scope.ServiceProvider.GetRequiredService<ProcessMessageService>();
 
         await processService.ProcessAsync(message);
-
-        _logger.LogInformation( "Message Status: {Status}, MessageId: {MessageId}", nameof(ProcessMessageStatus.Processed), message.MessageId);
+        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);
 
         await BasicAckAsync(eventArgs, channel, stoppingToken);
-
-        _logger.LogInformation( "Message Status: {Status}, MessageId: {MessageId}", nameof(ProcessMessageStatus.Acknowledged), message.MessageId);
+        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Acknowledged), message.MessageId);
     }
 
     private async Task ProcessMessageException(BasicDeliverEventArgs eventArgs, IChannel channel, ImageCreatedMessage? message, Exception ex, CancellationToken stoppingToken)
     {
-        _logger.LogError(ex, "Message Status: {status}, MessageId: {MessageId}, DeliveryTag: {DeliveryTag}",
+        _logger.LogError(ex, "{messager} Message Status: {status}, MessageId: {MessageId}, DeliveryTag: {DeliveryTag}", nameof(ImageCreatedMessage),
             nameof(ProcessMessageStatus.Failed), message?.MessageId, eventArgs.DeliveryTag);
 
         var retryCount = GetRetryCount(eventArgs);
         if (retryCount >= _settings.MaxRetryCount)
         {
-            _logger.LogError("Message Status: {status} - moved to DLQ after {RetryCount} retries", ProcessMessageStatus.DeadLetter, retryCount);
+            _logger.LogError("{messager} Message Status: {status} - moved to DLQ after {RetryCount} retries", nameof(ImageCreatedMessage), ProcessMessageStatus.DeadLetter, retryCount);
 
             await channel.BasicPublishAsync(exchange: string.Empty, routingKey: _settings.DeadLetterQueueName, body: eventArgs.Body, cancellationToken: stoppingToken);
             await BasicAckAsync(eventArgs, channel, stoppingToken);
@@ -90,5 +88,4 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
     {
         await channel.BasicAckAsync(deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
     }
-  
 }

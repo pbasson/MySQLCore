@@ -71,7 +71,6 @@ public class BaseWorker<T> : BackgroundService where T: IMessage
         };
     }
 
-
     public T? DeserializeMessage(BasicDeliverEventArgs eventArgs)
     {
         var body = eventArgs.Body.ToArray();
@@ -81,8 +80,7 @@ public class BaseWorker<T> : BackgroundService where T: IMessage
 
         if (message == null)
         {
-            _logger.LogWarning(
-                "Message Status: {Status} - Payload: {Payload}", nameof(ProcessMessageStatus.Failed), json);
+            _logger.LogWarning( "Message Status: {Status} - Payload: {Payload}", nameof(ProcessMessageStatus.Failed), json);
         }
 
         return message;
