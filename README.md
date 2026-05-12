@@ -1,58 +1,125 @@
-# MySQLCore By Preetpal Basson 
+# MySQLCore
 
------------
-## Overview
+MySQLCore is a backend demo project showing how to build a layered ASP.NET Core REST API backed by MySQL, with message-based processing, structured logging, containerized local infrastructure, and test coverage across the main application layers.
 
-ASP.NET Core REST API integrated with MySQL Database.
+## What This Demo Shows
 
------------
-## Features
+- A REST API for CRUD-style transaction data.
+- A one-to-many image transaction workflow using image records and gallery records.
+- Clean separation between API, Core, and Infrastructure projects.
+- Repository and service layers for data access and business logic.
+- MySQL persistence through Entity Framework Core.
+- RabbitMQ publishing and background message processing.
+- Message processing state tracking for image-created events.
+- API key middleware and Swagger security configuration.
+- Centralized error logging with Elmah.
+- Structured application logging with Serilog and Seq.
+- Docker Compose setup for the API, MySQL, RabbitMQ, and Seq.
+- Kubernetes manifests for backend and database deployment.
+- SQL scripts for database and table creation/removal.
+- Unit test projects for API, Core, and Infrastructure behavior.
 
-- CRUD operations with MySQL using Entity Framework, structured within an Onion Architecture for modular design.
-- Containerized deployment via Docker (API & database) with Kubernetes orchestration for scalability.
-- Environment variables for configuration management and a structured Git workflow.
-- Automated database handling, including creation, table management, and teardown processes.
-- Security measures implemented, including HTTPS, TLS, and API key authentication.
+## Technology
 
-### Controllers
-
-#### CRUDTransactionController
-
-Handles basic CRUD operations for single-table transactions.
-
-#### ImageTransactionController
-
-Manages a one-to-many table structure for storing image file paths efficiently.
-
-### Technology
-
-| Languages |
-|---|
-| C# |
-
-| Technology | Version |
+| Area | Technology |
 |---|---|
-| ASP.NET | 8.0 |
-| MySQL | 8.3 |
-| NUnit | - |
-| Elmah  | - |
-| Swagger | - |
-| Docker | - |
-| Kubernetes | - |
-| Automapper | - |
+| Runtime | .NET 8.0 |
+| Language | C# |
+| API | ASP.NET Core Web API |
+| Database | MySQL |
+| Data access | Entity Framework Core, Pomelo MySQL provider, MySqlConnector |
+| Messaging | RabbitMQ |
+| Background processing | ASP.NET Core hosted services |
+| Validation | FluentValidation |
+| API documentation | Swagger / OpenAPI |
+| Logging | Serilog, Seq, Elmah |
+| Containers | Docker, Docker Compose |
+| Orchestration | Kubernetes |
+| Testing | xUnit, Moq, AutoFixture, EF Core InMemory |
+| CI | GitHub Actions |
 
------------
-## Usage
+## Solution Structure
 
-Prefered way to execute is Docker Compose. 
+```text
+src/
+  MySQLCore.API             ASP.NET Core API, controllers, middleware, configuration, hosted workers
+  MySQLCore.Core            DTOs, interfaces, services, validators, messages, constants, shared models
+  MySQLCore.Infrastructure  EF Core DbContext, entities, repositories, factories, RabbitMQ publisher
 
-### Docker Compose
+middleware/
+  MySQLCore.Receiver        Console receiver project for RabbitMQ messaging experiments
 
-1. Set up docker network (required as docker compose cannot create this.) 
-    1. `$ docker network create mysqlcore_network`
-1. From Project Directory, Execute Docker Compose 
-    1. Execute Docker Compose with Build 
-        1. `$ docker compose up --build `
+test/
+  MySQLCore.API.Test
+  MySQLCore.Core.Test
+  MySQLCore.Infrastructure.Test
 
-------------------------
-# END
+data/                       SQL database and table scripts
+env/                        Docker and Kubernetes environment configuration
+kubernetes/                 Kubernetes manifests
+scripts/                    Docker and Kubernetes command notes
+```
+
+## Main API Areas
+
+### CRUDTransactionController
+
+Demonstrates standard CRUD operations for a simple transaction table:
+
+- Get all records.
+- Get paged records.
+- Get a record by ID.
+- Create a record.
+- Update a record.
+- Delete a record.
+
+### ImageTransactionController
+
+Demonstrates a richer transaction workflow with related image gallery records:
+
+- Manage image transaction records.
+- Return related gallery data.
+- Publish image-created messages for background processing.
+- Track processing through message status models.
+
+## Messaging Flow
+
+The API uses RabbitMQ for image-created events. When image transaction work creates a message, the infrastructure layer publishes it to RabbitMQ. The API also registers an `ImageProcessingWorker` hosted service that consumes from the image queue, processes the message through the core service layer, acknowledges successful messages, and retries or dead-letters failed messages.
+
+## Running With Docker Compose
+
+Docker Compose is the preferred local demo path.
+
+1. Create the external Docker network:
+
+```bash
+docker network create mysqlcore_network
+```
+
+2. Start the stack from the repository root:
+
+```bash
+docker compose up --build
+```
+
+The Compose stack includes:
+
+- MySQL database
+- RabbitMQ management broker
+- Seq logging server
+- MySQLCore API
+
+## Running Tests
+
+Run all tests from the repository root:
+
+```bash
+dotnet test
+```
+
+## Notes
+
+- Environment-specific values are kept under `env/`.
+- SQL setup and teardown scripts are kept under `data/`.
+- The API is configured for Swagger/OpenAPI and API key authentication.
+- Docker image build automation is included through GitHub Actions.
