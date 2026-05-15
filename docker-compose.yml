@@ -58,6 +58,24 @@ services:
       - /home/preet/Projects/Projects-Y/Logs/MySQLCore:/Logs
       # - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
 
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - mysqlcore_network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - /home/preet/Projects/Projects-Y/Logs/Grafana:/var/lib/grafana
+    networks:
+      - mysqlcore_network
+
 volumes:
   mysqlcore_vol:
 

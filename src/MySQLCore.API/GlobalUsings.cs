@@ -28,3 +28,4 @@ global using MySQLCore.Infrastructure.Repos;
 global using RabbitMQ.Client;
 global using RabbitMQ.Client.Events;
 global using Serilog;
+global using Prometheus;

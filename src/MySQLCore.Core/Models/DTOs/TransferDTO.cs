@@ -51,7 +51,6 @@ public enum TransferEnum
 {
     DTONull = 0,
     EntityNotCreated = 1,
-    SaveChangesNotExecuted,
-    EntityNotExist,
-
+    SaveChangesNotExecuted = 2,
+    EntityNotExist = 3,
 }
