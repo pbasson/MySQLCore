@@ -7,8 +7,7 @@ services:
       - env/docker-env/mysql-db.dev.env
       - env/docker-env/mysql-user.dev.env
     volumes:
-      - /home/preet/Projects/Projects-Y/DatabaseStorage/Test:/var/lib/mysql
-      # - mysqlcore_vol:/var/lib/mysql
+      - ${MYSQL_DATA_PATH}:/var/lib/mysql
     networks:
       - mysqlcore_network
     
@@ -30,7 +29,7 @@ services:
       ACCEPT_EULA: "Y"
       SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
     volumes:
-      - /home/preet/Projects/Projects-Y/Logs/Seq:/data
+      - ${SEQ_PATH}:/data
     networks:
       - mysqlcore_network
 
@@ -55,15 +54,15 @@ services:
     networks:
       - mysqlcore_network
     volumes:
-      - /home/preet/Projects/Projects-Y/Logs/MySQLCore:/Logs
-      # - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
+      - ${LOGS_PATH}:/Logs
+      # - ${CERTICATE_PATH}:/https/aspnetcore.pfx:ro  # Mount the cert
 
   prometheus:
     image: prom/prometheus:latest
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./configurations/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - mysqlcore_network
 
@@ -72,7 +71,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /home/preet/Projects/Projects-Y/Logs/Grafana:/var/lib/grafana
+      - ${GRAFANA_PATH}:/var/lib/grafana
     networks:
       - mysqlcore_network
 
