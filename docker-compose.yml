@@ -4,8 +4,8 @@ services:
     ports:
       - 33066:3306
     env_file:
-      - env/docker-env/mysql-db.dev.env
-      - env/docker-env/mysql-user.dev.env
+      - ${MYSQL_DB}
+      - ${MYSQL_USER}
     volumes:
       - ${MYSQL_DATA_PATH}:/var/lib/mysql
     networks:
@@ -41,11 +41,11 @@ services:
     ports:
       - 5820:5820
     env_file:
-      - env/docker-env/mysql-user.dev.env
-      - env/docker-env/app-cert.dev.env
-      - env/docker-env/app-settings.dev.env
-      - env/docker-env/app-apikey.dev.env
-      - env/docker-env/rabbitmq-settings.dev.env
+      - ${MYSQL_USER}
+      - ${APP_SETTINGS}
+      - ${APP_APIKEY}
+      - ${APP_CERT}
+      - ${RABBITMQ}
     restart: always
     depends_on:
       - mysqlcore.db
@@ -62,7 +62,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./configurations/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ${PROMETHEUS}:/etc/prometheus/prometheus.yml
     networks:
       - mysqlcore_network
 
