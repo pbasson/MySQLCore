@@ -46,6 +46,15 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
     private async Task ProcessMessage( ImageCreatedMessage message, BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
     {
+        using var activity = TracingConstants.MessagingActivitySource.StartActivity("Process Image Message");
+
+        activity?.SetTag("message.id", message.MessageId);
+        activity?.SetTag("image.id", message.ImageId);
+        activity?.SetTag("message.type", nameof(ImageCreatedMessage));
+
+        _logger.LogInformation( "Activity created: {ActivityCreated}, TraceId: {TraceId}, SpanId: {SpanId}",
+            activity != null, activity?.TraceId, activity?.SpanId);
+
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", nameof(ImageCreatedMessage),
             nameof(ProcessMessageStatus.Processing), message.MessageId, message.ImageId, message.FileName);
         MessageMetrics.Processing.Inc();

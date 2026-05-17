@@ -34,6 +34,10 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     {
         if ( dto.IsNull() ) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
 
+        using var activity = TracingConstants.RepoActivitySource.StartActivity("ImageTransactionRepo.CreateRecordAsync");
+        activity?.SetTag("dto.ImageType", dto.ImageType);
+        activity?.SetTag("dto.type", nameof(CreateImageTransactionDTO));
+
         var mapped = _factory.ToEntity(dto);
         _dBContext.ImageTransaction.Add(mapped);
         
@@ -46,6 +50,11 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     public async Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto)
     {
         if ( dto.IsNull() ) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
+
+        using var activity = TracingConstants.RepoActivitySource.StartActivity("ImageTransactionRepo.UpdateRecordAsync");
+        activity?.SetTag("dto.ImageTransactionID", dto.ImageTransactionID);
+        activity?.SetTag("dto.type", nameof(UpdateImageTransactionDTO));
+
 
         ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
 

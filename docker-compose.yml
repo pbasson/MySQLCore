@@ -75,6 +75,31 @@ services:
     networks:
       - mysqlcore_network
 
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yml" ]
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ${TEMPO}:/etc/tempo.yml
+    networks:
+      - mysqlcore_network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector.yml"]
+    ports:
+      - "4319:4317"
+      - "4320:4318"
+    volumes:
+      - ${OTEL_COLLECTOR}:/etc/otel-collector.yml
+    depends_on:
+      - tempo
+    networks:
+      - mysqlcore_network
+
 volumes:
   mysqlcore_vol:
 

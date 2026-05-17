@@ -7,19 +7,10 @@ public static class RegisterConfigurations
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        Log.Logger = new LoggerConfiguration().MinimumLevel.Information().WriteTo.Console()
-            .WriteTo.File(
-                path: "/Logs/mysqlcore-log-.txt",
-                rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: 7)
-            .WriteTo.Seq("http://seq")
-            .CreateLogger();
-
-
-        services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-        services.AddEndpointsApiExplorer();
-
-        services.Configure<RabbitMQSettings>(configuration.GetSection("RabbitMQ"));
+        RegisterSeq();
+        RegisterOpenTelemetry(services);
+        RegisterAPIConfigure(services);
+        RegisterMessager(services, configuration);
 
         #region Register Services
         RegisterSwagger(services);
@@ -38,8 +29,13 @@ public static class RegisterConfigurations
         services.RegisterBackgroundServices();
         #endregion
 
-
         return services;
+    }
+
+    private static void RegisterAPIConfigure(IServiceCollection services)
+    {
+        services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+        services.AddEndpointsApiExplorer();
     }
 
     public static ConfigureHostBuilder RegisterHost(this ConfigureHostBuilder configure)
@@ -48,7 +44,6 @@ public static class RegisterConfigurations
 
         return configure;
     }
-
 
     private static void RegisterLogs(IServiceCollection services, IConfiguration configuration)
     {
@@ -84,5 +79,38 @@ public static class RegisterConfigurations
         services.AddHostedService<ImageProcessingWorker>();
     }
 
+    private static void RegisterSeq()
+    {
+        string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL") ?? "http://seq";
+        string logPath = Environment.GetEnvironmentVariable("LOG_PATH") ?? "/Logs/mysqlcore-log-.txt";
+
+        Log.Logger = new LoggerConfiguration().MinimumLevel.Information().WriteTo.Console()
+            .WriteTo.File(
+                path: logPath,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 7)
+            .WriteTo.Seq(serverUrl: seqUrl)
+            .CreateLogger();
+    }
+
+    private static void RegisterOpenTelemetry(IServiceCollection services)
+    {
+        string tempoUrl = Environment.GetEnvironmentVariable("TEMPO_URL") ?? "http://tempo:4318";
+        string otelCollectorURL = "http://otel-collector:4317";
+        services.AddOpenTelemetry().ConfigureResource(resource => resource.AddService(serviceName: TracingConstants.SERVICE_NAME))
+            .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation()
+                .SetSampler(new AlwaysOnSampler())
+                .AddHttpClientInstrumentation().AddSource(TracingConstants.ACTIVITY_SOURCE)
+                .AddHttpClientInstrumentation().AddSource(TracingConstants.REPO_SOURCE)
+                // .AddConsoleExporter()
+                .AddOtlpExporter(options => { options.Endpoint = new Uri(otelCollectorURL);
+                    options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                 }));
+    }
+    
+    private static void RegisterMessager(IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<RabbitMQSettings>(configuration.GetSection("RabbitMQ"));
+    }
 
 }
