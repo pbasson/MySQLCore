@@ -3,8 +3,13 @@ namespace MySQLCore.Infrastructure.Repos;
 public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 {
     ImageFactory _factory = new();
+    private readonly IOutboxMessagerRepo _messagerRepo = default!;
 
-    public ImageTransactionRepo(MySQLCoreDBContext dBContext): base(dBContext) { }
+
+    public ImageTransactionRepo(MySQLCoreDBContext dBContext, IOutboxMessagerRepo messagerRepo): base(dBContext)
+    {
+        _messagerRepo = messagerRepo;
+    }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() 
     {
@@ -55,7 +60,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         activity?.SetTag("dto.ImageTransactionID", dto.ImageTransactionID);
         activity?.SetTag("dto.type", nameof(UpdateImageTransactionDTO));
 
-
+        var messageId = Guid.NewGuid();
         ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
 
         if ( existDTO == null ) { return TransferFactory.GetTransferFailure(TransferEnum.EntityNotExist); }
@@ -81,10 +86,11 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
         if (addList.Count > 0) { _dBContext.ImageGallery.AddRange(addList); }
 
+        await _messagerRepo.AddAsync(OutboxMessageTransfer.GetTransfer(messageId, nameof(UpdateImageTransactionDTO)));
         var result = await SaveChangesAsync();
         if(!result) { return TransferFactory.GetTransferFailure(TransferEnum.SaveChangesNotExecuted); }
 
-        return new TransferDTO(existDTO.ImageTransactionID, string.Empty, ServiceResultType.Success);
+        return new TransferDTO(existDTO.ImageTransactionID, string.Empty, ServiceResultType.Success, messageId);
     }
 
     private static Func<ImageGalleryDTO, bool> IsImageGalleryValid()

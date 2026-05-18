@@ -12,4 +12,5 @@ public class ImageCreatedMessage : IMessage
         ImageId = imageId;
         FileName = fileName;
     }
+
 }

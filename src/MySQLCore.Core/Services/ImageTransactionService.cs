@@ -1,14 +1,12 @@
 namespace MySQLCore.Core.Services;
 
-public class ImageTransactionService : IImageTransactionService
+public class ImageTransactionService : BaseService, IImageTransactionService
 {
-    private readonly ILogger<ImageTransactionService> _logger = default!;
-    private readonly IImageTransactionRepo _repo = default!;
     private readonly IMessagePublisher _publisher;
+    private readonly IImageTransactionRepo _repo = default!;
 
-    public ImageTransactionService(ILogger<ImageTransactionService> logger, IImageTransactionRepo repo, IMessagePublisher publisher)
+    public ImageTransactionService(ILogger<ImageTransactionService> logger, IImageTransactionRepo repo, IMessagePublisher publisher): base(logger)
     {
-        _logger = logger;
         _repo = repo;
         _publisher = publisher;
     }
@@ -47,7 +45,7 @@ public class ImageTransactionService : IImageTransactionService
         var result = await _repo.UpdateRecordAsync(dto);
         if(!result.Success) { return result; }
 
-        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType! ));
+        // await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, result.MessageId);
 
         return result;
     }

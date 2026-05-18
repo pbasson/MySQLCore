@@ -1,4 +1,3 @@
-using MySQLCore.Core.Enums;
 using MySQLCore.Core.Utilities;
 
 namespace MySQLCore.Core.Models.DTOs;
@@ -7,18 +6,21 @@ namespace MySQLCore.Core.Models.DTOs;
 public class TransferDTO
 {
     public int Id {get; set;}
+    public Guid? MessageId {get; set;} 
     public string Message { get; set; }
     public bool Success => Id > 0;
 
-    public ServiceResultType type = ServiceResultType.NoAction;
+    public ServiceResultType ServiceResultType = ServiceResultType.NoAction;
 
-    public TransferDTO(int id, string message = "", ServiceResultType type = ServiceResultType.NoAction)
+    public TransferDTO(int id, string message = "", ServiceResultType serviceResultType = ServiceResultType.NoAction, Guid? messageId = null)
     {
         var basicError = "Entity Not Created";
         var failure = !string.IsNullOrEmpty(message) ?  message : basicError ;
 
         Id = id;
+        MessageId = messageId;
         Message = id.IsNotZero() ? "Success: Entity Created" :   $"Failure: {failure}" ;
+        ServiceResultType = serviceResultType;
     }
 }
 
