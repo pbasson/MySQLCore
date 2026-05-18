@@ -13,4 +13,10 @@ public class ImageCreatedMessage : IMessage
         FileName = fileName;
     }
 
+    public ImageCreatedMessage(int imageId, string fileName, Guid messageId)
+    {
+        ImageId = imageId;
+        FileName = fileName;
+        MessageId = messageId;
+    }
 }

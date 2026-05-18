@@ -13,6 +13,8 @@ public class OutboxMessage
     public OutboxMessageStatus Status { get; set; } = OutboxMessageStatus.Pending;
     public int RetryCount { get; set; }
 
+    public string? EntityName { get; set; }
+    public int EntityId { get; set; }
     public string? ErrorMessage { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -32,7 +32,6 @@ public class ImageTransactionService : BaseService, IImageTransactionService
     public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto)
     {
         var result = await _repo.CreateRecordAsync(dto);
-
         if(!result.Success) { return result; }
 
         await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType! ));
@@ -45,7 +44,7 @@ public class ImageTransactionService : BaseService, IImageTransactionService
         var result = await _repo.UpdateRecordAsync(dto);
         if(!result.Success) { return result; }
 
-        // await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, result.MessageId);
+        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType!, result.MessageId!.Value ));
 
         return result;
     }
