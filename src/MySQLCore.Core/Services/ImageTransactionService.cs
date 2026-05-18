@@ -34,7 +34,7 @@ public class ImageTransactionService : BaseService, IImageTransactionService
         var result = await _repo.CreateRecordAsync(dto);
         if(!result.Success) { return result; }
 
-        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType! ));
+        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType!, result.MessageId!.Value ));
 
         return result;
     }

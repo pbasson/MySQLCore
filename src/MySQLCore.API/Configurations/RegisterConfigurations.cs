@@ -84,8 +84,10 @@ public static class RegisterConfigurations
         string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL") ?? "http://seq";
         string logPath = Environment.GetEnvironmentVariable("LOG_PATH") ?? "/Logs/mysqlcore-log-.txt";
 
-        Log.Logger = new LoggerConfiguration().MinimumLevel.Information().WriteTo.Console()
-            .WriteTo.File(
+        Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
+            .Filter.ByExcluding(logEvent =>
+                logEvent.RenderMessage().Contains("/metrics") || logEvent.RenderMessage().Contains("Prometheus metrics"))
+            .WriteTo.Console().WriteTo.File(
                 path: logPath,
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: 7)
