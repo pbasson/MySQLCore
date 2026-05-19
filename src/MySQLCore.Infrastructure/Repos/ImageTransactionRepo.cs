@@ -3,12 +3,10 @@ namespace MySQLCore.Infrastructure.Repos;
 public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 {
     ImageFactory _factory = new();
-    private readonly IOutboxMessagerRepo _messagerRepo = default!;
 
 
-    public ImageTransactionRepo(MySQLCoreDBContext dBContext, IOutboxMessagerRepo messagerRepo): base(dBContext)
+    public ImageTransactionRepo(MySQLCoreDBContext dBContext): base(dBContext)
     {
-        _messagerRepo = messagerRepo;
     }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() 
@@ -102,13 +100,10 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     public async Task<bool> DeleteRecordByIdAsync(int id)  
     {
         ImageTransaction? existDTO = await FindRecord(id);
-        if ( existDTO != null ) 
-        {
-            _dBContext.ImageTransaction.Remove(existDTO);
-            return await SaveChangesAsync();
-        }
+        if ( existDTO == null ) { return false; }
 
-        return false;
+        _dBContext.ImageTransaction.Remove(existDTO);
+        return await SaveChangesAsync();
     }
     
     private async Task<ImageTransaction?> FindRecord(int id) 

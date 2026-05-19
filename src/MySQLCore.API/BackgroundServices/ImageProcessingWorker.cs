@@ -46,7 +46,7 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
     private async Task ProcessMessage( ImageCreatedMessage message, BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
     {
-        using var activity = TracingConstants.MessagingActivitySource.StartActivity("Process Image Message");
+        using var activity = TracingConstants.MessagingActivitySource.StartActivity("ProcessMessage: Started");
 
         activity?.SetTag("message.id", message.MessageId);
         activity?.SetTag("image.id", message.ImageId);
@@ -74,8 +74,13 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
     private async Task ProcessMessageException(BasicDeliverEventArgs eventArgs, IChannel channel, ImageCreatedMessage? message, Exception ex, CancellationToken stoppingToken)
     {
-        _logger.LogError(ex, "{messager} Message Status: {status}, MessageId: {MessageId}, DeliveryTag: {DeliveryTag}", nameof(ImageCreatedMessage),
-            nameof(ProcessMessageStatus.Failed), message?.MessageId, eventArgs.DeliveryTag);
+        using var activity = TracingConstants.MessagingActivitySource.StartActivity("ProcessMessage: Failed");
+
+        activity?.SetTag("message.type", nameof(ImageCreatedMessage));
+        activity?.SetTag("DeliveryTag", eventArgs.DeliveryTag);
+
+        _logger.LogError(ex, "{messager} Message Status: {status}, DeliveryTag: {DeliveryTag}", nameof(ImageCreatedMessage),
+            nameof(ProcessMessageStatus.Failed), eventArgs.DeliveryTag);
         MessageMetrics.Failed.Inc();
 
         var retryCount = GetRetryCount(eventArgs);
