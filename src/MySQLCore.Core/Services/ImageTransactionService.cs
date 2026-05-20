@@ -42,11 +42,10 @@ public class ImageTransactionService : BaseService, IImageTransactionService
     public async Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto)
     {
         var result = await _repo.UpdateRecordAsync(dto);
-        if(!result.Success) { return result; }
-
-        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType!, result.MessageId!.Value ));
-
         return result;
+
+        // if(!result.Success) { return result; }
+        // await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType!, result.MessageId!.Value ));
     }
 
     public async Task<bool> DeleteRecordByIdAsync(int id)

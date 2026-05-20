@@ -2,7 +2,9 @@ namespace MySQLCore.Core.Interfaces.Messager;
 
 public interface IOutboxMessagerRepo
 {
-    Task AddAsync(OutboxMessage message);
-    Task<bool> UpdateAsync(long outboxMessageId, OutboxMessageStatus status);
-    Task<bool> ExistsAsync(Guid messageId);
+    Task<List<OutboxMessage>> GetPendingAsync(int take);
+    Task<bool> AddAsync(OutboxMessage message);
+    Task MarkPublishedAsync(long id);
+    Task MarkFailedAsync(long id, string errorMessage);
+    Task IncrementRetryAsync(long id, string errorMessage);
 }

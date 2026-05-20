@@ -77,6 +77,7 @@ public static class RegisterConfigurations
     {
         // services.AddHostedService<Worker>();
         services.AddHostedService<ImageProcessingWorker>();
+        services.AddHostedService<OutboxPublisherWorker>();
     }
 
     private static void RegisterSeq()

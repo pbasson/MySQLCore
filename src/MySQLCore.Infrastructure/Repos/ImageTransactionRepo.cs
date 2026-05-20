@@ -84,7 +84,9 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
         if (addList.Count > 0) { _dBContext.ImageGallery.AddRange(addList); }
 
-        _dBContext.OutboxMessage.Add(OutboxMessageTransfer.GetTransfer(messageId, nameof(UpdateImageTransactionDTO)));
+        var exportMessage = new ImageCreatedMessage( existDTO.ImageTransactionID, existDTO.ImageType!, messageId);
+
+        _dBContext.OutboxMessage.Add(OutboxMessageTransfer.GetTransfer(messageId, nameof(UpdateImageTransactionDTO), exportMessage));
 
         var result = await SaveChangesAsync();
         if(!result) { return TransferFactory.GetTransferFailure(TransferEnum.SaveChangesNotExecuted); }
