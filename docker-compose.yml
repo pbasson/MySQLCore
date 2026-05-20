@@ -4,11 +4,10 @@ services:
     ports:
       - 33066:3306
     env_file:
-      - env/docker-env/mysql-db.dev.env
-      - env/docker-env/mysql-user.dev.env
+      - ${MYSQL_DB}
+      - ${MYSQL_USER}
     volumes:
-      - /home/preet/Projects/Projects-Y/DatabaseStorage/Test:/var/lib/mysql
-      # - mysqlcore_vol:/var/lib/mysql
+      - ${MYSQL_DATA_PATH}:/var/lib/mysql
     networks:
       - mysqlcore_network
     
@@ -30,7 +29,7 @@ services:
       ACCEPT_EULA: "Y"
       SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
     volumes:
-      - /home/preet/Projects/Projects-Y/Logs/Seq:/data
+      - ${SEQ_PATH}:/data
     networks:
       - mysqlcore_network
 
@@ -42,11 +41,11 @@ services:
     ports:
       - 5820:5820
     env_file:
-      - env/docker-env/mysql-user.dev.env
-      - env/docker-env/app-cert.dev.env
-      - env/docker-env/app-settings.dev.env
-      - env/docker-env/app-apikey.dev.env
-      - env/docker-env/rabbitmq-settings.dev.env
+      - ${MYSQL_USER}
+      - ${APP_SETTINGS}
+      - ${APP_APIKEY}
+      - ${APP_CERT}
+      - ${RABBITMQ}
     restart: always
     depends_on:
       - mysqlcore.db
@@ -55,8 +54,51 @@ services:
     networks:
       - mysqlcore_network
     volumes:
-      - /home/preet/Projects/Projects-Y/Logs/MySQLCore:/Logs
-      # - /home/preet/Downloads/test/certs/aspnetcore.pfx:/https/aspnetcore.pfx:ro  # Mount the cert
+      - ${LOGS_PATH}:/Logs
+      # - ${CERTICATE_PATH}:/https/aspnetcore.pfx:ro  # Mount the cert
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ${PROMETHEUS}:/etc/prometheus/prometheus.yml
+    networks:
+      - mysqlcore_network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${GRAFANA_PATH}:/var/lib/grafana
+    networks:
+      - mysqlcore_network
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yml" ]
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ${TEMPO}:/etc/tempo.yml
+    networks:
+      - mysqlcore_network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector.yml"]
+    ports:
+      - "4319:4317"
+      - "4320:4318"
+    volumes:
+      - ${OTEL_COLLECTOR}:/etc/otel-collector.yml
+    depends_on:
+      - tempo
+    networks:
+      - mysqlcore_network
 
 volumes:
   mysqlcore_vol:

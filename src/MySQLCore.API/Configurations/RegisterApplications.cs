@@ -19,6 +19,9 @@ public static class RegisterApplications
         //     app.UseHttpsRedirection();
         //     app.UseHsts();
         // }
+        
+        app.UseHttpMetrics();
+        app.MapMetrics();
 
         app.UseMiddleware<ApiKeyMiddleware>( );
         app.UseAuthorization();

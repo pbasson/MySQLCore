@@ -2,14 +2,15 @@ namespace MySQLCore.Core.Messager;
 
 public class ImageCreatedMessage : IMessage
 {
-    public Guid MessageId { get; set; } = Guid.NewGuid();
+    public Guid MessageId { get; set; }
     public int ImageId { get; set; }
     public string FileName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public ImageCreatedMessage(int imageId, string fileName)
+    public ImageCreatedMessage(int imageId, string fileName, Guid messageId )
     {
         ImageId = imageId;
         FileName = fileName;
+        MessageId = messageId;
     }
 }

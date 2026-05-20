@@ -25,5 +25,6 @@ public static class RegisterServices {
         services.AddScoped<ICRUDTransactionRepo, CRUDTransactionRepo>();
         services.AddScoped<IImageTransactionRepo, ImageTransactionRepo>();
         services.AddScoped<IProcessedMessageRepo, ProcessedMessageRepo>();
+        services.AddScoped<IOutboxMessagerRepo, OutboxMessagerRepo>();
     }
 }

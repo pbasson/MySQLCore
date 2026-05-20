@@ -65,4 +65,3 @@ public class ImageFactory
         ImagePath = dto.ImagePath,
     };
 }
-

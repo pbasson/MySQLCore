@@ -10,15 +10,24 @@ public class ApiKeyMiddleware
     }
 
     public async Task InvokeAsync(HttpContext context) {
-        try {
-            var getApiKey = context.RequestServices.GetRequiredService<IConfiguration>().GetValue<string>(ApiKeyHeader);
+        try 
+        {
+            if (context.Request.Path.StartsWithSegments("/metrics"))
+            {
+                await _next(context);
+                return;
+            }
 
-            if (!context.Request.Headers.TryGetValue(ApiKeyHeader, out var extractedApiKey)) {
+            var getApiKey = context.RequestServices.GetRequiredService<IConfiguration>() .GetValue<string>(ApiKeyHeader);
+
+            if (!context.Request.Headers.TryGetValue(ApiKeyHeader, out var extractedApiKey))
+            {
                 await ErrorStatus(context, 401, APIConstants.APIKey_NotFound);
                 return;
             }
 
-            if (getApiKey != null && !getApiKey.Equals(extractedApiKey)) {
+            if (getApiKey != null && !getApiKey.Equals(extractedApiKey))
+            {
                 await ErrorStatus(context, 403, APIConstants.APIKey_Invalid);
                 return;
             }

@@ -11,7 +11,7 @@ public class ImageService
 
     public async Task CreateImageAsync(int imageId, string fileName)
     {
-        var message = new ImageCreatedMessage( imageId, fileName );
+        var message = new ImageCreatedMessage( imageId, fileName, new Guid() );
 
         await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, message);
     }

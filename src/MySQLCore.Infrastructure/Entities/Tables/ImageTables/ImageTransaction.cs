@@ -8,13 +8,8 @@ public class ImageTransaction : BaseModel
     public virtual List<ImageGallery>? ImageGalleries { get; set; } 
 
     public bool IsGallery() {
-        if (ImageGalleries != null && ImageGalleries.Any() ) {
-            return true;
-        }
-        return false;
+        return ( ImageGalleries != null && ImageGalleries.Any() ) ? true : false;
     }
-
-
 }
 
 public class ImageGallery 
@@ -27,6 +22,6 @@ public class ImageGallery
 
     public string? ImagePath { get; set; }
 
-    // public virtual ImageTransaction? ImageTransaction {get; set;}
+    public virtual ImageTransaction? ImageTransaction {get; set;}
 
 }
