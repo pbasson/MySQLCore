@@ -1,4 +1,7 @@
-namespace MySQLCore.API.Configurations;
+using Microsoft.EntityFrameworkCore;
+using MySQLCore.Infrastructure.Context;
+
+namespace MySQLCore.Worker.Configurations;
 
 public static class RegisterDatabases
 {
@@ -13,10 +16,9 @@ public static class RegisterDatabases
         var setDB = SetConnectionString(configuration);
 
         services.AddDbContext<TDBContext>( db => {
-            db.UseMySql(setDB,ServerVersion.AutoDetect(setDB),
+            db.UseMySql(setDB, new MySqlServerVersion(new Version(8, 3, 0)),
             db => db.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null));
         });
-
     }
 
     private static string SetConnectionString(IConfiguration _configuration)

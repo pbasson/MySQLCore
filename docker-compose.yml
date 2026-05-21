@@ -59,13 +59,29 @@ services:
       - ${APP_PATH}:/Logs
       # - ${CERTICATE_PATH}:/https/aspnetcore.pfx:ro  # Mount the cert
 
+  mysqlcore.worker:
+    image: mysqlcore-worker:latest
+    build:
+      context: .
+      dockerfile: worker/MySQLCore.Worker/Dockerfile
+    env_file:
+      - ${MYSQL_USER}
+      - ${APP_SETTINGS}
+      - ${RABBITMQ}
+    depends_on:
+      - mysqlcore.db
+      - rabbitmq
+      - otel-collector
+    networks:
+      - mysqlcore_network
+
   prometheus:
     image: prom/prometheus:latest
     ports:
       - "9090:9090"
     volumes:
       - ${PROMETHEUS}:/etc/prometheus/prometheus.yml
-      - ${PROMETHEUS_DATA_PATH}:/prometheus
+      # - ${PROMETHEUS_DATA_PATH}:/prometheus
     networks:
       - mysqlcore_network
 
@@ -87,7 +103,7 @@ services:
       - "4318:4318"
     volumes:
       - ${TEMPO}:/etc/tempo.yml
-      - ${TEMPO_DATA_PATH}:/tmp/tempo
+      # - ${TEMPO_DATA_PATH}:/tmp/tempo
     networks:
       - mysqlcore_network
 

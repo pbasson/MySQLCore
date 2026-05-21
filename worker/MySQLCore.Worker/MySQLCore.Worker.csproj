@@ -15,5 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/MySQLCore.Core/MySQLCore.Core.csproj" />
+    <ProjectReference Include="../../src/MySQLCore.Infrastructure/MySQLCore.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
