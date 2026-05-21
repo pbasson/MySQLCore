@@ -1,7 +1,6 @@
 global using AutoFixture;
 global using Microsoft.EntityFrameworkCore;
 global using MySQLCore.Core.Models.DTOs;
-global using MySQLCore.Core.Models.DTOs.ImageDTOs;
 global using MySQLCore.Core.Test.Helpers;
 global using MySQLCore.Infrastructure.Context;
 global using MySQLCore.Infrastructure.Entities.Tables;

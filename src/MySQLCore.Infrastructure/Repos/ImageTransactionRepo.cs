@@ -2,18 +2,13 @@ namespace MySQLCore.Infrastructure.Repos;
 
 public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 {
-    ImageFactory _factory = new();
-
-
-    public ImageTransactionRepo(MySQLCoreDBContext dBContext): base(dBContext)
-    {
-    }
+    public ImageTransactionRepo(MySQLCoreDBContext dBContext): base(dBContext) { }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() 
     {
         var results = await _dBContext.ImageTransaction.OrderByDescending(x => x.ImageTransactionID)
             .Include(x => x.ImageGalleries).AsNoTracking()
-            .Select(x => _factory.ToMapped(x)).ToListAsync();
+            .Select(x => x.ToMapped()).ToListAsync();
         return results ?? [];
     }
 
@@ -22,7 +17,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         var settings = new PageSettings();
         var results = await _dBContext.ImageTransaction.OrderBy(x => x.ImageTransactionID).Skip(settings.SkipCount(page))
             .Take(settings.PageSize).Include(x => x.ImageGalleries).AsNoTracking()
-            .Select(x => _factory.ToMapped(x)).ToListAsync();
+            .Select(x => x.ToMapped()).ToListAsync();
         return results ?? [];
     }
 
@@ -30,24 +25,48 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     {
         var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries)
             .FirstOrDefaultAsync(x => x.ImageTransactionID == id);
-        return result != null ? _factory.ToMapped(result) : new();
+        return result != null ? result.ToMapped() : new();
     }
 
-    public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto) 
+    public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto)
     {
-        if ( dto.IsNull() ) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
+        if (dto.IsNull())
+        {
+            return TransferFactory.GetTransferFailure(TransferEnum.DTONull);
+        }
 
         using var activity = TracingConstants.RepoActivitySource.StartActivity("ImageTransactionRepo.CreateRecordAsync");
-        activity?.SetTag("dto.ImageType", dto.ImageType);
         activity?.SetTag("dto.type", nameof(CreateImageTransactionDTO));
 
-        var mapped = _factory.ToEntity(dto);
-        _dBContext.ImageTransaction.Add(mapped);
-        
-        var result = await SaveChangesAsync();
-        if(!result) { return TransferFactory.GetTransferFailure(TransferEnum.SaveChangesNotExecuted); }
+        var strategy = _dBContext.Database.CreateExecutionStrategy();
 
-        return new TransferDTO(mapped.ImageTransactionID, string.Empty, ServiceResultType.Success); 
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await _dBContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                var mapped = dto.ToEntity();
+
+                _dBContext.ImageTransaction.Add(mapped);
+                await _dBContext.SaveChangesAsync();
+
+                var message = new ImageCreatedMessage(mapped.ImageTransactionID, dto.ImageType!);
+                var outbox = OutboxMessageTransfer.GetTransfer( message.MessageId, nameof(CreateImageTransactionDTO), message);
+
+                _dBContext.OutboxMessage.Add(outbox);
+                await _dBContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return new TransferDTO( mapped.ImageTransactionID, string.Empty, ServiceResultType.Success, message.MessageId );
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        });
     }
 
     public async Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto)
@@ -58,42 +77,57 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         activity?.SetTag("dto.ImageTransactionID", dto.ImageTransactionID);
         activity?.SetTag("dto.type", nameof(UpdateImageTransactionDTO));
 
-        var messageId = Guid.NewGuid();
         ImageTransaction? existDTO = await FindRecord(dto.ImageTransactionID);
 
         if ( existDTO == null ) { return TransferFactory.GetTransferFailure(TransferEnum.EntityNotExist); }
 
-        existDTO.ImageType = dto.ImageType;
+        var strategy = _dBContext.Database.CreateExecutionStrategy();   
 
-        var incomingGalleries = dto.ImageGalleries ?? [];
-        var incomingExistingIds = incomingGalleries.Where(IsImageGalleryValid()).Select(x => x.ImageGalleryId).ToHashSet();
-
-        var removeList = existDTO.ImageGalleries!.Where(x => !incomingExistingIds.Contains(x.ImageGalleryId)).ToList();
-        if (removeList.Count > 0) { _dBContext.ImageGallery.RemoveRange(removeList); }
-
-        foreach (var incomingGallery in incomingGalleries.Where(IsImageGalleryValid()))
+        return await strategy.ExecuteAsync(async () =>
         {
-            var existingGallery = existDTO.ImageGalleries!.FirstOrDefault(x => x.ImageGalleryId == incomingGallery.ImageGalleryId);
-            if (existingGallery == null) { continue; }
+            await using var transaction = await _dBContext.Database.BeginTransactionAsync();
 
-            existingGallery.ImagePath = incomingGallery.ImagePath;
-        }
+            try
+            {
+                existDTO.ImageType = dto.ImageType;
 
-        var addList = incomingGalleries.Where(x => x.ImageGalleryId == 0)
-            .Select(x => _factory.ToEntity(existDTO.ImageTransactionID, x.ImagePath)).ToList();
+                var incomingGalleries = dto.ImageGalleries ?? [];
+                var incomingExistingIds = incomingGalleries.Where(IsImageGalleryValid()).Select(x => x.ImageGalleryId).ToHashSet();
 
-        if (addList.Count > 0) { _dBContext.ImageGallery.AddRange(addList); }
+                var removeList = existDTO.ImageGalleries!.Where(x => !incomingExistingIds.Contains(x.ImageGalleryId)).ToList();
+                if (removeList.Count > 0) { _dBContext.ImageGallery.RemoveRange(removeList); }
 
-        var exportMessage = new ImageCreatedMessage( existDTO.ImageTransactionID, existDTO.ImageType!, messageId);
+                foreach (var incomingGallery in incomingGalleries.Where(IsImageGalleryValid()))
+                {
+                    var existingGallery = existDTO.ImageGalleries!.FirstOrDefault(x => x.ImageGalleryId == incomingGallery.ImageGalleryId);
+                    if (existingGallery == null) { continue; }
 
-        _dBContext.OutboxMessage.Add(OutboxMessageTransfer.GetTransfer(messageId, nameof(UpdateImageTransactionDTO), exportMessage));
+                    existingGallery.ImagePath = incomingGallery.ImagePath;
+                }
 
-        var result = await SaveChangesAsync();
-        if(!result) { return TransferFactory.GetTransferFailure(TransferEnum.SaveChangesNotExecuted); }
+                var addList = incomingGalleries.Where(x => x.ImageGalleryId == 0)
+                    .Select(x => ToEntity(existDTO.ImageTransactionID, x.ImagePath)).ToList();
 
-        return new TransferDTO(existDTO.ImageTransactionID, string.Empty, ServiceResultType.Success, messageId);
+                if (addList.Count > 0) { _dBContext.ImageGallery.AddRange(addList); }
+                await SaveChangesAsync();
+
+                var exportMessage = new ImageCreatedMessage( existDTO.ImageTransactionID, existDTO.ImageType!);
+
+                _dBContext.OutboxMessage.Add(OutboxMessageTransfer.GetTransfer(exportMessage.MessageId, nameof(UpdateImageTransactionDTO), exportMessage));
+                await SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return new TransferDTO(existDTO.ImageTransactionID, string.Empty, ServiceResultType.Success, exportMessage.MessageId);
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        });
     }
-
+    
     private static Func<ImageGalleryDTO, bool> IsImageGalleryValid()
     {
         return x => x.ImageGalleryId > 0;
@@ -114,4 +148,10 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
             .FirstOrDefaultAsync(x => x.ImageTransactionID == id);
         return result.IsNotNull() ? result : null;
     }
+    private ImageGallery ToEntity(int id, string? imagePath) => new()
+    {
+        ImageGalleryId = 0,
+        ImageTransactionID = id,
+        ImagePath = imagePath,
+    };
 }

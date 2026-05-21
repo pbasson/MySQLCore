@@ -1,4 +1,4 @@
-namespace MySQLCore.API.BackgroundServices;
+namespace MySQLCore.Worker.MetricManager;
 
 public static class MessageMetrics
 {

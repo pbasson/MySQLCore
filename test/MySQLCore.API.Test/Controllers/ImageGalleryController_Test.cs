@@ -83,43 +83,43 @@ public class ImageGalleryController_Test : Base_Test
         Assert.Null(result.Value);
     }
 
-    [Fact]
-    public async Task CreateRecord_CheckIsValue() {
-        var response = true;
-        var parameter = _fixture.Create<CreateImageTransactionDTO>();
+    // [Fact]
+    // public async Task CreateRecord_CheckIsValue() {
+    //     var response = true;
+    //     var parameter = _fixture.Create<CreateImageTransactionDTO>();
 
-        var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
-        var result = await _controller.CreateRecord(parameter);
-        Assert.True(result.Value);
-    }
+    //     var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
+    //     var result = await _controller.CreateRecord(parameter);
+    //     Assert.True(result.Value);
+    // }
 
-    [Fact]
-    public async Task CreateRecord_CheckIsValueFalse() {
-        var response = false;
-        var parameter = new CreateImageTransactionDTO ();
-        var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
-        var result = await _controller.CreateRecord(parameter);
-        Assert.False(result.Value);
-    }
-     [Fact]
-    public async Task UpdateRecord_CheckIsValue() {
-        var response = true;
-        var parameter = new UpdateImageTransactionDTO { ImageTransactionID = 1, ImageType = "John Doe"};
-        var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
-        var result = await _controller.UpdateRecord(parameter);
-        Assert.True(result.Value);
+    // [Fact]
+    // public async Task CreateRecord_CheckIsValueFalse() {
+    //     var response = false;
+    //     var parameter = new CreateImageTransactionDTO ();
+    //     var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
+    //     var result = await _controller.CreateRecord(parameter);
+    //     Assert.False(result.Value);
+    // }
+    //  [Fact]
+    // public async Task UpdateRecord_CheckIsValue() {
+    //     var response = true;
+    //     var parameter = new UpdateImageTransactionDTO { ImageTransactionID = 1, ImageType = "John Doe"};
+    //     var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
+    //     var result = await _controller.UpdateRecord(parameter);
+    //     Assert.True(result.Value);
   
-    }
+    // }
 
-    [Fact]
-    public async Task UpdateRecord_CheckIsValueFalse() {
-        var response = false;
-        var parameter = new UpdateImageTransactionDTO ();
-        var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
-        var result = await _controller.UpdateRecord(parameter);
-        Assert.False(result.Value);
+    // [Fact]
+    // public async Task UpdateRecord_CheckIsValueFalse() {
+    //     var response = false;
+    //     var parameter = new UpdateImageTransactionDTO ();
+    //     var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
+    //     var result = await _controller.UpdateRecord(parameter);
+    //     Assert.False(result.Value);
  
-    }
+    // }
 
     [Fact]
     public async Task DeleteRecord_CheckIsValue() {

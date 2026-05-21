@@ -10,7 +10,6 @@ public static class RegisterConfigurations
         RegisterSeq();
         RegisterOpenTelemetry(services);
         RegisterAPIConfigure(services);
-        RegisterMessager(services, configuration);
 
         #region Register Services
         RegisterSwagger(services);
@@ -23,10 +22,6 @@ public static class RegisterConfigurations
 
         #region Register Database
         services.RegisterDatabase(configuration);
-        #endregion
-
-        #region Register Background Services
-        services.RegisterBackgroundServices();
         #endregion
 
         return services;
@@ -73,14 +68,7 @@ public static class RegisterConfigurations
         );
     }
 
-    private static void RegisterBackgroundServices(this IServiceCollection services)
-    {
-        // services.AddHostedService<Worker>();
-        services.AddHostedService<ImageProcessingWorker>();
-        services.AddHostedService<OutboxPublisherWorker>();
-    }
-
-    private static void RegisterSeq()
+    private static void RegisterSeq( )
     {
         string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL") ?? "http://seq";
         string logPath = Environment.GetEnvironmentVariable("LOG_PATH") ?? "/Logs/mysqlcore-log-.txt";
@@ -110,10 +98,4 @@ public static class RegisterConfigurations
                     options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
                  }));
     }
-    
-    private static void RegisterMessager(IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<RabbitMQSettings>(configuration.GetSection("RabbitMQ"));
-    }
-
 }

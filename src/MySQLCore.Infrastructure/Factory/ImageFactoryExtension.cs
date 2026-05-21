@@ -1,8 +1,8 @@
 namespace MySQLCore.Infrastructure.Factory;
 
-public class ImageFactory
+public static class ImageFactoryExtension
 {
-    public ImageTransaction ToEntity(ImageTransactionDTO dto) => new()
+    public static ImageTransaction ToEntity(this ImageTransactionDTO dto) => new()
     {
         ImageTransactionID = dto.ImageTransactionID,
         ImageType = dto.ImageType,
@@ -13,41 +13,39 @@ public class ImageFactory
         ImageGalleries = dto.ImageGalleries?.Select(x => ToEntity(x)).ToList() ?? []
     };
 
-    public ImageGallery ToEntity(ImageGalleryDTO dto) => new()
+    public static ImageGallery ToEntity(ImageGalleryDTO dto) => new()
     {
         ImageGalleryId = dto.ImageGalleryId,
         ImageTransactionID = dto.ImageTransactionID,
         ImagePath = dto.ImagePath,
     };
 
-    public ImageTransaction ToEntity(CreateImageTransactionDTO dto) => new()
+    public static ImageTransaction ToEntity(this CreateImageTransactionDTO dto) => new()
     {
         ImageType = dto.ImageType,
         ImageGalleries = dto.ImageGalleries?.Select(x => ToEntity(x)).ToList() ?? []
     };
 
-    public ImageGallery ToEntity(CreateImageGalleryDTO dto) => new()
+    public static ImageGallery ToEntity(this CreateImageGalleryDTO dto) => new()
     {
         ImagePath = dto.ImagePath,
     };
 
-    public ImageGallery ToEntity(int id, string? imagePath) => new()
+    public static ImageGallery ToEntity(int id, string? imagePath) => new()
     {
         ImageGalleryId = 0,
         ImageTransactionID = id,
         ImagePath = imagePath,
     };
 
-
-    public ImageTransaction ToEntity(UpdateImageTransactionDTO dto) => new()
+    public static ImageTransaction ToEntity(this UpdateImageTransactionDTO dto) => new()
     {
         ImageTransactionID = dto.ImageTransactionID,
         ImageType = dto.ImageType,
         ImageGalleries = dto.ImageGalleries?.Select(x => ToEntity(x)).ToList() ?? []
     };
 
-
-    public ImageTransactionDTO ToMapped(ImageTransaction dto) => new()
+    public static ImageTransactionDTO ToMapped(this ImageTransaction dto) => new()
     {
         ImageTransactionID = dto.ImageTransactionID,
         ImageType = dto.ImageType,
@@ -58,7 +56,7 @@ public class ImageFactory
         ImageGalleries = dto.ImageGalleries?.Select(x => ToMapped(x)).ToList() ?? []
     };
 
-    public ImageGalleryDTO ToMapped(ImageGallery dto) => new()
+    public static ImageGalleryDTO ToMapped(ImageGallery dto) => new()
     {
         ImageGalleryId = dto.ImageGalleryId,
         ImageTransactionID = dto.ImageTransactionID,

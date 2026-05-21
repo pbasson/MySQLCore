@@ -1,4 +1,6 @@
-namespace MySQLCore.API.BackgroundServices;
+using MySQLCore.Worker.MetricManager;
+
+namespace MySQLCore.Worker.BackgroundServices;
 
 public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 {
