@@ -2,13 +2,11 @@ namespace MySQLCore.Core.Services;
 
 public class ImageTransactionService : BaseService, IImageTransactionService
 {
-    private readonly IMessagePublisher _publisher;
     private readonly IImageTransactionRepo _repo = default!;
 
-    public ImageTransactionService(ILogger<ImageTransactionService> logger, IImageTransactionRepo repo, IMessagePublisher publisher): base(logger)
+    public ImageTransactionService(ILogger<ImageTransactionService> logger, IImageTransactionRepo repo): base(logger)
     {
         _repo = repo;
-        _publisher = publisher;
     }
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync()
@@ -32,10 +30,6 @@ public class ImageTransactionService : BaseService, IImageTransactionService
     public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto)
     {
         var result = await _repo.CreateRecordAsync(dto);
-        if(!result.Success) { return result; }
-
-        await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType!, result.MessageId!.Value ));
-
         return result;
     }
 
@@ -43,9 +37,6 @@ public class ImageTransactionService : BaseService, IImageTransactionService
     {
         var result = await _repo.UpdateRecordAsync(dto);
         return result;
-
-        // if(!result.Success) { return result; }
-        // await _publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, new ImageCreatedMessage( result.Id, dto.ImageType!, result.MessageId!.Value ));
     }
 
     public async Task<bool> DeleteRecordByIdAsync(int id)

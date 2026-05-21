@@ -13,17 +13,17 @@ public class ImageTransactionController : BaseController
     [Route("GetAllRecords")]
     public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecords() {
         var result = await _service.GetAllRecordsAsync();
-        return result.IsNotNull() && result.Count > 0 ? result : new List<ImageTransactionDTO>();
+        return Ok(result);
     }
 
     [HttpGet]
     [Route("GetAllRecordsPaginationAsync/{page:int}")]
     public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
-        if (page.IsNotZero())  {
+        if (page.IsNotZero())  
+        {
             var result = await _service.GetAllRecordsPaginationAsync(page);
-            return result.IsNotNull() && result.Count > 0 ? result : new List<ImageTransactionDTO>();
+            return Ok(result);
         }
-        
         return BadRequest(); 
     }
 
@@ -31,17 +31,18 @@ public class ImageTransactionController : BaseController
     [HttpGet]
     [Route("GetRecordById/{Id:int}")]
     public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int Id) {
-        if (Id.IsNotZero())  {
+        if (Id.IsNotZero())  
+        {
             var result = await _service.GetRecordByIdAsync(Id);
-            return result.IsNotNull() ? result : new ImageTransactionDTO();
+            if (result.IsNotNull()) { return (result.ImageTransactionID > 0) ? result : NotFound(); } 
         }
-        
         return BadRequest(); 
     }
 
     [HttpPost]
     [Route("CreateRecord")]
-    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageTransactionDTO dTO) {
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageTransactionDTO dTO) 
+    {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.CreateRecordAsync(dTO);
         return result;
@@ -49,7 +50,8 @@ public class ImageTransactionController : BaseController
 
     [HttpPut]
     [Route("UpdateRecord")]
-    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageTransactionDTO dTO) {
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageTransactionDTO dTO) 
+    {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.UpdateRecordAsync(dTO);
         return result;
@@ -58,7 +60,8 @@ public class ImageTransactionController : BaseController
     [HttpDelete]
     [Route("DeleteRecord")]
     public async Task<ActionResult<bool>> DeleteRecord(int id) {
-        if (id.IsNotZero()) {
+        if (id.IsNotZero()) 
+        {
             var result = await _service.DeleteRecordByIdAsync(id);
             return result;
         }

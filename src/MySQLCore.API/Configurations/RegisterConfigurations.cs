@@ -76,7 +76,7 @@ public static class RegisterConfigurations
     private static void RegisterBackgroundServices(this IServiceCollection services)
     {
         // services.AddHostedService<Worker>();
-        services.AddHostedService<ImageProcessingWorker>();
+        // services.AddHostedService<ImageProcessingWorker>();
         services.AddHostedService<OutboxPublisherWorker>();
     }
 
