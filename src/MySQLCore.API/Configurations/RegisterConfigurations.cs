@@ -75,11 +75,11 @@ public static class RegisterConfigurations
 
     private static void RegisterBackgroundServices(this IServiceCollection services)
     {
-        services.AddHostedService<OutboxPublisherWorker>();
-        services.AddHostedService<ImageProcessingWorker>();
+        // services.AddHostedService<OutboxPublisherWorker>();
+        // services.AddHostedService<ImageProcessingWorker>();
     }
 
-    private static void RegisterSeq()
+    private static void RegisterSeq( )
     {
         string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL") ?? "http://seq";
         string logPath = Environment.GetEnvironmentVariable("LOG_PATH") ?? "/Logs/mysqlcore-log-.txt";

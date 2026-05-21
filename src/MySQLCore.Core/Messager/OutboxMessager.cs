@@ -31,10 +31,7 @@ public class OutboxMessage
 
 public static class OutboxMessageTransfer
 {
-      public static OutboxMessage GetTransfer<TMessage>(
-        Guid messageId,
-        string eventType,
-        TMessage message) where TMessage : IMessage
+    public static OutboxMessage GetTransfer<TMessage>( Guid messageId, string eventType, TMessage message) where TMessage : IMessage
     {
         return new OutboxMessage
         {

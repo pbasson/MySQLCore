@@ -1,4 +1,4 @@
-namespace MySQLCore.API.BackgroundServices;
+namespace MySQLCore.Worker.BackgroundServices;
 
 public class BaseWorker<TMessage> : BackgroundService where TMessage: IMessage 
 {

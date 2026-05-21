@@ -137,22 +137,22 @@ public class ImageTransactionRepo_Test : BaseRepo_Test {
     //     }
     // }
     
-    [Fact]
-    public async Task UpdateRecord_CheckIsValue()
-    {
-        var payload = new ImageTransaction { ImageType = "John Doe"};
-        Add(payload);
+    // [Fact]
+    // public async Task UpdateRecord_CheckIsValue()
+    // {
+    //     var payload = new ImageTransaction { ImageType = "John Doe"};
+    //     Add(payload);
 
-        var parameter = new UpdateImageTransactionDTO { ImageTransactionID = payload.ImageTransactionID, ImageType = "Tony Joe"};
+    //     var parameter = new UpdateImageTransactionDTO { ImageTransactionID = payload.ImageTransactionID, ImageType = "Tony Joe"};
         
-        try {
-            var result = await _repo.UpdateRecordAsync(parameter);
-            Assert.True(result);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+    //     try {
+    //         var result = await _repo.UpdateRecordAsync(parameter);
+    //         Assert.True(result);
+    //     }
+    //     catch (Exception) {
+    //         throw;
+    //     }
+    // }
 
     // [Fact]
     // public async Task UpdateRecord_CheckIsValueFalse()

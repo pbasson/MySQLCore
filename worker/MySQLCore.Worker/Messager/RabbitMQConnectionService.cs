@@ -1,6 +1,4 @@
-using Microsoft.Extensions.Options;
-
-namespace MySQLCore.Infrastructure.Messager;
+namespace MySQLCore.Worker.Messager;
 
 public class RabbitMQConnectionService
 {

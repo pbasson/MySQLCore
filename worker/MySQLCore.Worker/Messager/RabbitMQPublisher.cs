@@ -1,4 +1,6 @@
-namespace MySQLCore.Infrastructure.Messager;
+using MySQLCore.Core.Enums;
+
+namespace MySQLCore.Worker.Messager;
 
 public class RabbitMQPublisher : IMessagePublisher
 {

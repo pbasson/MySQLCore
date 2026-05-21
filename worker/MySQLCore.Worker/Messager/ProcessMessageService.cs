@@ -1,4 +1,4 @@
-namespace MySQLCore.Infrastructure.Messager;
+namespace MySQLCore.Worker.Messager;
 
 public class ProcessMessageService
 {
@@ -22,6 +22,6 @@ public class ProcessMessageService
         _logger.LogInformation( "{messager} Message Status: {status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", 
             nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Pending), message.MessageId, message.ImageId, message.FileName);
 
-        await _repo.AddAsync(new ProcessedMessageTransfer().GetTransfer(message.MessageId, nameof(ImageCreatedMessage), nameof(ImageTransaction), message.ImageId));
+        await _repo.AddAsync(new ProcessedMessageTransfer().GetTransfer(message.MessageId, nameof(ImageCreatedMessage), "ImageTransaction", message.ImageId));
     }
 }
