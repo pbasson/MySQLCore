@@ -11,14 +11,16 @@ public class ImageTransactionController : BaseController
 
     [HttpGet]
     [Route("GetAllRecords")]
-    public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecords() {
+    public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecords() 
+    {
         var result = await _service.GetAllRecordsAsync();
         return Ok(result);
     }
 
     [HttpGet]
     [Route("GetAllRecordsPaginationAsync/{page:int}")]
-    public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecordsPaginationAsync(int page) {
+    public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecordsPaginationAsync(int page) 
+    {
         if (page.IsNotZero())  
         {
             var result = await _service.GetAllRecordsPaginationAsync(page);
@@ -30,7 +32,8 @@ public class ImageTransactionController : BaseController
 
     [HttpGet]
     [Route("GetRecordById/{Id:int}")]
-    public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int Id) {
+    public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int Id) 
+    {
         if (Id.IsNotZero())  
         {
             var result = await _service.GetRecordByIdAsync(Id);
@@ -45,7 +48,7 @@ public class ImageTransactionController : BaseController
     {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.CreateRecordAsync(dTO);
-        return result;
+        return result.IsNotNull() ? Ok(result) : BadRequest();
     }
 
     [HttpPut]
@@ -54,16 +57,17 @@ public class ImageTransactionController : BaseController
     {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.UpdateRecordAsync(dTO);
-        return result;
+        return result.IsNotNull() ? Ok(result) : BadRequest();
     }
 
     [HttpDelete]
     [Route("DeleteRecord")]
-    public async Task<ActionResult<bool>> DeleteRecord(int id) {
+    public async Task<ActionResult<bool>> DeleteRecord(int id) 
+    {
         if (id.IsNotZero()) 
         {
             var result = await _service.DeleteRecordByIdAsync(id);
-            return result;
+            return result.IsNotNull() ? Ok(result) : BadRequest();
         }
         return BadRequest();
     }
