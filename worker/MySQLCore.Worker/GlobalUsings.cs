@@ -14,3 +14,4 @@ global using MySQLCore.Worker.Messager;
 global using Prometheus;
 global using RabbitMQ.Client;
 global using RabbitMQ.Client.Events;
+global using Serilog;

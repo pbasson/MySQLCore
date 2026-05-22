@@ -7,6 +7,7 @@ public static class RegisterConfigurations
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
+        RegisterSeq();
         RegisterMessager(services, configuration);
         services.RegisterDatabase(configuration);
         services.RegisterService();
@@ -23,5 +24,37 @@ public static class RegisterConfigurations
     {
         services.AddHostedService<OutboxPublisherWorker>();
         services.AddHostedService<ImageProcessingWorker>();
+    }
+
+    private static void RegisterSeq()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.Console()
+            .WriteTo.Seq("http://seq")
+            .CreateLogger();
+    }
+
+    //     private static void RegisterSeq( )
+    // {
+    //     string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL") ?? "http://seq";
+    //     string logPath = Environment.GetEnvironmentVariable("LOG_PATH") ?? "/Logs/mysqlcore.worker-log-.txt";
+
+    //     Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
+    //         .Filter.ByExcluding(logEvent =>
+    //             logEvent.RenderMessage().Contains("/metrics") || logEvent.RenderMessage().Contains("Prometheus metrics"))
+    //         .WriteTo.Console().WriteTo.File(
+    //             path: logPath,
+    //             rollingInterval: RollingInterval.Day,
+    //             retainedFileCountLimit: 7)
+    //         .WriteTo.Seq(serverUrl: seqUrl)
+    //         .CreateLogger();
+    // }
+
+    public static HostApplicationBuilder RegisterHost(this HostApplicationBuilder builder)
+    {
+        builder.Logging.ClearProviders();
+        builder.Logging.AddSerilog(Log.Logger, dispose: true);
+        return builder;
     }
 }
