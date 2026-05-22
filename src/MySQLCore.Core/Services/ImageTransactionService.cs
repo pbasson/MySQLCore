@@ -19,7 +19,7 @@ public class ImageTransactionService : BaseService, IImageTransactionService
         var result = await _repo.GetAllRecordsAsync();
         if (result == null || result.Count <= 0) { return []; }
 
-        await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+        await _cache.SetAsync(cacheKey, result, timeSpan);
         return result;
     }
 
@@ -33,7 +33,7 @@ public class ImageTransactionService : BaseService, IImageTransactionService
         var result = await _repo.GetAllRecordsPaginationAsync(page);
         if (result == null || result.Count <= 0) { return []; }
 
-        await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+        await _cache.SetAsync(cacheKey, result, timeSpan);
         return result;
     }
 
@@ -46,26 +46,29 @@ public class ImageTransactionService : BaseService, IImageTransactionService
 
         var result = await _repo.GetRecordByIdAsync(id);
 
-        await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+        await _cache.SetAsync(cacheKey, result, timeSpan);
         return result;
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto)
     {
         var result = await _repo.CreateRecordAsync(dto);
+        await _cache.RemoveAsync("images:GetAllRecordsAsync");
         return result;
     }
 
     public async Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto)
     {
         var result = await _repo.UpdateRecordAsync(dto);
+        await _cache.RemoveAsync("images:GetAllRecordsAsync");
+        await _cache.RemoveAsync($"image:GetRecordByIdAsync:id={dto.ImageTransactionID}");
         return result;
     }
 
     public async Task<bool> DeleteRecordByIdAsync(int id)
     {
         var result = await _repo.DeleteRecordByIdAsync(id);
+        await _cache.RemoveAsync($"image:GetRecordByIdAsync:id={id}");
         return result;
     }
-
 }
