@@ -1,3 +1,5 @@
+using MySQLCore.Infrastructure.Repos.MessagerRepo;
+
 namespace MySQLCore.Worker.Configurations;
 
 public static class RegisterServices 
