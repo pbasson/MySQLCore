@@ -4,8 +4,11 @@ public abstract class BaseService
 {
     protected readonly ILogger<BaseService> _logger = default!;
 
-    public BaseService(ILogger<BaseService> logger)
+    protected readonly ICacheService _cache = default!;
+
+    public BaseService(ILogger<BaseService> logger, ICacheService cache)
     {
         _logger = logger;
+        _cache = cache;
     }
 }

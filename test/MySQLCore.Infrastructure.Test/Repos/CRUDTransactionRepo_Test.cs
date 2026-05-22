@@ -1,3 +1,5 @@
+using MySQLCore.Infrastructure.Repos.TransactionRepo;
+
 namespace MySQLCore.Infrastructure.Test.Repos;
 
 public class CRUDTransactionRepo_Test : BaseRepo_Test

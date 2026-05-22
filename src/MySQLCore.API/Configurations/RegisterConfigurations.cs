@@ -22,6 +22,7 @@ public static class RegisterConfigurations
 
         #region Register Database
         services.RegisterDatabase(configuration);
+        services.RegisterCache();
         #endregion
 
         return services;
@@ -97,5 +98,14 @@ public static class RegisterConfigurations
                 .AddOtlpExporter(options => { options.Endpoint = new Uri(otelCollectorURL);
                     options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
                  }));
+    }
+
+    private static void RegisterCache(this IServiceCollection services)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = "redis:6379";
+            options.InstanceName = "MySQLCore:";
+        });
     }
 }

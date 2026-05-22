@@ -1,4 +1,4 @@
-namespace MySQLCore.Infrastructure.Repos;
+namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
 public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 {

@@ -15,6 +15,7 @@ public static class RegisterServices
     {
         services.AddScoped<ICRUDTransactionService,CRUDTransactionService>();
         services.AddScoped<IImageTransactionService,ImageTransactionService>();
+        services.AddScoped<ICacheService,RedisCacheService>();
     }
 
     private static void RegisterCoreRepos(IServiceCollection services)

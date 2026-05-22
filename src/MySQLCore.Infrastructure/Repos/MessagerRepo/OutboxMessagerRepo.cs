@@ -1,4 +1,4 @@
-namespace MySQLCore.Infrastructure.Repos;
+namespace MySQLCore.Infrastructure.Repos.MessagerRepo;
 
 public class OutboxMessagerRepo : BaseRepo, IOutboxMessagerRepo
 {

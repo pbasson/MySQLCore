@@ -1,5 +1,3 @@
-using MySQLCore.Core.Models.DTOs.ImageDTOs;
-
 namespace MySQLCore.Core.Interfaces.Services;
 
 public interface IImageTransactionService
