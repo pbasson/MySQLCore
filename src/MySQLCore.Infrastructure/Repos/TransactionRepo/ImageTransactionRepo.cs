@@ -30,10 +30,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto)
     {
-        if (dto.IsNull())
-        {
-            return TransferFactory.GetTransferFailure(TransferEnum.DTONull);
-        }
+        if (dto.IsNull()) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
 
         using var activity = TracingConstants.RepoActivitySource.StartActivity("ImageTransactionRepo.CreateRecordAsync");
         activity?.SetTag("dto.type", nameof(CreateImageTransactionDTO));
