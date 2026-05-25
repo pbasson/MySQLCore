@@ -20,9 +20,6 @@ public sealed class ExceptionHandlingMiddleware
         catch (Exception exception)
         {
             _logger.LogError(exception, "Unhandled exception occurred.");
-
-            ElmahCore.ElmahExtensions.RaiseError(exception);
-
             await HandleExceptionAsync(context, exception);
         }
     }

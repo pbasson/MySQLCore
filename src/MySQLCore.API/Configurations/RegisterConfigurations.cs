@@ -13,7 +13,7 @@ public static class RegisterConfigurations
 
         #region Register Services
         RegisterSwagger(services);
-        RegisterLogs(services, configuration);
+        // RegisterLogs(services, configuration);
         #endregion
 
         #region Register DataService
@@ -41,13 +41,13 @@ public static class RegisterConfigurations
         return configure;
     }
 
-    private static void RegisterLogs(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddElmah<XmlFileErrorLog>(option => 
-        {
-            option.LogPath = configuration.GetValue<string>("ElmahPath") ;
-        });
-    }
+    // private static void RegisterLogs(IServiceCollection services, IConfiguration configuration)
+    // {
+    //     services.AddElmah<XmlFileErrorLog>(option => 
+    //     {
+    //         option.LogPath = configuration.GetValue<string>("ElmahPath") ;
+    //     });
+    // }
 
     private static void RegisterSwagger(IServiceCollection services)
     {

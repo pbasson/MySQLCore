@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace MySQLCore.Core.Constants;
 
 public static class TracingConstants

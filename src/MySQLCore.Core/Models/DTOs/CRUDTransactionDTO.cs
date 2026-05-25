@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace MySQLCore.Core.Models.DTOs;
 
 public class CRUDTransactionDTO : BaseDTO, IEntity

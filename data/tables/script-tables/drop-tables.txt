@@ -1,8 +1,9 @@
 -- Drop Database
-source /var/lib/mysql-files/data/databases/drop-databases/MySQLCore-Database_Drop.sql
+source /var/lib/mysql-files/data/databases/drop-databases/MySQLCore-Drop-Database.sql
 
 -- Drop Tables
-source /var/lib/mysql-files/data/tables/drop-tables/CRUDTransaction-Table_Drop.sql
-source /var/lib/mysql-files/data/tables/drop-tables/ImageTransaction-Table_Drop.sql
+source /var/lib/mysql-files/data/tables/drop-tables/CRUDTransaction-Drop-Table.sql
+source /var/lib/mysql-files/data/tables/drop-tables/ImageTransaction-Drop-Table.sql
 
-
+source /var/lib/mysql-files/data/tables/drop-tables/OutboxMessage-Drop-Table.sql
+source /var/lib/mysql-files/data/tables/drop-tables/ProcessMessage-Drop-Table.sql

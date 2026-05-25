@@ -1,9 +1,11 @@
 -- Create Database
-source /var/lib/mysql-files/data/databases/create-databases/MySQLCore-Database_Create.sql
+source /var/lib/mysql-files/data/databases/create-databases/MySQLCore-Create-Database.sql
 
 -- Create Tables: Content
-source /var/lib/mysql-files/data/tables/create-tables/CRUDTransaction-Table_Create.sql
+source /var/lib/mysql-files/data/tables/create-tables/CRUDTransaction-Create-Table.sql
 
-source /var/lib/mysql-files/data/tables/create-tables/ImageTransaction-Table_Create.sql
-source /var/lib/mysql-files/data/tables/create-tables/ImageGallery-Table_Create.sql
+source /var/lib/mysql-files/data/tables/create-tables/ImageTransaction-Create-Table.sql
+source /var/lib/mysql-files/data/tables/create-tables/ImageGallery-Create-Table.sql
 
+source /var/lib/mysql-files/data/tables/create-tables/OutboxMessage-Create-Table.sql
+source /var/lib/mysql-files/data/tables/create-tables/ProcessMessage-Create-Table.sql
