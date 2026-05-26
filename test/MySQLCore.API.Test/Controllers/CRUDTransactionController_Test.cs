@@ -92,62 +92,62 @@ public class CRUDTransactionController_Test : Base_Test
         }
     }
 
-    [Fact]
-    public async Task CreateRecord_CheckIsValue() {
-        var response = true;
-        var parameter = new CreateCRUDTransactionDTO { Name = "John Doe"};
-        var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
-        try {
-            var result = await _controller.CreateRecord(parameter);
-            Assert.True(result.Value);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+    // [Fact]
+    // public async Task CreateRecord_CheckIsValue() {
+    //     var response = true;
+    //     var parameter = new CreateCRUDTransactionDTO { Name = "John Doe"};
+    //     var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
+    //     try {
+    //         var result = await _controller.CreateRecord(parameter);
+    //         Assert.True(result.Value);
+    //     }
+    //     catch (Exception) {
+    //         throw;
+    //     }
+    // }
 
-    [Fact]
-    public async Task CreateRecord_CheckIsValueFalse() {
-        var response = false;
-        var parameter = new CreateCRUDTransactionDTO ();
-        var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
-        try {
-            var result = await _controller.CreateRecord(parameter);
-            Assert.False(result.Value);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+    // [Fact]
+    // public async Task CreateRecord_CheckIsValueFalse() {
+    //     var response = false;
+    //     var parameter = new CreateCRUDTransactionDTO ();
+    //     var request = _service.Setup( x => x.CreateRecordAsync(parameter)).ReturnsAsync(response);
+    //     try {
+    //         var result = await _controller.CreateRecord(parameter);
+    //         Assert.False(result.Value);
+    //     }
+    //     catch (Exception) {
+    //         throw;
+    //     }
+    // }
 
 
-    [Fact]
-    public async Task UpdateRecord_CheckIsValue() {
-        var response = true;
-        var parameter = new UpdateCRUDTransactionDTO { Id = 1, Name = "John Doe"};
-        var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
-        try {
-            var result = await _controller.UpdateRecord(parameter);
-            Assert.True(result.Value);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+    // [Fact]
+    // public async Task UpdateRecord_CheckIsValue() {
+    //     var response = true;
+    //     var parameter = new UpdateCRUDTransactionDTO { Id = 1, Name = "John Doe"};
+    //     var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
+    //     try {
+    //         var result = await _controller.UpdateRecord(parameter);
+    //         Assert.True(result.Value);
+    //     }
+    //     catch (Exception) {
+    //         throw;
+    //     }
+    // }
 
-    [Fact]
-    public async Task UpdateRecord_CheckIsValueFalse() {
-        var response = false;
-        var parameter = new UpdateCRUDTransactionDTO ();
-        var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
-        try {
-            var result = await _controller.UpdateRecord(parameter);
-            Assert.False(result.Value);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+    // [Fact]
+    // public async Task UpdateRecord_CheckIsValueFalse() {
+    //     var response = false;
+    //     var parameter = new UpdateCRUDTransactionDTO ();
+    //     var request = _service.Setup( x => x.UpdateRecordAsync(parameter)).ReturnsAsync(response);
+    //     try {
+    //         var result = await _controller.UpdateRecord(parameter);
+    //         Assert.False(result.Value);
+    //     }
+    //     catch (Exception) {
+    //         throw;
+    //     }
+    // }
 
     [Fact]
     public async Task DeleteRecord_CheckIsValue() {

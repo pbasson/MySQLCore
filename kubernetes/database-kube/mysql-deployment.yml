@@ -5,9 +5,9 @@ metadata:
 spec:
   ports:
   - port: 3306
+    targetPort: 3306
   selector:
     app: mysql
-  clusterIP: None
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -26,10 +26,18 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: mysql:5.6
+        image: mysql:8.3
         env:
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: mysqlcore-configmap-dev
+              key: mysql_database
         - name: MYSQL_ROOT_PASSWORD
-          value: password
+          valueFrom:
+            secretKeyRef:
+              name: mysqlcore-secret-dev
+              key: mysql_root_password
         ports:
         - containerPort: 3306
           name: mysql

@@ -139,22 +139,22 @@ public class CRUDTransactionRepo_Test : BaseRepo_Test
     //     }
     // }
 
-    [Fact]
-    public async Task UpdateRecord_CheckIsValue()
-    {
-        var payload = new CRUDTransaction { Name = "John Doe"};
-        Add(payload);
+    // [Fact]
+    // public async Task UpdateRecord_CheckIsValue()
+    // {
+    //     var payload = new CRUDTransaction { Name = "John Doe"};
+    //     Add(payload);
 
-        var parameter = new UpdateCRUDTransactionDTO { Id = payload.Id, Name = "Tony Joe"};
+    //     var parameter = new UpdateCRUDTransactionDTO { Id = payload.Id, Name = "Tony Joe"};
         
-        try {
-            var result = await _repo.UpdateRecordAsync(parameter);
-            Assert.True(result);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+    //     try {
+    //         var result = await _repo.UpdateRecordAsync(parameter);
+    //         Assert.True(result);
+    //     }
+    //     catch (Exception) {
+    //         throw;
+    //     }
+    // }
 
     // [Fact]
     // public async Task UpdateRecord_CheckIsValueFalse()

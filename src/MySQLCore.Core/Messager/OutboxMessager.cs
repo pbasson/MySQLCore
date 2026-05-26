@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace MySQLCore.Core.Messager;
 
 public class OutboxMessage

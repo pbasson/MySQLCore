@@ -42,7 +42,7 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
 
     public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id)
     {
-        var cacheKey = $"image:GetRecordByIdAsync:id={id}";
+        var cacheKey = $"crud:GetRecordByIdAsync:id={id}";
         
         var cached = await _cache.GetAsync<CRUDTransactionDTO>(cacheKey);
         if (cached != null) { return cached; }
@@ -53,14 +53,14 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
         return result;
     }
 
-    public async Task<bool> CreateRecordAsync(CreateCRUDTransactionDTO dto)
+    public async Task<TransferDTO> CreateRecordAsync(CreateCRUDTransactionDTO dto)
     {
         var result = await _repo.CreateRecordAsync(dto);
         await _cache.RemoveAsync("crud:GetAllRecordsAsync");
         return result;
     }
 
-    public async Task<bool> UpdateRecordAsync(UpdateCRUDTransactionDTO dto)
+    public async Task<TransferDTO> UpdateRecordAsync(UpdateCRUDTransactionDTO dto)
     {
         var result = await _repo.UpdateRecordAsync(dto);
         await _cache.RemoveAsync("crud:GetAllRecordsAsync");

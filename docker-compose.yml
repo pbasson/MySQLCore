@@ -90,7 +90,8 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ${PROMETHEUS}:/etc/prometheus/prometheus.yml
+      - ${PROMETHEUS}:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
       # - ${PROMETHEUS_DATA_PATH}:/prometheus
     networks:
       - mysqlcore_network
@@ -106,13 +107,15 @@ services:
 
   tempo:
     image: grafana/tempo:latest
+    # user: "0:0"
     command: [ "-config.file=/etc/tempo.yml" ]
     ports:
       - "3200:3200"
       - "4317:4317"
       - "4318:4318"
     volumes:
-      - ${TEMPO}:/etc/tempo.yml
+      - ${TEMPO}:/etc/tempo.yml:ro
+      # - tempo_data:/tmp/tempo
       # - ${TEMPO_DATA_PATH}:/tmp/tempo
     networks:
       - mysqlcore_network
@@ -124,7 +127,7 @@ services:
       - "4319:4317"
       - "4320:4318"
     volumes:
-      - ${OTEL_COLLECTOR}:/etc/otel-collector.yml
+      - ${OTEL_COLLECTOR}:/etc/otel-collector.yml:ro
     depends_on:
       - tempo
     networks:
@@ -132,7 +135,8 @@ services:
 
 volumes:
   mysqlcore_vol:
-
+  prometheus_data:
+  tempo_data:
 networks:
   mysqlcore_network:
     name: mysqlcore_network

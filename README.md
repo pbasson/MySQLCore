@@ -1,21 +1,27 @@
 # MySQLCore
 
-MySQLCore is a backend demo project showing how to build a layered ASP.NET Core REST API backed by MySQL, with message-based processing, structured logging, containerized local infrastructure, and test coverage across the main application layers.
+MySQLCore is a backend demo project showing how to build a layered ASP.NET Core REST API backed by MySQL, with RabbitMQ messaging, outbox-based background processing, Redis caching, structured logging, distributed tracing, metrics, containerized infrastructure, and test coverage across the main application layers.
 
 ## What This Demo Shows
 
 - A REST API for CRUD-style transaction data.
 - A one-to-many image transaction workflow using image records and gallery records.
-- Clean separation between API, Core, and Infrastructure projects.
+- Clean separation between API, Core, Infrastructure, and Worker projects.
 - Repository and service layers for data access and business logic.
 - MySQL persistence through Entity Framework Core.
+- Redis-backed caching through the ASP.NET Core distributed cache abstraction.
 - RabbitMQ publishing and background message processing.
-- Message processing state tracking for image-created events.
+- Outbox message storage and publishing for more reliable asynchronous work.
+- Processed message tracking for image-created events.
+- API endpoints for transaction, outbox, and processed message data.
 - API key middleware and Swagger security configuration.
-- Centralized error logging with Elmah.
+- Global exception handling middleware.
 - Structured application logging with Serilog and Seq.
-- Docker Compose setup for the API, MySQL, RabbitMQ, and Seq.
-- Kubernetes manifests for backend and database deployment.
+- OpenTelemetry tracing exported through the OTLP collector.
+- Prometheus metrics for the API and worker process.
+- Grafana, Tempo, Prometheus, Seq, RabbitMQ, Redis, and MySQL infrastructure support.
+- Docker Compose setup for the full local stack.
+- Kubernetes manifests for backend, worker, database, middleware, and observability services.
 - SQL scripts for database and table creation/removal.
 - Unit test projects for API, Core, and Infrastructure behavior.
 
@@ -26,28 +32,34 @@ MySQLCore is a backend demo project showing how to build a layered ASP.NET Core 
 | Runtime | .NET 8.0 |
 | Language | C# |
 | API | ASP.NET Core Web API |
-| Database | MySQL |
+| Worker | .NET Worker Service |
+| Database | MySQL 8 |
 | Data access | Entity Framework Core, Pomelo MySQL provider, MySqlConnector |
+| Cache | Redis, StackExchangeRedis distributed cache |
 | Messaging | RabbitMQ |
-| Background processing | ASP.NET Core hosted services |
+| Background processing | Hosted services, dedicated worker process |
+| Message reliability | Outbox pattern, processed message tracking |
 | Validation | FluentValidation |
 | API documentation | Swagger / OpenAPI |
-| Logging | Serilog, Seq, Elmah |
+| Security | API key middleware |
+| Logging | Serilog, Seq, rolling file logs |
+| Tracing | OpenTelemetry, OTLP collector, Tempo |
+| Metrics | prometheus-net, Prometheus, Grafana |
 | Containers | Docker, Docker Compose |
 | Orchestration | Kubernetes |
-| Testing | xUnit, Moq, AutoFixture, EF Core InMemory |
+| Testing | xUnit, Moq, AutoFixture, EF Core InMemory, coverlet |
 | CI | GitHub Actions |
 
 ## Solution Structure
 
 ```text
 src/
-  MySQLCore.API             ASP.NET Core API, controllers, middleware, configuration, hosted workers
+  MySQLCore.API             ASP.NET Core API, controllers, middleware, security, configuration
   MySQLCore.Core            DTOs, interfaces, services, validators, messages, constants, shared models
-  MySQLCore.Infrastructure  EF Core DbContext, entities, repositories, factories, RabbitMQ publisher
+  MySQLCore.Infrastructure  EF Core DbContext, entities, repositories, factories, RabbitMQ and Redis services
 
-middleware/
-  MySQLCore.Receiver        Console receiver project for RabbitMQ messaging experiments
+worker/
+  MySQLCore.Worker          Background workers for outbox publishing and image message processing
 
 test/
   MySQLCore.API.Test
@@ -55,8 +67,8 @@ test/
   MySQLCore.Infrastructure.Test
 
 data/                       SQL database and table scripts
-env/                        Docker and Kubernetes environment configuration
-kubernetes/                 Kubernetes manifests
+configurations/             Prometheus, Tempo, and OpenTelemetry collector configuration
+kubernetes/                 Kubernetes manifests for app, middleware, database, and observability services
 scripts/                    Docker and Kubernetes command notes
 ```
 
@@ -79,47 +91,44 @@ Demonstrates a richer transaction workflow with related image gallery records:
 
 - Manage image transaction records.
 - Return related gallery data.
-- Publish image-created messages for background processing.
-- Track processing through message status models.
+- Create image transaction data for asynchronous processing.
+- Work with the messaging flow through the core service layer.
+
+### OutboxMessagerController
+
+Shows the current state of messages waiting to be published or recently published:
+
+- Get pending outbox messages.
+- Get the latest published message.
+- Get a single outbox message by ID.
+
+### ProcessedMessageController
+
+Shows the result of messages handled by the worker process:
+
+- Get a processed message by ID.
+- Get the latest processed messages.
 
 ## Messaging Flow
 
-The API uses RabbitMQ for image-created events. When image transaction work creates a message, the infrastructure layer publishes it to RabbitMQ. The API also registers an `ImageProcessingWorker` hosted service that consumes from the image queue, processes the message through the core service layer, acknowledges successful messages, and retries or dead-letters failed messages.
+The project uses RabbitMQ for image-created events and an outbox table to keep the publish workflow more reliable.
 
-## Running With Docker Compose
+When the API creates work that needs to happen asynchronously, the message is stored as an outbox record. The worker process runs an `OutboxPublisherWorker` that reads pending outbox messages and publishes them to RabbitMQ. The `ImageProcessingWorker` then consumes image-created messages, processes them through the service layer, tracks the result as a processed message, and handles retry/dead-letter style failure paths through the messaging layer.
 
-Docker Compose is the preferred local demo path.
+## Observability
 
-1. Create the external Docker network:
+The project includes a small observability stack so the backend can be inspected beyond basic console output:
 
-```bash
-docker network create mysqlcore_network
-```
-
-2. Start the stack from the repository root:
-
-```bash
-docker compose up --build
-```
-
-The Compose stack includes:
-
-- MySQL database
-- RabbitMQ management broker
-- Seq logging server
-- MySQLCore API
-
-## Running Tests
-
-Run all tests from the repository root:
-
-```bash
-dotnet test
-```
+- Serilog writes structured logs to the console, files, and Seq.
+- The API exposes Prometheus metrics through `/metrics`.
+- The worker exposes Prometheus metrics on its own metric server.
+- OpenTelemetry tracing is exported to the OTLP collector.
+- Tempo stores traces and Grafana can be used to inspect metrics and traces.
 
 ## Notes
 
-- Environment-specific values are kept under `env/`.
+- Environment-specific values are kept outside the main project files.
 - SQL setup and teardown scripts are kept under `data/`.
+- Docker Compose and Kubernetes files are included, but setup steps are intentionally not documented here.
 - The API is configured for Swagger/OpenAPI and API key authentication.
 - Docker image build automation is included through GitHub Actions.

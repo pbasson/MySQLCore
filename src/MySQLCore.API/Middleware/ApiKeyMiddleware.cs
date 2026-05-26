@@ -4,9 +4,11 @@ public class ApiKeyMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly string ApiKeyHeader = AppSettings.API_KEY;
+    private readonly ILogger<ApiKeyMiddleware> _logger;
 
-    public ApiKeyMiddleware(RequestDelegate next) {
+    public ApiKeyMiddleware(RequestDelegate next, ILogger<ApiKeyMiddleware> logger) {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context) {
@@ -35,7 +37,7 @@ public class ApiKeyMiddleware
             await _next(context);
         }
         catch (Exception ex) {
-            ElmahExtensions.RaiseError(ex);
+            _logger.LogError(ex, "Error occurred in API Key Middleware.");
             throw;  
         }
     }

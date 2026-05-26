@@ -11,6 +11,8 @@ global using MySQLCore.Infrastructure.Repos.MessagerRepo;
 global using MySQLCore.Worker.BackgroundServices;
 global using MySQLCore.Worker.Configurations;
 global using MySQLCore.Worker.Messager;
+global using OpenTelemetry.Resources;
+global using OpenTelemetry.Trace;
 global using Prometheus;
 global using RabbitMQ.Client;
 global using RabbitMQ.Client.Events;
