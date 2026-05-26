@@ -8,6 +8,7 @@ global using Microsoft.OpenApi.Models;
 global using MySQLCore.API.Configurations;
 global using MySQLCore.API.Middleware;
 global using MySQLCore.Core.Constants;
+global using MySQLCore.Core.Enums;
 global using MySQLCore.Core.Interfaces.Messager;
 global using MySQLCore.Core.Interfaces.Repos;
 global using MySQLCore.Core.Interfaces.Services;

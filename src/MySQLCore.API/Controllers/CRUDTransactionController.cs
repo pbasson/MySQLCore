@@ -42,7 +42,7 @@ public class CRUDTransactionController : BaseController
     {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.CreateRecordAsync(dTO);
-        return result.IsNotNull() ? Ok(result) : BadRequest();
+        return TransferActionResult(result);
     }
 
     [HttpPut("update")]
@@ -50,7 +50,7 @@ public class CRUDTransactionController : BaseController
     {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.UpdateRecordAsync(dTO);
-        return result.IsNotNull() ? Ok(result) : BadRequest();
+        return TransferActionResult(result);
     }
 
     [HttpDelete("delete/{id:int}")]
