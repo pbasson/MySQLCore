@@ -13,7 +13,6 @@ public static class RegisterConfigurations
 
         #region Register Services
         RegisterSwagger(services);
-        // RegisterLogs(services, configuration);
         #endregion
 
         #region Register DataService
