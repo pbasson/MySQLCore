@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS MySQLCore.ProcessedMessage (
   MessageType varchar(100) NOT NULL,
   EntityName varchar(100) NOT NULL,
   EntityId int NOT NULL,
-  Status int NOT NULL
+  Status int NOT NULL,
+  ProcessedAt DATETIME NOT NULL
 )

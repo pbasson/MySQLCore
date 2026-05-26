@@ -1,5 +1,3 @@
-using MySQLCore.Infrastructure.Repos.MessagerRepo;
-
 namespace MySQLCore.Worker.Configurations;
 
 public static class RegisterServices 
@@ -15,7 +13,7 @@ public static class RegisterServices
     private static void RegisterCoreServices(IServiceCollection services)
     {
         services.AddScoped<IMessagePublisher,RabbitMQPublisher>();
-        services.AddScoped<ProcessMessageService>();
+        services.AddScoped<ProcessWorkerService>();
         services.AddSingleton<RabbitMQConnectionService>();
     }
 

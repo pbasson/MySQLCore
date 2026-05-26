@@ -63,7 +63,7 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
         using var scope = _scopeFactory.CreateScope();
 
-        var processService = scope.ServiceProvider.GetRequiredService<ProcessMessageService>();
+        var processService = scope.ServiceProvider.GetRequiredService<ProcessWorkerService>();
 
         await processService.ProcessAsync(message);
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);

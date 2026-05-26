@@ -16,6 +16,8 @@ public static class RegisterServices
         services.AddScoped<ICRUDTransactionService,CRUDTransactionService>();
         services.AddScoped<IImageTransactionService,ImageTransactionService>();
         services.AddScoped<ICacheService,RedisCacheService>();
+        services.AddScoped<IProcessedMessageService,ProcessedMessageService>();
+        services.AddScoped<IOutboxMessagerService,OutboxMessagerService>();
     }
 
     private static void RegisterCoreRepos(IServiceCollection services)
