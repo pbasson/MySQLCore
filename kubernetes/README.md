@@ -28,6 +28,7 @@ kubectl apply -f kubernetes/database-kube/mysql-pv.yml
 kubectl apply -f kubernetes/database-kube/mysql-deployment.yml
 
 kubectl apply -f kubernetes/middleware-kube/
+kubectl apply -f kubernetes/observability-kube/seq-pv.yml
 kubectl apply -f kubernetes/observability-kube/
 kubectl apply -f kubernetes/backend-kube/
 ```

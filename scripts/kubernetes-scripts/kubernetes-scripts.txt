@@ -17,3 +17,6 @@ kubectl delete -f kubernetes/database-kube/mysql-pv.yml
 
 kubectl apply -f kubernetes/database-kube/mysql-deployment.yml
 kubectl delete -f kubernetes/database-kube/mysql-deployment.yml
+
+kubectl apply -f kubernetes/observability-kube/seq-pv.yml
+kubectl delete -f kubernetes/observability-kube/seq-pv.yml
