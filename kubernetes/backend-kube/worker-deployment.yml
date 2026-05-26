@@ -17,6 +17,9 @@ spec:
       - name: mysqlcore-worker
         image: mysqlcore-worker:latest
         imagePullPolicy: Never
+        ports:
+        - containerPort: 9100
+          name: metrics
         resources:
           limits:
             memory: "512Mi"
@@ -82,3 +85,15 @@ spec:
               key: rabbitmq_max_retry_count
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: http://otel-collector:4317
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysqlcore-worker
+spec:
+  selector:
+    app: mysqlcore-worker
+  ports:
+  - name: metrics
+    port: 9100
+    targetPort: 9100

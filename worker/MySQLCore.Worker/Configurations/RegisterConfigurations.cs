@@ -9,6 +9,7 @@ public static class RegisterConfigurations
 
         RegisterSeq();
         RegisterOpenTelemetry(services);
+        RegisterMetrics(services);
         RegisterMessager(services, configuration);
         services.RegisterDatabase(configuration);
         services.RegisterService();
@@ -50,6 +51,14 @@ public static class RegisterConfigurations
                     options.Endpoint = new Uri(otelCollectorURL);
                     options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
                 }));
+    }
+
+    private static void RegisterMetrics(IServiceCollection services)
+    {
+        services.AddMetricServer(options =>
+        {
+            options.Port = 9100;
+        });
     }
 
     //     private static void RegisterSeq( )

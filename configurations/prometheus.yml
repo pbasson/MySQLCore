@@ -5,4 +5,8 @@ scrape_configs:
   - job_name: "mysqlcore-api"
     metrics_path: /metrics
     static_configs:
-      - targets: ["mysqlcore.api:5820"]
+      - targets: ["backend:5820"]
+  - job_name: "mysqlcore-worker"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["mysqlcore-worker:9100"]

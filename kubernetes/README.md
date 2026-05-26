@@ -31,6 +31,7 @@ kubectl apply -f kubernetes/middleware-kube/
 kubectl apply -f kubernetes/observability-kube/seq-pv.yml
 kubectl apply -f kubernetes/observability-kube/tempo-pv.yml
 kubectl apply -f kubernetes/observability-kube/grafana-pv.yml
+kubectl apply -f kubernetes/observability-kube/prometheus-pv.yml
 kubectl apply -f kubernetes/observability-kube/
 kubectl apply -f kubernetes/backend-kube/
 ```
@@ -53,3 +54,4 @@ Notes:
 - Seq stores events in `/mnt/data/seq` inside the local Kubernetes VM.
 - Tempo stores traces in `/mnt/data/tempo` inside the local Kubernetes VM.
 - Grafana stores dashboards and settings in `/mnt/data/grafana` inside the local Kubernetes VM.
+- Prometheus stores metrics in `/mnt/data/prometheus` inside the local Kubernetes VM.
