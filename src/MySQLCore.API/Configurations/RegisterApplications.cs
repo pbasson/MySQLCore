@@ -7,7 +7,6 @@ public static class RegisterApplications
         var isDev = app.Environment.IsDevelopment();
 
         app.UseGlobalExceptionHandling();
-        // app.UseElmah();
 
         if (isDev) {
             app.UseSwagger();

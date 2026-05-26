@@ -37,17 +37,8 @@ public static class RegisterConfigurations
     public static ConfigureHostBuilder RegisterHost(this ConfigureHostBuilder configure)
     {
         configure.UseSerilog();
-
         return configure;
     }
-
-    // private static void RegisterLogs(IServiceCollection services, IConfiguration configuration)
-    // {
-    //     services.AddElmah<XmlFileErrorLog>(option => 
-    //     {
-    //         option.LogPath = configuration.GetValue<string>("ElmahPath") ;
-    //     });
-    // }
 
     private static void RegisterSwagger(IServiceCollection services)
     {
