@@ -14,7 +14,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: manual
   hostPath:
-    path: "/mnt/data/mysqlcore"
+    path: "/data/mysqlcore"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

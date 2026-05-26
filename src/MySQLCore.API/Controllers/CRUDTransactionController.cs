@@ -1,6 +1,6 @@
 namespace MySQLCore.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/crud-transactions")]
 [ApiController]
 public class CRUDTransactionController : BaseController
 {
@@ -10,14 +10,12 @@ public class CRUDTransactionController : BaseController
     }
 
     [HttpGet]
-    [Route("GetAllRecords")]
     public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecords() {
         var result = await _service.GetAllRecordsAsync();
         return Ok(result);
     }
 
-    [HttpGet]
-    [Route("GetAllRecordsPaginationAsync/{page:int}")]
+    [HttpGet("by-page/{page:int}")]
     public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecordsPaginationAsync(int page) 
     {
         if ( page.IsNotZero() )  
@@ -28,8 +26,7 @@ public class CRUDTransactionController : BaseController
         return BadRequest(); 
     }
 
-    [HttpGet]
-    [Route("GetRecordById/{Id:int}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<CRUDTransactionDTO>> GetRecordById(int Id) 
     {
         if ( Id.IsNotZero() )  
@@ -40,8 +37,7 @@ public class CRUDTransactionController : BaseController
         return BadRequest(); 
     }
 
-    [HttpPost]
-    [Route("CreateRecord")]
+    [HttpPost("create")]
     public async Task<ActionResult<TransferDTO>> CreateRecord(CreateCRUDTransactionDTO dTO) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
@@ -49,8 +45,7 @@ public class CRUDTransactionController : BaseController
         return result.IsNotNull() ? Ok(result) : BadRequest();
     }
 
-    [HttpPut]
-    [Route("UpdateRecord")]
+    [HttpPut("update")]
     public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateCRUDTransactionDTO dTO) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
@@ -58,11 +53,11 @@ public class CRUDTransactionController : BaseController
         return result.IsNotNull() ? Ok(result) : BadRequest();
     }
 
-    [HttpDelete]
-    [Route("DeleteRecord")]
+    [HttpDelete("delete/{id:int}")]
     public async Task<ActionResult<bool>> DeleteRecord(int id) 
     {
-        if (id.IsNotZero()) {
+        if (id.IsNotZero()) 
+        {
             var result = await _service.DeleteRecordByIdAsync(id);
             return result.IsNotNull() ? Ok(result) : BadRequest();
         }

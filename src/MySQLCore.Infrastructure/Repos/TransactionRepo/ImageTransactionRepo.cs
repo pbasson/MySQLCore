@@ -6,7 +6,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() 
     {
-        var results = await _dBContext.ImageTransaction.OrderByDescending(x => x.ImageTransactionID)
+        var results = await _dBContext.ImageTransaction.OrderByDescending(x => x.ImageTransactionID).Take(100)  
             .Include(x => x.ImageGalleries).AsNoTracking()
             .Select(x => x.ToMapped()).ToListAsync();
         return results ?? [];

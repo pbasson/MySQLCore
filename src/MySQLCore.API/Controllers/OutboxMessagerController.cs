@@ -1,7 +1,7 @@
 namespace MySQLCore.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/outbox-messager")]
 public class OutboxMessagerController : BaseController
 {
     private readonly IOutboxMessagerService _service = default!; 
@@ -11,21 +11,21 @@ public class OutboxMessagerController : BaseController
         _service = service;
     }
 
-    [HttpGet("GetPendingMessages")]
-    public async Task<IActionResult> GetPendingMessages(int take = 10)
-    {
-        var messages = await _service.GetPendingAsync(take);
-        return Ok(messages);
-    }
-
-    [HttpGet("GetLatestPublishedMessage")]
+    [HttpGet()]
     public async Task<IActionResult> GetLatestPublishedOutboxMessage()
     {
         var messages = await _service.GetLatestPublishedOutboxMessage();
         return Ok(messages);
     }
 
-    [HttpGet("GetOutboxMessage/{id}")]
+    [HttpGet("pending-messages")]
+    public async Task<IActionResult> GetPendingMessages(int take = 10)
+    {
+        var messages = await _service.GetPendingAsync(take);
+        return Ok(messages);
+    }
+
+    [HttpGet("{id:long}")]
     public async Task<IActionResult> GetOutboxMessage(long id)
     {
         var messages = await _service.GetOutboxMessage(id);

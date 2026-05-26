@@ -1,6 +1,6 @@
 namespace MySQLCore.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/image-transactions")]
 [ApiController]
 public class ImageTransactionController : BaseController
 {
@@ -10,15 +10,13 @@ public class ImageTransactionController : BaseController
     }
 
     [HttpGet]
-    [Route("GetAllRecords")]
     public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecords() 
     {
         var result = await _service.GetAllRecordsAsync();
         return Ok(result);
     }
 
-    [HttpGet]
-    [Route("GetAllRecordsPaginationAsync/{page:int}")]
+    [HttpGet("by-page/{page:int}")]
     public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecordsPaginationAsync(int page) 
     {
         if (page.IsNotZero())  
@@ -29,21 +27,18 @@ public class ImageTransactionController : BaseController
         return BadRequest(); 
     }
 
-
-    [HttpGet]
-    [Route("GetRecordById/{Id:int}")]
-    public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int Id) 
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int id) 
     {
-        if (Id.IsNotZero())  
+        if (id.IsNotZero())  
         {
-            var result = await _service.GetRecordByIdAsync(Id);
+            var result = await _service.GetRecordByIdAsync(id);
             if (result.IsNotNull()) { return (result.ImageTransactionID > 0) ? result : NotFound(); } 
         }
         return BadRequest(); 
     }
 
-    [HttpPost]
-    [Route("CreateRecord")]
+    [HttpPost("create")]
     public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageTransactionDTO dTO) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
@@ -51,8 +46,7 @@ public class ImageTransactionController : BaseController
         return result.IsNotNull() ? Ok(result) : BadRequest();
     }
 
-    [HttpPut]
-    [Route("UpdateRecord")]
+    [HttpPut("update")]
     public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageTransactionDTO dTO) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
@@ -60,8 +54,7 @@ public class ImageTransactionController : BaseController
         return result.IsNotNull() ? Ok(result) : BadRequest();
     }
 
-    [HttpDelete]
-    [Route("DeleteRecord")]
+    [HttpDelete("delete/{id:int}")]
     public async Task<ActionResult<bool>> DeleteRecord(int id) 
     {
         if (id.IsNotZero()) 
