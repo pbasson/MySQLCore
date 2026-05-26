@@ -87,8 +87,8 @@ public static class RegisterConfigurations
 
     private static void RegisterOpenTelemetry(IServiceCollection services)
     {
-        string tempoUrl = Environment.GetEnvironmentVariable("TEMPO_URL") ?? "http://tempo:4318";
-        string otelCollectorURL = "http://otel-collector:4317";
+        string otelCollectorURL = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4317";
+
         services.AddOpenTelemetry().ConfigureResource(resource => resource.AddService(serviceName: TracingConstants.SERVICE_NAME))
             .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation()
                 .SetSampler(new AlwaysOnSampler())

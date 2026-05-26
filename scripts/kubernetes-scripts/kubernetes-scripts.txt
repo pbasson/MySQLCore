@@ -20,3 +20,12 @@ kubectl delete -f kubernetes/database-kube/mysql-deployment.yml
 
 kubectl apply -f kubernetes/observability-kube/seq-pv.yml
 kubectl delete -f kubernetes/observability-kube/seq-pv.yml
+
+kubectl apply -f kubernetes/observability-kube/tempo-pv.yml
+kubectl delete -f kubernetes/observability-kube/tempo-pv.yml
+
+kubectl apply -f kubernetes/observability-kube/grafana-pv.yml
+kubectl delete -f kubernetes/observability-kube/grafana-pv.yml
+
+kubectl apply -f kubernetes/observability-kube/
+kubectl delete -f kubernetes/observability-kube/

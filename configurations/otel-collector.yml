@@ -7,7 +7,7 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 exporters:
-  otlp/tempo:
+  otlp_grpc/tempo:
     endpoint: tempo:4317
     tls:
       insecure: true
@@ -18,4 +18,4 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [debug, otlp/tempo]
+      exporters: [debug, otlp_grpc/tempo]

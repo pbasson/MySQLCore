@@ -29,6 +29,8 @@ kubectl apply -f kubernetes/database-kube/mysql-deployment.yml
 
 kubectl apply -f kubernetes/middleware-kube/
 kubectl apply -f kubernetes/observability-kube/seq-pv.yml
+kubectl apply -f kubernetes/observability-kube/tempo-pv.yml
+kubectl apply -f kubernetes/observability-kube/grafana-pv.yml
 kubectl apply -f kubernetes/observability-kube/
 kubectl apply -f kubernetes/backend-kube/
 ```
@@ -48,4 +50,6 @@ Notes:
 - If you use Docker Desktop Kubernetes, the cluster can usually see images built by your local Docker daemon.
 - If you use Minikube, build inside Minikube's Docker daemon first: `eval $(minikube docker-env)`, then run the two `docker build` commands.
 - Secrets are in `stringData` for dev convenience. Use a real secret workflow for production.
-- Prometheus, Grafana, Tempo, and the OpenTelemetry collector are still separate follow-up manifests.
+- Seq stores events in `/mnt/data/seq` inside the local Kubernetes VM.
+- Tempo stores traces in `/mnt/data/tempo` inside the local Kubernetes VM.
+- Grafana stores dashboards and settings in `/mnt/data/grafana` inside the local Kubernetes VM.

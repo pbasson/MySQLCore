@@ -79,6 +79,8 @@ spec:
             configMapKeyRef:
               name: mysqlcore-configmap-dev
               key: seq_url
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://otel-collector:4317
         livenessProbe:
           tcpSocket:
             port: 5820

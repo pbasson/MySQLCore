@@ -80,3 +80,5 @@ spec:
             configMapKeyRef:
               name: mysqlcore-configmap-dev
               key: rabbitmq_max_retry_count
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://otel-collector:4317

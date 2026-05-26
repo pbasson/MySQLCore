@@ -8,6 +8,7 @@ public static class RegisterConfigurations
         ArgumentNullException.ThrowIfNull(configuration);
 
         RegisterSeq();
+        RegisterOpenTelemetry(services);
         RegisterMessager(services, configuration);
         services.RegisterDatabase(configuration);
         services.RegisterService();
@@ -33,6 +34,22 @@ public static class RegisterConfigurations
             .WriteTo.Console()
             .WriteTo.Seq("http://seq")
             .CreateLogger();
+    }
+
+    private static void RegisterOpenTelemetry(IServiceCollection services)
+    {
+        string otelCollectorURL = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4317";
+
+        services.AddOpenTelemetry().ConfigureResource(resource => resource.AddService(serviceName: "mysqlcore-worker"))
+            .WithTracing(tracing => tracing
+                .SetSampler(new AlwaysOnSampler())
+                .AddSource(TracingConstants.ACTIVITY_SOURCE)
+                .AddSource(TracingConstants.REPO_SOURCE)
+                .AddOtlpExporter(options =>
+                {
+                    options.Endpoint = new Uri(otelCollectorURL);
+                    options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                }));
     }
 
     //     private static void RegisterSeq( )
