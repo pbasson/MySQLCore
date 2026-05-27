@@ -1,3 +1,5 @@
+using MySQLCore.Worker.Enums;
+
 namespace MySQLCore.Worker.Messager;
 
 public class ProcessWorkerService
@@ -11,17 +13,30 @@ public class ProcessWorkerService
         _repo = repo;
     }
 
-    public async Task ProcessAsync(ImageCreatedMessage message)
+    public async Task<ProcessWorkerResult> ProcessAsync(ImageCreatedMessage message)
     {
-        if (await _repo.ExistsAsync(message.MessageId))
-        {
-            _logger.LogInformation("{messager} Message Status: {status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.IgnoredDuplicate), message.MessageId);
-            return;
-        }
-
         _logger.LogInformation( "{messager} Message Status: {status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", 
             nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Pending), message.MessageId, message.ImageId, message.FileName);
-
+        
+        if (await _repo.ExistsAsync(message.MessageId))
+        {
+            await _repo.UpdateAsync(message.MessageId, ProcessMessageStatus.IgnoredDuplicate);
+            _logger.LogInformation("{messager} Message Status: {status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.IgnoredDuplicate), message.MessageId);
+            MessageMetrics.Duplicate.Inc();
+            return ProcessWorkerResult.Duplicate;
+        }
+      
         await _repo.AddAsync(new ProcessedMessageTransfer().GetTransfer(message.MessageId, nameof(ImageCreatedMessage), "ImageTransaction", message.ImageId));
+        
+        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", nameof(ImageCreatedMessage),
+            nameof(ProcessMessageStatus.Processing), message.MessageId, message.ImageId, message.FileName);
+        MessageMetrics.Processing.Inc();
+        return ProcessWorkerResult.Completed;
+    }
+
+    public async Task<bool> UpdateMessageStatusAsync(Guid messageId, ProcessMessageStatus status)
+    {
+        var result = await _repo.UpdateAsync(messageId, status);
+        return result;
     }
 }

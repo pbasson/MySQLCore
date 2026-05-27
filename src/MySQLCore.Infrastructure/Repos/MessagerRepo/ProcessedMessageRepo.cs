@@ -1,4 +1,3 @@
-
 namespace MySQLCore.Infrastructure.Repos.MessagerRepo;
 
 public class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
@@ -28,5 +27,15 @@ public class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
             // .Where(x => x.Status == OutboxMessageStatus.Published )
             .OrderByDescending(x => x.ProcessedAt).Take(1000).ToListAsync();
         return result;
+    }
+
+    public async Task<bool> UpdateAsync(Guid messageId, ProcessMessageStatus status)
+    {
+        var message = await GetMessageById(messageId);
+        message.Status = status;
+        message.ProcessedAt = DateTime.UtcNow;
+
+        _dBContext.ProcessedMessage.Update(message);
+        return await SaveChangesAsync();
     }
 }

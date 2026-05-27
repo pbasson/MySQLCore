@@ -1,5 +1,3 @@
-using MySQLCore.Core.Enums;
-
 namespace MySQLCore.Worker.Messager;
 
 public class RabbitMQPublisher : IMessagePublisher
@@ -21,5 +19,6 @@ public class RabbitMQPublisher : IMessagePublisher
 
         await channel.BasicPublishAsync(exchange: string.Empty, routingKey: queueName, body: body);
         _logger.LogInformation("{QueueName} Message Status: {status} ", queueName, nameof(ProcessMessageStatus.Published));
+        MessageMetrics.Published.Inc();
     }
 }

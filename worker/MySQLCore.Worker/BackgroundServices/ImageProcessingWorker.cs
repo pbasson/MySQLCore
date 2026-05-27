@@ -1,5 +1,3 @@
-using MySQLCore.Worker.MetricManager;
-
 namespace MySQLCore.Worker.BackgroundServices;
 
 public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
@@ -15,14 +13,13 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         IChannel channel = await _connectionService.CreateConnection(stoppingToken);
-
         var consumer = new AsyncEventingBasicConsumer(channel);
-
-        _logger.LogInformation("{messager} Message Status: {status}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Received));
-        MessageMetrics.Received.Inc();
 
         consumer.ReceivedAsync += async (sender, eventArgs) =>
         {
+            _logger.LogInformation("{messager} Message Status: {status}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Received));
+            MessageMetrics.Received.Inc();
+            
             ImageCreatedMessage? message = null;
 
             try
@@ -57,19 +54,23 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         _logger.LogInformation( "Activity created: {ActivityCreated}, TraceId: {TraceId}, SpanId: {SpanId}",
             activity != null, activity?.TraceId, activity?.SpanId);
 
-        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", nameof(ImageCreatedMessage),
-            nameof(ProcessMessageStatus.Processing), message.MessageId, message.ImageId, message.FileName);
-        MessageMetrics.Processing.Inc();
-
         using var scope = _scopeFactory.CreateScope();
-
         var processService = scope.ServiceProvider.GetRequiredService<ProcessWorkerService>();
 
-        await processService.ProcessAsync(message);
+        var result = await processService.ProcessAsync(message);
+
+        if(result == Enums.ProcessWorkerResult.Duplicate)
+        {
+            await BasicAckAsync(eventArgs, channel, stoppingToken);
+            return;
+        }        
+
+        await processService.UpdateMessageStatusAsync(message.MessageId, ProcessMessageStatus.Processed);
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);
         MessageMetrics.Processed.Inc();
 
         await BasicAckAsync(eventArgs, channel, stoppingToken);
+        await processService.UpdateMessageStatusAsync(message.MessageId, ProcessMessageStatus.Acknowledged);
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Acknowledged), message.MessageId);
         MessageMetrics.Acknowledged.Inc();
     }
@@ -81,16 +82,20 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         activity?.SetTag("message.type", nameof(ImageCreatedMessage));
         activity?.SetTag("DeliveryTag", eventArgs.DeliveryTag);
 
+        using var scope = _scopeFactory.CreateScope();
+        var processService = scope.ServiceProvider.GetRequiredService<ProcessWorkerService>();
+
         _logger.LogError(ex, "{messager} Message Status: {status}, DeliveryTag: {DeliveryTag}", nameof(ImageCreatedMessage),
             nameof(ProcessMessageStatus.Failed), eventArgs.DeliveryTag);
         MessageMetrics.Failed.Inc();
+
 
         var retryCount = GetRetryCount(eventArgs);
         if (retryCount >= _settings.MaxRetryCount)
         {
             _logger.LogError("{messager} Message Status: {status} - moved to DLQ after {RetryCount} retries", nameof(ImageCreatedMessage), ProcessMessageStatus.DeadLetter, retryCount);
-
             await channel.BasicPublishAsync(exchange: string.Empty, routingKey: _settings.DeadLetterQueueName, body: eventArgs.Body, cancellationToken: stoppingToken);
+            await processService.UpdateMessageStatusAsync(message!.MessageId, ProcessMessageStatus.DeadLetter);
             await BasicAckAsync(eventArgs, channel, stoppingToken);
             MessageMetrics.DeadLetter.Inc();
             return;

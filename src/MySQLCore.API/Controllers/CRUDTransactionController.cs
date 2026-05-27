@@ -5,12 +5,14 @@ namespace MySQLCore.API.Controllers;
 public class CRUDTransactionController : BaseController
 {
     private readonly ICRUDTransactionService _service;
-    public CRUDTransactionController(ICRUDTransactionService service, ILogger<CRUDTransactionController> logger) : base(logger) {
+    public CRUDTransactionController(ICRUDTransactionService service, ILogger<CRUDTransactionController> logger) : base(logger) 
+    {
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecords() {
+    public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecords() 
+    {
         var result = await _service.GetAllRecordsAsync();
         return Ok(result);
     }
