@@ -11,30 +11,30 @@ public class CRUDTransactionController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecords() 
+    public async Task<ActionResult<TransferCRUDTransactionGridDTO>> GetAllRecords() 
     {
         var result = await _service.GetAllRecordsAsync();
-        return Ok(result);
+        return TransferActionResult(result);
     }
 
     [HttpGet("by-page/{page:int}")]
-    public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecordsPaginationAsync(int page) 
+    public async Task<ActionResult<TransferCRUDTransactionGridDTO>> GetAllRecordsPaginationAsync(int page) 
     {
         if ( page.IsNotZero() )  
         {
             var result = await _service.GetAllRecordsPaginationAsync(page);
-            return Ok(result);
+            return TransferActionResult(result);
         }
         return BadRequest(); 
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<CRUDTransactionDTO>> GetRecordById(int Id) 
+    public async Task<ActionResult<TransferCRUDTransactionDTO>> GetRecordById(int Id) 
     {
         if ( Id.IsNotZero() )  
         {
             var result = await _service.GetRecordByIdAsync(Id);
-            if (result.IsNotNull()) { return (result.Id > 0) ? result : NotFound(); } 
+            return TransferActionResult(result);
         }
         return BadRequest(); 
     }

@@ -6,7 +6,7 @@ namespace MySQLCore.API.Controllers
     {
         public readonly ILogger<BaseController> _logger = logger;
 
-        protected ActionResult<TransferDTO> TransferActionResult(TransferDTO? result)
+        protected ActionResult<TResult> TransferActionResult<TResult>(TResult? result) where TResult : BaseTransfer
         {
             if (result == null) { return BadRequest(); }
 
@@ -20,7 +20,8 @@ namespace MySQLCore.API.Controllers
                 ActionStatusType.Conflict => Conflict(result),
                 ActionStatusType.InternalServerError => StatusCode(StatusCodes.Status500InternalServerError, result),
                 ActionStatusType.Failed => BadRequest(result),
-                _ => result.Success ? Ok(result) : BadRequest(result)
+                ActionStatusType.NoAction => BadRequest(result),
+                _ => BadRequest(result)
             };
         }
     }

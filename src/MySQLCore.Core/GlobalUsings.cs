@@ -6,6 +6,7 @@ global using MySQLCore.Core.Interfaces.Repos;
 global using MySQLCore.Core.Interfaces.Services;
 global using MySQLCore.Core.Messager;
 global using MySQLCore.Core.Models.DTOs;
+global using MySQLCore.Core.Utilities;
 global using System.ComponentModel.DataAnnotations;
 global using System.Diagnostics;
 global using MySQLCore.Core.Models.DTOs.ImageDTOs;

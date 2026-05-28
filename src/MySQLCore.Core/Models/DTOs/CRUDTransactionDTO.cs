@@ -23,3 +23,25 @@ public class UpdateCRUDTransactionDTO : IEntity
     [Required]
     public string Name { get; set; } = "";
 }
+
+public class TransferCRUDTransactionGridDTO : BaseTransfer
+{
+    public List<CRUDTransactionDTO> Records { get; set; }
+
+    public TransferCRUDTransactionGridDTO( ActionStatusType ActionStatusType, List<CRUDTransactionDTO> Records) 
+    {
+        this.ActionStatusType = ActionStatusType;
+        this.Records = Records;
+    }
+}
+
+public class TransferCRUDTransactionDTO : BaseTransfer
+{
+    public CRUDTransactionDTO Record { get; set; }
+
+    public TransferCRUDTransactionDTO( ActionStatusType ActionStatusType, CRUDTransactionDTO Record) 
+    {
+        this.ActionStatusType = ActionStatusType;
+        this.Record = Record;
+    }
+}

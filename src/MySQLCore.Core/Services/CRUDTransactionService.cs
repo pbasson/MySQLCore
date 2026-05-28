@@ -12,50 +12,75 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
     /// <summary>
     /// Get All Records 
     /// </summary>
-    public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync()
+    public async Task<TransferCRUDTransactionGridDTO> GetAllRecordsAsync()
     {
         var cacheKey = $"crud:GetAllRecordsAsync";
 
         var cached = await _cache.GetAsync<List<CRUDTransactionDTO>>(cacheKey);
-        if (cached != null) { return cached; }
+        if (cached != null) 
+        { 
+            return new TransferCRUDTransactionGridDTO(ActionStatusType.Ok, cached!);
+        }
 
         var result = await _repo.GetAllRecordsAsync();
-        if (result == null || result.Count <= 0) { return []; }
+        if (result == null || result.Count <= 0) 
+        { 
+            return new TransferCRUDTransactionGridDTO(ActionStatusType.NotFound, []); 
+        }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return result;
+        return new TransferCRUDTransactionGridDTO(ActionStatusType.Ok, result); 
+
     }
 
-    public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page)
+    public async Task<TransferCRUDTransactionGridDTO> GetAllRecordsPaginationAsync(int page)
     {
         var cacheKey = $"crud:GetAllRecordsPaginationAsync:page={page}";
         
         var cached = await _cache.GetAsync<List<CRUDTransactionDTO>>(cacheKey);
-        if (cached != null) { return cached; }
+        if (cached != null) 
+        { 
+            return new TransferCRUDTransactionGridDTO(ActionStatusType.Ok, cached!);
+        }
 
         var result = await _repo.GetAllRecordsPaginationAsync(page);
-        if (result == null || result.Count <= 0) { return []; }
+        if (result == null || result.Count <= 0) 
+        { 
+            return new TransferCRUDTransactionGridDTO(ActionStatusType.NotFound, []); 
+        }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return result;
+        return new TransferCRUDTransactionGridDTO(ActionStatusType.Ok, result); 
+
     }
 
-    public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id)
+    public async Task<TransferCRUDTransactionDTO> GetRecordByIdAsync(int id)
     {
         var cacheKey = $"crud:GetRecordByIdAsync:id={id}";
         
         var cached = await _cache.GetAsync<CRUDTransactionDTO>(cacheKey);
-        if (cached != null) { return cached; }
+        if (cached != null)
+        { 
+            return new TransferCRUDTransactionDTO(ActionStatusType.Ok, new()); 
+        }
 
         var result = await _repo.GetRecordByIdAsync(id);
+        if (result == null || result!.Id <= 0)
+        { 
+            return new TransferCRUDTransactionDTO(ActionStatusType.NotFound, new()); 
+        }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return result;
+        return new TransferCRUDTransactionDTO(ActionStatusType.Ok, result!); 
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateCRUDTransactionDTO dto)
     {
         var result = await _repo.CreateRecordAsync(dto);
+        if (result == null || !result.Success)
+        {
+            return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated);
+        }
         await _cache.RemoveAsync("crud:GetAllRecordsAsync");
         return result;
     }
@@ -63,6 +88,11 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
     public async Task<TransferDTO> UpdateRecordAsync(UpdateCRUDTransactionDTO dto)
     {
         var result = await _repo.UpdateRecordAsync(dto);
+        if (result == null || !result.Success)
+        {
+            return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated);
+        }
+
         await _cache.RemoveAsync("crud:GetAllRecordsAsync");
         await _cache.RemoveAsync($"crud:GetRecordByIdAsync:id={dto.Id}");
         return result;
@@ -71,6 +101,7 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
     public async Task<bool> DeleteRecordByIdAsync(int id)
     {
         var result = await _repo.DeleteRecordByIdAsync(id);
+        await _cache.RemoveAsync("crud:GetAllRecordsAsync");
         await _cache.RemoveAsync($"crud:GetRecordByIdAsync:id={id}");
         return result;
     }

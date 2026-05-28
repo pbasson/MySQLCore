@@ -1,9 +1,6 @@
-using MySQLCore.Core.Utilities;
-
 namespace MySQLCore.Core.Models.DTOs;
 
-
-public class TransferDTO
+public class TransferDTO : BaseTransfer
 {
     public int Id {get; set;}
     public Guid? MessageId {get; set;} 
@@ -11,7 +8,6 @@ public class TransferDTO
     public bool Success => Id > 0;
 
     public ServiceResultType ServiceResultType = ServiceResultType.NoAction;
-    public ActionStatusType ActionStatusType { get; set; } = ActionStatusType.NoAction;
 
     public TransferDTO(
         int id,

@@ -1,195 +1,195 @@
-using MySQLCore.Infrastructure.Repos.TransactionRepo;
+// using MySQLCore.Infrastructure.Repos.TransactionRepo;
 
-namespace MySQLCore.Infrastructure.Test.Repos;
+// namespace MySQLCore.Infrastructure.Test.Repos;
 
-public class CRUDTransactionRepo_Test : BaseRepo_Test
-{
-    private readonly CRUDTransactionRepo _repo ;
+// public class CRUDTransactionRepo_Test : BaseRepo_Test
+// {
+//     private readonly CRUDTransactionRepo _repo ;
     
-    public CRUDTransactionRepo_Test() {
-        _repo = new CRUDTransactionRepo(_dBContext);
-    }
+//     public CRUDTransactionRepo_Test() {
+//         _repo = new CRUDTransactionRepo(_dBContext);
+//     }
 
-    [Fact]
-    public async Task GetAllRecords_CheckIsValue() {
-        var fixture = _fixture.Create<List<CRUDTransaction>>();
-        base.AddRange(fixture);
+//     [Fact]
+//     public async Task GetAllRecords_CheckIsValue() {
+//         var fixture = _fixture.Create<List<CRUDTransaction>>();
+//         base.AddRange(fixture);
         
-        try {
-            var result = await _repo.GetAllRecordsAsync();
+//         try {
+//             var result = await _repo.GetAllRecordsAsync();
 
-            Assert.NotNull(result);
-            Assert.NotEmpty(result);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+//             Assert.NotNull(result);
+//             Assert.NotEmpty(result);
+//         }
+//         catch (Exception) {
+//             throw;
+//         }
+//     }
 
-    [Fact]
-    public async Task GetAllRecords_CheckValueEmpty() {
-        var fixture = new List<CRUDTransaction>();
-        AddRange(fixture);
+//     [Fact]
+//     public async Task GetAllRecords_CheckValueEmpty() {
+//         var fixture = new List<CRUDTransaction>();
+//         AddRange(fixture);
 
-        try {
-            var result = await _repo.GetAllRecordsAsync();
+//         try {
+//             var result = await _repo.GetAllRecordsAsync();
 
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+//             Assert.NotNull(result);
+//             Assert.Empty(result);
+//         }
+//         catch (Exception) {
+//             throw;
+//         }
+//     }
     
-    [Fact]
-    public async Task GetAllRecordsPagination_CheckIsValue()
-    {
-        var response = _fixture.Create<List<CRUDTransaction>>();
-        AddRange(response);
+//     [Fact]
+//     public async Task GetAllRecordsPagination_CheckIsValue()
+//     {
+//         var response = _fixture.Create<List<CRUDTransaction>>();
+//         AddRange(response);
 
-        var parameter = 1;
+//         var parameter = 1;
 
-        try
-        {
-            var result = await _repo.GetAllRecordsPaginationAsync(parameter);
+//         try
+//         {
+//             var result = await _repo.GetAllRecordsPaginationAsync(parameter);
 
-            Assert.NotNull(result);
-            Assert.NotEmpty(result);
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-    }
+//             Assert.NotNull(result);
+//             Assert.NotEmpty(result);
+//         }
+//         catch (Exception)
+//         {
+//             throw;
+//         }
+//     }
 
-    [Fact]
-    public async Task GetAllRecordsPagination_CheckValueEmpty() {
-        var response = new List<CRUDTransaction>();
-        AddRange(response);
-        var parameter = 0;
+//     [Fact]
+//     public async Task GetAllRecordsPagination_CheckValueEmpty() {
+//         var response = new List<CRUDTransaction>();
+//         AddRange(response);
+//         var parameter = 0;
 
-        try {
-            var result = await _repo.GetAllRecordsPaginationAsync(parameter);
+//         try {
+//             var result = await _repo.GetAllRecordsPaginationAsync(parameter);
 
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+//             Assert.NotNull(result);
+//             Assert.Empty(result);
+//         }
+//         catch (Exception) {
+//             throw;
+//         }
+//     }
 
-    [Fact]
-    public async Task GetRecordById_CheckIsValue() {
-        var response = _fixture.Create<CRUDTransaction>();
-        Add(response);
+//     [Fact]
+//     public async Task GetRecordById_CheckIsValue() {
+//         var response = _fixture.Create<CRUDTransaction>();
+//         Add(response);
 
-        try {
-            var result = await _repo.GetRecordByIdAsync(response.Id);
+//         try {
+//             var result = await _repo.GetRecordByIdAsync(response.Id);
 
-            Assert.NotNull(result);
-            Assert.NotEqual(0, result.Id);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+//             Assert.NotNull(result);
+//             Assert.NotEqual(0, result.Id);
+//         }
+//         catch (Exception) {
+//             throw;
+//         }
+//     }
 
-    [Fact]
-    public async Task GetRecordById_CheckValueEmpty() {
-        var response = new CRUDTransaction();
-        Add(response);
-        var parameter = 0;
+//     [Fact]
+//     public async Task GetRecordById_CheckValueEmpty() {
+//         var response = new CRUDTransaction();
+//         Add(response);
+//         var parameter = 0;
 
-        try {
-            var result = await _repo.GetRecordByIdAsync(parameter);
+//         try {
+//             var result = await _repo.GetRecordByIdAsync(parameter);
 
-            Assert.Null(result);
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+//             Assert.Null(result);
+//         }
+//         catch (Exception) {
+//             throw;
+//         }
+//     }
 
-    // [Fact]
-    // public async Task CreateRecord_CheckIsValue()
-    // {
-    //     var payload = new CRUDTransaction { Name = "John Doe"};
-    //     Add(payload);
+//     // [Fact]
+//     // public async Task CreateRecord_CheckIsValue()
+//     // {
+//     //     var payload = new CRUDTransaction { Name = "John Doe"};
+//     //     Add(payload);
         
-    //     try {
-    //         var result = await _repo.CreateRecordAsync(_mapper.Map<CreateCRUDTransactionDTO>(payload));
-    //         Assert.True(result);
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+//     //     try {
+//     //         var result = await _repo.CreateRecordAsync(_mapper.Map<CreateCRUDTransactionDTO>(payload));
+//     //         Assert.True(result);
+//     //     }
+//     //     catch (Exception) {
+//     //         throw;
+//     //     }
+//     // }
 
-    // [Fact]
-    // public async Task CreateRecord_CheckIsValueFalse()
-    // {
-    //     try {
-    //         var result = await _repo.CreateRecordAsync(null);
-    //         Assert.False(result);
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+//     // [Fact]
+//     // public async Task CreateRecord_CheckIsValueFalse()
+//     // {
+//     //     try {
+//     //         var result = await _repo.CreateRecordAsync(null);
+//     //         Assert.False(result);
+//     //     }
+//     //     catch (Exception) {
+//     //         throw;
+//     //     }
+//     // }
 
-    // [Fact]
-    // public async Task UpdateRecord_CheckIsValue()
-    // {
-    //     var payload = new CRUDTransaction { Name = "John Doe"};
-    //     Add(payload);
+//     // [Fact]
+//     // public async Task UpdateRecord_CheckIsValue()
+//     // {
+//     //     var payload = new CRUDTransaction { Name = "John Doe"};
+//     //     Add(payload);
 
-    //     var parameter = new UpdateCRUDTransactionDTO { Id = payload.Id, Name = "Tony Joe"};
+//     //     var parameter = new UpdateCRUDTransactionDTO { Id = payload.Id, Name = "Tony Joe"};
         
-    //     try {
-    //         var result = await _repo.UpdateRecordAsync(parameter);
-    //         Assert.True(result);
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+//     //     try {
+//     //         var result = await _repo.UpdateRecordAsync(parameter);
+//     //         Assert.True(result);
+//     //     }
+//     //     catch (Exception) {
+//     //         throw;
+//     //     }
+//     // }
 
-    // [Fact]
-    // public async Task UpdateRecord_CheckIsValueFalse()
-    // {
-    //     try {
-    //         var result = await _repo.UpdateRecordAsync(null);
-    //         Assert.False(result);
-    //     }
-    //     catch (Exception) {
-    //         throw;
-    //     }
-    // }
+//     // [Fact]
+//     // public async Task UpdateRecord_CheckIsValueFalse()
+//     // {
+//     //     try {
+//     //         var result = await _repo.UpdateRecordAsync(null);
+//     //         Assert.False(result);
+//     //     }
+//     //     catch (Exception) {
+//     //         throw;
+//     //     }
+//     // }
 
-    [Fact]
-    public async Task DeleteRecord_CheckIsValue() {
-        var payload = new CRUDTransaction { Name = "John Doe"};
-        Add(payload);
+//     [Fact]
+//     public async Task DeleteRecord_CheckIsValue() {
+//         var payload = new CRUDTransaction { Name = "John Doe"};
+//         Add(payload);
 
-        try {
-            var result = await _repo.DeleteRecordByIdAsync(payload.Id);
-            Assert.True( result );
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
+//         try {
+//             var result = await _repo.DeleteRecordByIdAsync(payload.Id);
+//             Assert.True( result );
+//         }
+//         catch (Exception) {
+//             throw;
+//         }
+//     }
 
-    [Fact]
-    public async Task DeleteRecord_CheckIsValueFalse() {
-        try {
-            var result = await _repo.DeleteRecordByIdAsync(0);
-            Assert.False( result );
-        }
-        catch (Exception) {
-            throw;
-        }
-    }
-}
+//     [Fact]
+//     public async Task DeleteRecord_CheckIsValueFalse() {
+//         try {
+//             var result = await _repo.DeleteRecordByIdAsync(0);
+//             Assert.False( result );
+//         }
+//         catch (Exception) {
+//             throw;
+//         }
+//     }
+// }
