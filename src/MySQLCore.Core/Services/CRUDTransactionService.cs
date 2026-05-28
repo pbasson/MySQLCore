@@ -59,19 +59,23 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
         var cacheKey = $"crud:GetRecordByIdAsync:id={id}";
         
         var cached = await _cache.GetAsync<CRUDTransactionDTO>(cacheKey);
-        if (cached != null)
+        if (cached != null && cached.Id > 0)
         { 
-            return new TransferCRUDTransactionDTO(ActionStatusType.Ok, new()); 
+            return new TransferCRUDTransactionDTO(ActionStatusType.Ok, cached); 
+        }
+        else if (cached != null)
+        {
+            await _cache.RemoveAsync(cacheKey);
         }
 
         var result = await _repo.GetRecordByIdAsync(id);
-        if (result == null || result!.Id <= 0)
+        if (result == null || result.Id <= 0)
         { 
             return new TransferCRUDTransactionDTO(ActionStatusType.NotFound, new()); 
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new TransferCRUDTransactionDTO(ActionStatusType.Ok, result!); 
+        return new TransferCRUDTransactionDTO(ActionStatusType.Ok, result); 
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateCRUDTransactionDTO dto)

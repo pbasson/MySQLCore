@@ -19,10 +19,10 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
         return results ?? [];
     }
 
-    public async Task<CRUDTransactionDTO> GetRecordByIdAsync(int id) 
+    public async Task<CRUDTransactionDTO?> GetRecordByIdAsync(int id) 
     {
-        var result = await _dBContext.CRUDTransaction.FirstOrDefaultAsync(x => x.Id == id);
-        return result != null ? result.ToMapped() : new();
+        var result = await _dBContext.CRUDTransaction.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        return result?.ToMapped();
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateCRUDTransactionDTO dto) 

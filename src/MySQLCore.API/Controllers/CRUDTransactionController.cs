@@ -29,11 +29,11 @@ public class CRUDTransactionController : BaseController
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<TransferCRUDTransactionDTO>> GetRecordById(int Id) 
+    public async Task<ActionResult<TransferCRUDTransactionDTO>> GetRecordById(int id) 
     {
-        if ( Id.IsNotZero() )  
+        if ( id.IsNotZero() )  
         {
-            var result = await _service.GetRecordByIdAsync(Id);
+            var result = await _service.GetRecordByIdAsync(id);
             return TransferActionResult(result);
         }
         return BadRequest(); 
