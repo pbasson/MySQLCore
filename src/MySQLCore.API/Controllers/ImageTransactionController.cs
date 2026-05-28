@@ -10,30 +10,32 @@ public class ImageTransactionController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecords() 
+    public async Task<ActionResult<TransferImageTransactionGridDTO>> GetAllRecords() 
     {
         var result = await _service.GetAllRecordsAsync();
-        return Ok(result);
+        return TransferActionResult(result);
     }
 
     [HttpGet("by-page/{page:int}")]
-    public async Task<ActionResult<List<ImageTransactionDTO>>> GetAllRecordsPaginationAsync(int page) 
+    public async Task<ActionResult<TransferImageTransactionGridDTO>> GetAllRecordsPaginationAsync(int page) 
     {
         if (page.IsNotZero())  
         {
             var result = await _service.GetAllRecordsPaginationAsync(page);
-            return Ok(result);
+            return TransferActionResult(result);
         }
         return BadRequest(); 
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<ImageTransactionDTO>> GetRecordById(int id) 
+    public async Task<ActionResult<TransferImageTransactionDTO>> GetRecordById(int id) 
     {
         if (id.IsNotZero())  
         {
             var result = await _service.GetRecordByIdAsync(id);
-            if (result.IsNotNull()) { return (result.ImageTransactionID > 0) ? result : NotFound(); } 
+            return TransferActionResult(result);
+
+            // if (result.IsNotNull()) { return (result.ImageTransactionID > 0) ? result : NotFound(); } 
         }
         return BadRequest(); 
     }

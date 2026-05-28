@@ -21,11 +21,11 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         return results ?? [];
     }
 
-    public async Task<ImageTransactionDTO> GetRecordByIdAsync(int id)  
+    public async Task<ImageTransactionDTO?> GetRecordByIdAsync(int id)  
     {
         var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries)
             .FirstOrDefaultAsync(x => x.ImageTransactionID == id);
-        return result != null ? result.ToMapped() : new();
+        return result?.ToMapped();
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto)
