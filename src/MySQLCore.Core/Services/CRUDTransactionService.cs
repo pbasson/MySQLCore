@@ -14,6 +14,8 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
     /// </summary>
     public async Task<TransferCRUDTransactionGridDTO> GetAllRecordsAsync()
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionService>(nameof(GetAllRecordsAsync));
+
         var cacheKey = $"crud:GetAllRecordsAsync";
 
         var cached = await _cache.GetAsync<List<CRUDTransactionDTO>>(cacheKey);
@@ -29,6 +31,9 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
 
     public async Task<TransferCRUDTransactionGridDTO> GetAllRecordsPaginationAsync(int page)
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionService>(nameof(GetAllRecordsPaginationAsync));
+        activity?.SetTag("page", page);
+
         var cacheKey = $"crud:GetAllRecordsPaginationAsync:page={page}";
         
         var cached = await _cache.GetAsync<List<CRUDTransactionDTO>>(cacheKey);
@@ -44,6 +49,9 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
 
     public async Task<TransferCRUDTransactionDTO> GetRecordByIdAsync(int id)
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionService>(nameof(GetRecordByIdAsync));
+        activity?.SetTag("id", id);
+
         var cacheKey = $"crud:GetRecordByIdAsync:id={id}";
         
         var cached = await _cache.GetAsync<CRUDTransactionDTO>(cacheKey);
@@ -59,6 +67,9 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
 
     public async Task<TransferDTO> CreateRecordAsync(CreateCRUDTransactionDTO dto)
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionService>(nameof(CreateRecordAsync));
+        activity?.SetTag("dto.type", nameof(CreateCRUDTransactionDTO));
+
         var result = await _repo.CreateRecordAsync(dto);
         if (result == null || !result.Success) { return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); }
         await _cache.RemoveAsync("crud:GetAllRecordsAsync");
@@ -67,6 +78,10 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
 
     public async Task<TransferDTO> UpdateRecordAsync(UpdateCRUDTransactionDTO dto)
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionService>(nameof(UpdateRecordAsync));
+        activity?.SetTag("dto.Id", dto.Id);
+        activity?.SetTag("dto.type", nameof(UpdateCRUDTransactionDTO));
+
         var result = await _repo.UpdateRecordAsync(dto);
         if (result == null || !result.Success) { return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); }
 
@@ -77,6 +92,9 @@ public class CRUDTransactionService : BaseService, ICRUDTransactionService
 
     public async Task<bool> DeleteRecordByIdAsync(int id)
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionService>(nameof(DeleteRecordByIdAsync));
+        activity?.SetTag("id", id);
+
         var result = await _repo.DeleteRecordByIdAsync(id);
         await _cache.RemoveAsync("crud:GetAllRecordsAsync");
         await _cache.RemoveAsync($"crud:GetRecordByIdAsync:id={id}");

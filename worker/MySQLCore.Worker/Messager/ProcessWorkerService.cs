@@ -15,6 +15,11 @@ public class ProcessWorkerService
 
     public async Task<ProcessWorkerResult> ProcessAsync(ImageCreatedMessage message)
     {
+        using Activity? activity = TracingConstants.StartMessagingActivity<ProcessWorkerService>(nameof(ProcessAsync));
+        activity?.SetTag("message.id", message.MessageId);
+        activity?.SetTag("image.id", message.ImageId);
+        activity?.SetTag("message.type", nameof(ImageCreatedMessage));
+
         _logger.LogInformation( "{messager} Message Status: {status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", 
             nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Pending), message.MessageId, message.ImageId, message.FileName);
         

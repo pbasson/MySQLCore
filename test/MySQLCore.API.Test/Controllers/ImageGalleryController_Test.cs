@@ -35,7 +35,7 @@ public class ImageGalleryController_Test : Base_Test
         _service.Setup(x => x.GetAllRecordsAsync()).ReturnsAsync(response);
 
         // Act
-        var result = await _controller.GetAllRecords();
+        var result = await _controller.GetAllRecordsAsync();
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -53,7 +53,7 @@ public class ImageGalleryController_Test : Base_Test
         _service.Setup(x => x.GetAllRecordsAsync()).ReturnsAsync(response);
 
         // Act
-        var result = await _controller.GetAllRecords();
+        var result = await _controller.GetAllRecordsAsync();
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -104,7 +104,7 @@ public class ImageGalleryController_Test : Base_Test
         const int id = 1;
         _service.Setup(x => x.GetRecordByIdAsync(id)).ReturnsAsync(response);
 
-        var result = await _controller.GetRecordById(id);
+        var result = await _controller.GetRecordByIdAsync(id);
 
         Assert.Same(response, result.Value);
         Assert.Null(result.Result);
@@ -117,7 +117,7 @@ public class ImageGalleryController_Test : Base_Test
         const int id = 1;
         _service.Setup(x => x.GetRecordByIdAsync(id)).ReturnsAsync(response);
 
-        var result = await _controller.GetRecordById(id);
+        var result = await _controller.GetRecordByIdAsync(id);
 
         Assert.IsType<NotFoundResult>(result.Result);
     }
@@ -125,7 +125,7 @@ public class ImageGalleryController_Test : Base_Test
     [Fact]
     public async Task GetRecordById_WithZeroId_ReturnsBadRequest()
     {
-        var result = await _controller.GetRecordById(0);
+        var result = await _controller.GetRecordByIdAsync(0);
 
         Assert.IsType<BadRequestResult>(result.Result);
         _service.Verify(x => x.GetRecordByIdAsync(It.IsAny<int>()), Times.Never);

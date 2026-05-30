@@ -24,4 +24,5 @@ global using MySQLCore.Infrastructure.Repos.TransactionRepo;
 global using OpenTelemetry.Resources;
 global using OpenTelemetry.Trace;
 global using Prometheus;
+global using System.Diagnostics;
 global using Serilog;

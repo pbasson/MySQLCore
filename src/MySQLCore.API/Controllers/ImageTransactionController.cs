@@ -10,7 +10,7 @@ public class ImageTransactionController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<TransferImageTransactionGridDTO>> GetAllRecords() 
+    public async Task<ActionResult<TransferImageTransactionGridDTO>> GetAllRecordsAsync() 
     {
         var result = await _service.GetAllRecordsAsync();
         return TransferActionResult(result);
@@ -28,31 +28,29 @@ public class ImageTransactionController : BaseController
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<TransferImageTransactionDTO>> GetRecordById(int id) 
+    public async Task<ActionResult<TransferImageTransactionDTO>> GetRecordByIdAsync(int id) 
     {
         if (id.IsNotZero())  
         {
             var result = await _service.GetRecordByIdAsync(id);
             return TransferActionResult(result);
-
-            // if (result.IsNotNull()) { return (result.ImageTransactionID > 0) ? result : NotFound(); } 
         }
         return BadRequest(); 
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageTransactionDTO dTO) 
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageTransactionDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
-        var result = await _service.CreateRecordAsync(dTO);
+        var result = await _service.CreateRecordAsync(dto);
         return TransferActionResult(result);
     }
 
     [HttpPut("update")]
-    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageTransactionDTO dTO) 
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageTransactionDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
-        var result = await _service.UpdateRecordAsync(dTO);
+        var result = await _service.UpdateRecordAsync(dto);
         return TransferActionResult(result);
     }
 

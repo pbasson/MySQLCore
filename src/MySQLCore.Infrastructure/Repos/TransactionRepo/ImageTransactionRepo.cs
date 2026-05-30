@@ -6,6 +6,8 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsAsync() 
     {
+        using Activity? activity = TracingConstants.StartApiActivity<ImageTransactionRepo>(nameof(GetAllRecordsAsync));
+
         var results = await _dBContext.ImageTransaction.OrderByDescending(x => x.ImageTransactionID).Take(100)  
             .Include(x => x.ImageGalleries).AsNoTracking()
             .Select(x => x.ToMapped()).ToListAsync();
@@ -14,6 +16,9 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page) 
     {
+        using Activity? activity = TracingConstants.StartApiActivity<ImageTransactionRepo>(nameof(GetAllRecordsPaginationAsync));
+        activity?.SetTag("page", page);
+
         var settings = new PageSettings();
         var results = await _dBContext.ImageTransaction.OrderBy(x => x.ImageTransactionID).Skip(settings.SkipCount(page))
             .Take(settings.PageSize).Include(x => x.ImageGalleries).AsNoTracking()
@@ -23,6 +28,9 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<ImageTransactionDTO?> GetRecordByIdAsync(int id)  
     {
+        using Activity? activity = TracingConstants.StartApiActivity<ImageTransactionRepo>(nameof(GetRecordByIdAsync));
+        activity?.SetTag("id", id);
+
         var result = await _dBContext.ImageTransaction.Include(x => x.ImageGalleries)
             .FirstOrDefaultAsync(x => x.ImageTransactionID == id);
         return result?.ToMapped();
@@ -32,7 +40,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     {
         if (dto.IsNull()) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
 
-        using var activity = TracingConstants.RepoActivitySource.StartActivity("ImageTransactionRepo.CreateRecordAsync");
+        using Activity? activity = TracingConstants.StartApiActivity<ImageTransactionRepo>(nameof(CreateRecordAsync));
         activity?.SetTag("dto.type", nameof(CreateImageTransactionDTO));
 
         var strategy = _dBContext.Database.CreateExecutionStrategy();
@@ -70,7 +78,7 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
     {
         if ( dto.IsNull() ) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
 
-        using var activity = TracingConstants.RepoActivitySource.StartActivity("ImageTransactionRepo.UpdateRecordAsync");
+        using Activity? activity = TracingConstants.StartApiActivity<ImageTransactionRepo>(nameof(UpdateRecordAsync));
         activity?.SetTag("dto.ImageTransactionID", dto.ImageTransactionID);
         activity?.SetTag("dto.type", nameof(UpdateImageTransactionDTO));
 
@@ -132,11 +140,27 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
 
     public async Task<bool> DeleteRecordByIdAsync(int id)  
     {
-        ImageTransaction? existDTO = await FindRecord(id);
-        if ( existDTO == null ) { return false; }
+        using Activity? activity = TracingConstants.StartApiActivity<ImageTransactionRepo>(nameof(DeleteRecordByIdAsync));
+        activity?.SetTag("id", id);
 
-        _dBContext.ImageTransaction.Remove(existDTO);
-        return await SaveChangesAsync();
+        await _semaphore.WaitAsync();
+
+        try
+        {
+            ImageTransaction? existDTO = await FindRecord(id);
+            if(existDTO.IsNull() ) { return false; }
+            else if (existDTO != null) 
+            {
+                _dBContext.ImageTransaction.Remove(existDTO);
+                return await SaveChangesAsync();
+            }
+
+            return false;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
     
     private async Task<ImageTransaction?> FindRecord(int id) 

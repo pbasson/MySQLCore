@@ -6,6 +6,8 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() 
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(GetAllRecordsAsync));
+
         var results = await _dBContext.CRUDTransaction.OrderByDescending(x => x.Id).AsNoTracking()
             .Select(x => x.ToMapped()).ToListAsync();
         return results ?? [];
@@ -13,6 +15,9 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page) 
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(GetAllRecordsPaginationAsync));
+        activity?.SetTag("page", page);
+        
         var settings = new PageSettings();
         var results = await _dBContext.CRUDTransaction.OrderBy(x=>x.Id).Skip(settings.SkipCount(page))
             .Take(settings.PageSize).AsNoTracking().Select(x => x.ToMapped()).ToListAsync();
@@ -21,17 +26,19 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<CRUDTransactionDTO?> GetRecordByIdAsync(int id) 
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(GetRecordByIdAsync));
+        activity?.SetTag("id", id);
+
         var result = await _dBContext.CRUDTransaction.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         return result?.ToMapped();
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateCRUDTransactionDTO dto) 
     {
-        if (dto.IsNull()) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
-
-        using var activity = TracingConstants.RepoActivitySource.StartActivity("CRUDTransactionRepo.CreateRecordAsync");
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(CreateRecordAsync));
         activity?.SetTag("dto.type", nameof(CreateCRUDTransactionDTO));
-
+        
+        if (dto.IsNull()) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
 
         await _semaphore.WaitAsync();
 
@@ -52,11 +59,11 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<TransferDTO> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) 
     {
-        if ( dto.IsNull() ) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
-
-        using var activity = TracingConstants.RepoActivitySource.StartActivity("CRUDTransactionRepo.UpdateRecordAsync");
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(UpdateRecordAsync));
         activity?.SetTag("dto.ImageTransactionID", dto.Id);
         activity?.SetTag("dto.type", nameof(UpdateCRUDTransactionDTO));
+
+        if ( dto.IsNull() ) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
 
         await _semaphore.WaitAsync();
 
@@ -83,6 +90,9 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<bool> DeleteRecordByIdAsync(int id) 
     {
+        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(DeleteRecordByIdAsync));
+        activity?.SetTag("id", id);
+
         await _semaphore.WaitAsync();
 
         try

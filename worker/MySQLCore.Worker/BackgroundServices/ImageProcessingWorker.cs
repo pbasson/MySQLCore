@@ -45,8 +45,7 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
     private async Task ProcessMessage( ImageCreatedMessage message, BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
     {
-        using var activity = TracingConstants.MessagingActivitySource.StartActivity("ProcessMessage: Started");
-
+        using Activity? activity = TracingConstants.StartMessagingActivity<ImageProcessingWorker>(nameof(ProcessMessage));
         activity?.SetTag("message.id", message.MessageId);
         activity?.SetTag("image.id", message.ImageId);
         activity?.SetTag("message.type", nameof(ImageCreatedMessage));
@@ -77,8 +76,7 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
     private async Task ProcessMessageException(BasicDeliverEventArgs eventArgs, IChannel channel, ImageCreatedMessage? message, Exception ex, CancellationToken stoppingToken)
     {
-        using var activity = TracingConstants.MessagingActivitySource.StartActivity("ProcessMessage: Failed");
-
+        using Activity? activity = TracingConstants.StartMessagingActivity<ImageProcessingWorker>(nameof(ProcessMessageException));
         activity?.SetTag("message.type", nameof(ImageCreatedMessage));
         activity?.SetTag("DeliveryTag", eventArgs.DeliveryTag);
 

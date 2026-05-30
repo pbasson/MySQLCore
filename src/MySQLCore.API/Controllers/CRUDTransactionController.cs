@@ -18,7 +18,7 @@ public class CRUDTransactionController : BaseController
     }
 
     [HttpGet("by-page/{page:int}")]
-    public async Task<ActionResult<TransferCRUDTransactionGridDTO>> GetAllRecordsPaginationAsync(int page) 
+    public async Task<ActionResult<TransferCRUDTransactionGridDTO>> GetAllRecordsPagination(int page) 
     {
         if ( page.IsNotZero() )  
         {
@@ -40,18 +40,18 @@ public class CRUDTransactionController : BaseController
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateCRUDTransactionDTO dTO) 
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateCRUDTransactionDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
-        var result = await _service.CreateRecordAsync(dTO);
+        var result = await _service.CreateRecordAsync(dto);
         return TransferActionResult(result);
     }
 
     [HttpPut("update")]
-    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateCRUDTransactionDTO dTO) 
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateCRUDTransactionDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
-        var result = await _service.UpdateRecordAsync(dTO);
+        var result = await _service.UpdateRecordAsync(dto);
         return TransferActionResult(result);
     }
 

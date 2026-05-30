@@ -12,6 +12,10 @@ public class RabbitMQPublisher : IMessagePublisher
 
     public async Task PublishAsync<TMessage>(string queueName, TMessage message) where TMessage : IMessage
     {
+        using Activity? activity = TracingConstants.StartMessagingActivity<RabbitMQPublisher>(nameof(PublishAsync));
+        activity?.SetTag("queue.name", queueName);
+        activity?.SetTag("message.type", typeof(TMessage).Name);
+
         var channel = await _connectionService.CreateConnection(CancellationToken.None);
 
         /// RabbitMQ only accepts Bytes hence payload must be serialized JSON to get bytes
