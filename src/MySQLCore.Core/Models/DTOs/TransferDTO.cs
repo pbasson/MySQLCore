@@ -1,9 +1,6 @@
-using MySQLCore.Core.Utilities;
-
 namespace MySQLCore.Core.Models.DTOs;
 
-
-public class TransferDTO
+public class TransferDTO : BaseTransfer
 {
     public int Id {get; set;}
     public Guid? MessageId {get; set;} 
@@ -12,7 +9,12 @@ public class TransferDTO
 
     public ServiceResultType ServiceResultType = ServiceResultType.NoAction;
 
-    public TransferDTO(int id, string message = "", ServiceResultType serviceResultType = ServiceResultType.NoAction, Guid? messageId = null)
+    public TransferDTO(
+        int id,
+        string message = "",
+        ServiceResultType serviceResultType = ServiceResultType.NoAction,
+        Guid? messageId = null,
+        ActionStatusType actionStatusType = ActionStatusType.NoAction)
     {
         var basicError = "Entity Not Created";
         var failure = !string.IsNullOrEmpty(message) ?  message : basicError ;
@@ -21,6 +23,9 @@ public class TransferDTO
         MessageId = messageId;
         Message = id.IsNotZero() ? "Success: Entity Created" :   $"Failure: {failure}" ;
         ServiceResultType = serviceResultType;
+        ActionStatusType = actionStatusType == ActionStatusType.NoAction && id.IsNotZero()
+            ? ActionStatusType.Ok
+            : actionStatusType;
     }
 }
 
@@ -29,23 +34,29 @@ public static class TransferFactory
     public static TransferDTO GetTransferFailure(TransferEnum transfer)
     {
         var message = "Data Error";
+        var actionStatusType = ActionStatusType.BadRequest;
+
         switch (transfer)
         {
             case TransferEnum.DTONull:
                 message = "DTO Is Null";
+                actionStatusType = ActionStatusType.BadRequest;
                 break;
             case TransferEnum.EntityNotCreated:
                 message = "Entity Not Created";
+                actionStatusType = ActionStatusType.InternalServerError;
                 break;
             case TransferEnum.EntityNotExist:
                 message = "Entity Does Not Exist";
+                actionStatusType = ActionStatusType.NotFound;
                 break;
             case TransferEnum.SaveChangesNotExecuted:
                 message = "Save Changes Not Executed";
+                actionStatusType = ActionStatusType.InternalServerError;
                 break;
 
         }
-        return new TransferDTO(0, message, ServiceResultType.Failed);
+        return new TransferDTO(0, message, ServiceResultType.Failed, actionStatusType: actionStatusType);
     }
 }
 

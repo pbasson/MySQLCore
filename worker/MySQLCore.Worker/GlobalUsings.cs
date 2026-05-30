@@ -1,3 +1,4 @@
+global using System.Diagnostics;
 global using System.Text;
 global using System.Text.Json;
 global using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ global using MySQLCore.Infrastructure.Repos.MessagerRepo;
 global using MySQLCore.Worker.BackgroundServices;
 global using MySQLCore.Worker.Configurations;
 global using MySQLCore.Worker.Messager;
+global using MySQLCore.Worker.MetricManager;
 global using OpenTelemetry.Resources;
 global using OpenTelemetry.Trace;
 global using Prometheus;

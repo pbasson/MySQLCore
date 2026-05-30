@@ -1,5 +1,3 @@
-using MySQLCore.Core.Enums;
-
 namespace MySQLCore.Worker.Messager;
 
 public class RabbitMQPublisher : IMessagePublisher
@@ -14,6 +12,10 @@ public class RabbitMQPublisher : IMessagePublisher
 
     public async Task PublishAsync<TMessage>(string queueName, TMessage message) where TMessage : IMessage
     {
+        using Activity? activity = TracingConstants.StartMessagingActivity<RabbitMQPublisher>(nameof(PublishAsync));
+        activity?.SetTag("queue.name", queueName);
+        activity?.SetTag("message.type", typeof(TMessage).Name);
+
         var channel = await _connectionService.CreateConnection(CancellationToken.None);
 
         /// RabbitMQ only accepts Bytes hence payload must be serialized JSON to get bytes
@@ -21,5 +23,6 @@ public class RabbitMQPublisher : IMessagePublisher
 
         await channel.BasicPublishAsync(exchange: string.Empty, routingKey: queueName, body: body);
         _logger.LogInformation("{QueueName} Message Status: {status} ", queueName, nameof(ProcessMessageStatus.Published));
+        MessageMetrics.Published.Inc();
     }
 }

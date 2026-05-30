@@ -1,68 +1,65 @@
 namespace MySQLCore.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/crud-transactions")]
 [ApiController]
 public class CRUDTransactionController : BaseController
 {
     private readonly ICRUDTransactionService _service;
-    public CRUDTransactionController(ICRUDTransactionService service, ILogger<CRUDTransactionController> logger) : base(logger) {
+    public CRUDTransactionController(ICRUDTransactionService service, ILogger<CRUDTransactionController> logger) : base(logger) 
+    {
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     [HttpGet]
-    [Route("GetAllRecords")]
-    public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecords() {
+    public async Task<ActionResult<TransferCRUDTransactionGridDTO>> GetAllRecords() 
+    {
         var result = await _service.GetAllRecordsAsync();
-        return Ok(result);
+        return TransferActionResult(result);
     }
 
-    [HttpGet]
-    [Route("GetAllRecordsPaginationAsync/{page:int}")]
-    public async Task<ActionResult<List<CRUDTransactionDTO>>> GetAllRecordsPaginationAsync(int page) 
+    [HttpGet("by-page/{page:int}")]
+    public async Task<ActionResult<TransferCRUDTransactionGridDTO>> GetAllRecordsPagination(int page) 
     {
         if ( page.IsNotZero() )  
         {
             var result = await _service.GetAllRecordsPaginationAsync(page);
-            return Ok(result);
+            return TransferActionResult(result);
         }
         return BadRequest(); 
     }
 
-    [HttpGet]
-    [Route("GetRecordById/{Id:int}")]
-    public async Task<ActionResult<CRUDTransactionDTO>> GetRecordById(int Id) 
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<TransferCRUDTransactionDTO>> GetRecordById(int id) 
     {
-        if ( Id.IsNotZero() )  
+        if ( id.IsNotZero() )  
         {
-            var result = await _service.GetRecordByIdAsync(Id);
-            if (result.IsNotNull()) { return (result.Id > 0) ? result : NotFound(); } 
+            var result = await _service.GetRecordByIdAsync(id);
+            return TransferActionResult(result);
         }
         return BadRequest(); 
     }
 
-    [HttpPost]
-    [Route("CreateRecord")]
-    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateCRUDTransactionDTO dTO) 
+    [HttpPost("create")]
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateCRUDTransactionDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
-        var result = await _service.CreateRecordAsync(dTO);
-        return result.IsNotNull() ? Ok(result) : BadRequest();
+        var result = await _service.CreateRecordAsync(dto);
+        return TransferActionResult(result);
     }
 
-    [HttpPut]
-    [Route("UpdateRecord")]
-    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateCRUDTransactionDTO dTO) 
+    [HttpPut("update")]
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateCRUDTransactionDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
-        var result = await _service.UpdateRecordAsync(dTO);
-        return result.IsNotNull() ? Ok(result) : BadRequest();
+        var result = await _service.UpdateRecordAsync(dto);
+        return TransferActionResult(result);
     }
 
-    [HttpDelete]
-    [Route("DeleteRecord")]
+    [HttpDelete("delete/{id:int}")]
     public async Task<ActionResult<bool>> DeleteRecord(int id) 
     {
-        if (id.IsNotZero()) {
+        if (id.IsNotZero()) 
+        {
             var result = await _service.DeleteRecordByIdAsync(id);
             return result.IsNotNull() ? Ok(result) : BadRequest();
         }

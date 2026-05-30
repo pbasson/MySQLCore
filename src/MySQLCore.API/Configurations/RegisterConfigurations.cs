@@ -83,7 +83,7 @@ public static class RegisterConfigurations
             .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation()
                 .SetSampler(new AlwaysOnSampler())
                 .AddHttpClientInstrumentation().AddSource(TracingConstants.ACTIVITY_SOURCE)
-                .AddHttpClientInstrumentation().AddSource(TracingConstants.REPO_SOURCE)
+                .AddHttpClientInstrumentation().AddSource(TracingConstants.API_SOURCE)
                 // .AddConsoleExporter()
                 .AddOtlpExporter(options => { options.Endpoint = new Uri(otelCollectorURL);
                     options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;

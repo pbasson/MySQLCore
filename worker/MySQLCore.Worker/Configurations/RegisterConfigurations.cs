@@ -45,7 +45,7 @@ public static class RegisterConfigurations
             .WithTracing(tracing => tracing
                 .SetSampler(new AlwaysOnSampler())
                 .AddSource(TracingConstants.ACTIVITY_SOURCE)
-                .AddSource(TracingConstants.REPO_SOURCE)
+                .AddSource(TracingConstants.API_SOURCE)
                 .AddOtlpExporter(options =>
                 {
                     options.Endpoint = new Uri(otelCollectorURL);
