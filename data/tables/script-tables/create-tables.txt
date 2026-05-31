@@ -2,7 +2,7 @@
 source /var/lib/mysql-files/data/databases/create-databases/MySQLCore-Create-Database.sql
 
 -- Create Tables: Content
-source /var/lib/mysql-files/data/tables/create-tables/CRUDTransaction-Create-Table.sql
+source /var/lib/mysql-files/data/tables/create-tables/User-Create-Table.sql
 
 source /var/lib/mysql-files/data/tables/create-tables/ImageTransaction-Create-Table.sql
 source /var/lib/mysql-files/data/tables/create-tables/ImageGallery-Create-Table.sql

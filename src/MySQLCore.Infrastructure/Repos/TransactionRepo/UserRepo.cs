@@ -1,42 +1,42 @@
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
-public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo 
+public class UserRepo : BaseRepo, IUserRepo 
 {
-    public CRUDTransactionRepo(MySQLCoreDBContext dBContext) : base(dBContext) { }
+    public UserRepo(MySQLCoreDBContext dBContext) : base(dBContext) { }
 
-    public async Task<List<CRUDTransactionDTO>> GetAllRecordsAsync() 
+    public async Task<List<UserDTO>> GetAllRecordsAsync() 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(GetAllRecordsAsync));
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetAllRecordsAsync));
 
-        var results = await _dBContext.CRUDTransaction.OrderByDescending(x => x.Id).AsNoTracking()
+        var results = await _dBContext.User.OrderByDescending(x => x.Id).AsNoTracking()
             .Select(x => x.ToMapped()).ToListAsync();
         return results ?? [];
     }
 
-    public async Task<List<CRUDTransactionDTO>> GetAllRecordsPaginationAsync(int page) 
+    public async Task<List<UserDTO>> GetAllRecordsPaginationAsync(int page) 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(GetAllRecordsPaginationAsync));
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetAllRecordsPaginationAsync));
         activity?.SetTag("page", page);
         
         var settings = new PageSettings();
-        var results = await _dBContext.CRUDTransaction.OrderBy(x=>x.Id).Skip(settings.SkipCount(page))
+        var results = await _dBContext.User.OrderBy(x=>x.Id).Skip(settings.SkipCount(page))
             .Take(settings.PageSize).AsNoTracking().Select(x => x.ToMapped()).ToListAsync();
         return results ?? [];
     }
 
-    public async Task<CRUDTransactionDTO?> GetRecordByIdAsync(int id) 
+    public async Task<UserDTO?> GetRecordByIdAsync(int id) 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(GetRecordByIdAsync));
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetRecordByIdAsync));
         activity?.SetTag("id", id);
 
-        var result = await _dBContext.CRUDTransaction.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        var result = await _dBContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         return result?.ToMapped();
     }
 
-    public async Task<TransferDTO> CreateRecordAsync(CreateCRUDTransactionDTO dto) 
+    public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto) 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(CreateRecordAsync));
-        activity?.SetTag("dto.type", nameof(CreateCRUDTransactionDTO));
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(CreateRecordAsync));
+        activity?.SetTag("dto.type", nameof(CreateUserDTO));
         
         if (dto.IsNull()) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
 
@@ -45,7 +45,7 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
         try
         {
             var mapped = dto.ToEntity();
-            _dBContext.CRUDTransaction.Add(mapped);
+            _dBContext.User.Add(mapped);
             await SaveChangesAsync();
 
             return new TransferDTO( mapped.Id, string.Empty, ServiceResultType.Success);
@@ -57,11 +57,11 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
         }
     }
 
-    public async Task<TransferDTO> UpdateRecordAsync(UpdateCRUDTransactionDTO dto) 
+    public async Task<TransferDTO> UpdateRecordAsync(UpdateUserDTO dto) 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(UpdateRecordAsync));
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(UpdateRecordAsync));
         activity?.SetTag("dto.ImageTransactionID", dto.Id);
-        activity?.SetTag("dto.type", nameof(UpdateCRUDTransactionDTO));
+        activity?.SetTag("dto.type", nameof(UpdateUserDTO));
 
         if ( dto.IsNull() ) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
 
@@ -70,7 +70,7 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
         try
         {
             // await Task.Delay(1000); // Simulating long running operation, to test semaphore locking.
-            CRUDTransaction? existModel = await FindRecordByIdAsync(dto.Id);
+            User? existModel = await FindRecordByIdAsync(dto.Id);
             if(existModel == null ) 
             { 
                 return TransferFactory.GetTransferFailure(TransferEnum.EntityNotExist);    
@@ -90,17 +90,17 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
 
     public async Task<bool> DeleteRecordByIdAsync(int id) 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<CRUDTransactionRepo>(nameof(DeleteRecordByIdAsync));
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(DeleteRecordByIdAsync));
         activity?.SetTag("id", id);
 
         await _semaphore.WaitAsync();
 
         try
         {
-            CRUDTransaction? existModel = await FindRecordByIdAsync(id);
+            User? existModel = await FindRecordByIdAsync(id);
             if(existModel.IsNull() ) { return false; }
             else if (existModel != null) {
-                _dBContext.CRUDTransaction.Remove(existModel);
+                _dBContext.User.Remove(existModel);
                 return await SaveChangesAsync();
             }
 
@@ -112,8 +112,8 @@ public class CRUDTransactionRepo : BaseRepo, ICRUDTransactionRepo
         }
     }
     
-    private async Task<CRUDTransaction?> FindRecordByIdAsync(int id) {
-        var result = await _dBContext.CRUDTransaction.FindAsync(id);
+    private async Task<User?> FindRecordByIdAsync(int id) {
+        var result = await _dBContext.User.FindAsync(id);
         return result.IsNotNull() ? result : null;
     }
 }

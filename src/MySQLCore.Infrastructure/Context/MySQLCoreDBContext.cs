@@ -2,7 +2,7 @@ namespace MySQLCore.Infrastructure.Context;
 
 public class MySQLCoreDBContext(DbContextOptions<MySQLCoreDBContext> option) : DbContext(option)
 {
-    public virtual DbSet<CRUDTransaction> CRUDTransaction {get; set;}
+    public virtual DbSet<User> User {get; set;}
     public virtual DbSet<ImageTransaction> ImageTransaction {get; set;}
     public virtual DbSet<ImageGallery> ImageGallery {get; set;}
     public virtual DbSet<ProcessedMessage> ProcessedMessage {get; set;}
@@ -37,16 +37,16 @@ public class MySQLCoreDBContext(DbContextOptions<MySQLCoreDBContext> option) : D
         }
     }
 
-    private const string User = "Preetpal Basson";
+    private const string userBy = "Preetpal Basson";
     private static void SetCreatedChange(EntityEntry<BaseModel> entry)
     {
         entry.Entity.CreatedDateTime = DateTime.Now;
-        entry.Entity.CreatedBy = User;
+        entry.Entity.CreatedBy = userBy;
     }
     
     private static void SetUpdatedChange(EntityEntry<BaseModel> entry)
     {
         entry.Entity.UpdatedDateTime = DateTime.Now;
-        entry.Entity.UpdatedBy = User;
+        entry.Entity.UpdatedBy = userBy;
     }
 }
