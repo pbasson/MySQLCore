@@ -49,7 +49,10 @@ public class UserRepo : BaseRepo, IUserRepo
             await SaveChangesAsync();
 
             return new TransferDTO( mapped.Id, string.Empty, ServiceResultType.Success);
-
+        }
+        catch (DbUpdateException ex) when (IsDuplicateKeyException(ex))
+        {
+            return TransferFactory.GetTransferFailure(TransferEnum.Conflict);
         }
         finally
         {
@@ -75,12 +78,23 @@ public class UserRepo : BaseRepo, IUserRepo
             { 
                 return TransferFactory.GetTransferFailure(TransferEnum.EntityNotExist);    
             }
+
+            var emailExists = await _dBContext.User.AnyAsync(x => x.Email == dto.Email);
+
+            if (emailExists)
+            {
+                return TransferFactory.GetTransferFailure(TransferEnum.Conflict);
+            }
                 
             var mapped = dto.ToEntity();
             existModel.SetCreated(mapped);
             UpdateEntity(existModel, mapped);
             await SaveChangesAsync();
             return new TransferDTO( mapped.Id, string.Empty, ServiceResultType.Success );
+        }
+        catch (DbUpdateException ex) when (IsDuplicateKeyException(ex))
+        {
+            return TransferFactory.GetTransferFailure(TransferEnum.Conflict);
         }
         finally
         {

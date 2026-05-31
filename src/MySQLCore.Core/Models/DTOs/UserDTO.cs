@@ -22,6 +22,7 @@ public class CreateUserDTO
     [Required]
     public string? LastName { get; set; }
     [Required]
+    [EmailAddress]
     public string? Email { get; set; }
     public DateOnly? DateOfBirth { get; set; }
 }
@@ -35,6 +36,7 @@ public class UpdateUserDTO : IEntity
     public string? UserName { get; set; }
 
     [Required]
+    [EmailAddress]
     public string? Email { get; set; }
 }
 
