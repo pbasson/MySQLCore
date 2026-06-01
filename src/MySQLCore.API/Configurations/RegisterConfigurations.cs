@@ -80,10 +80,11 @@ public static class RegisterConfigurations
         string otelCollectorURL = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4317";
 
         services.AddOpenTelemetry().ConfigureResource(resource => resource.AddService(serviceName: TracingConstants.SERVICE_NAME))
-            .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation()
+            .WithTracing(tracing => tracing
                 .SetSampler(new AlwaysOnSampler())
-                .AddHttpClientInstrumentation().AddSource(TracingConstants.ACTIVITY_SOURCE)
-                .AddHttpClientInstrumentation().AddSource(TracingConstants.API_SOURCE)
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddSource(TracingConstants.ACTIVITY_SOURCE, TracingConstants.API_SOURCE)
                 // .AddConsoleExporter()
                 .AddOtlpExporter(options => { options.Endpoint = new Uri(otelCollectorURL);
                     options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;

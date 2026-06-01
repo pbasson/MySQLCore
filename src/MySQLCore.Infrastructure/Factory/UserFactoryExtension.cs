@@ -22,13 +22,18 @@ public static class UserFactoryExtension
         LastName = dto.LastName ?? string.Empty,
         DateOfBirth = dto.DateOfBirth ,
         Email = dto.Email! ?? string.Empty,
+        IsActive = true
     };
 
     public static User ToEntity(this UpdateUserDTO dto) => new()
     {
         Id = dto.Id,
         UserName = dto.UserName ?? string.Empty,
+        FirstName = dto.FirstName ?? string.Empty,
+        LastName = dto.LastName ?? string.Empty,
+        DateOfBirth = dto.DateOfBirth ,
         Email = dto.Email! ?? string.Empty,
+        IsActive = true
     };
 
     public static UserDTO ToMapped(this User dto) => new()

@@ -1,13 +1,21 @@
+using Microsoft.Extensions.Logging;
+
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
 public class UserRepo : BaseRepo, IUserRepo 
 {
-    public UserRepo(MySQLCoreDBContext dBContext) : base(dBContext) { }
+    private ILogger<UserRepo> _logger = default!;
+    
+    public UserRepo(MySQLCoreDBContext dBContext, ILogger<UserRepo> logger) : base(dBContext)
+    {
+        _logger = logger;
+    }
 
     public async Task<List<UserDTO>> GetAllRecordsAsync() 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetAllRecordsAsync));
 
+        _logger.LogInformation($"{nameof(UserRepo)}.{nameof(GetAllRecordsAsync)}.");
         var results = await _dBContext.User.OrderByDescending(x => x.Id).AsNoTracking()
             .Select(x => x.ToMapped()).ToListAsync();
         return results ?? [];
@@ -66,12 +74,17 @@ public class UserRepo : BaseRepo, IUserRepo
         activity?.SetTag("dto.ImageTransactionID", dto.Id);
         activity?.SetTag("dto.type", nameof(UpdateUserDTO));
 
-        if ( dto.IsNull() ) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
+        if ( dto.IsNull() )
+        { 
+            _logger.LogWarning("{name}: Update failed: DTO is null", nameof(UserRepo));
+            return TransferFactory.GetTransferFailure(TransferEnum.DTONull);
+        }
 
         await _semaphore.WaitAsync();
 
         try
         {
+            _logger.LogInformation("{name}: Update Record ID {Id}", nameof(UserRepo), dto.Id);
             // await Task.Delay(1000); // Simulating long running operation, to test semaphore locking.
             User? existModel = await FindRecordByIdAsync(dto.Id);
             if(existModel == null ) 
@@ -94,6 +107,7 @@ public class UserRepo : BaseRepo, IUserRepo
         }
         catch (DbUpdateException ex) when (IsDuplicateKeyException(ex))
         {
+            _logger.LogWarning("Update failed due to duplicate key: {Message}", ex.Message);
             return TransferFactory.GetTransferFailure(TransferEnum.Conflict);
         }
         finally

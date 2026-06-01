@@ -16,13 +16,17 @@ public class UserService : BaseService, IUserService
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(nameof(GetAllRecordsAsync));
 
-        var cacheKey = $"crud:GetAllRecordsAsync";
+        var cacheKey = $"user:GetAllRecordsAsync";
 
         var cached = await _cache.GetAsync<List<UserDTO>>(cacheKey);
-        if (cached != null) { return new UserTransferGridDTO(ActionStatusType.Ok, cached!); }
+        if (cached != null) { 
+            _logger.LogInformation("Cache hit for {CacheKey}", cacheKey);
+            return new UserTransferGridDTO(ActionStatusType.Ok, cached!); }
 
         var result = await _repo.GetAllRecordsAsync();
-        if (result == null || result.Count <= 0)  { return new UserTransferGridDTO(ActionStatusType.NotFound, []); }
+        if (result == null || result.Count <= 0)  { 
+            _logger.LogWarning("No records found}");
+            return new UserTransferGridDTO(ActionStatusType.NotFound, []); }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
         return new UserTransferGridDTO(ActionStatusType.Ok, result); 
@@ -34,7 +38,7 @@ public class UserService : BaseService, IUserService
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(nameof(GetAllRecordsPaginationAsync));
         activity?.SetTag("page", page);
 
-        var cacheKey = $"crud:GetAllRecordsPaginationAsync:page={page}";
+        var cacheKey = $"user:GetAllRecordsPaginationAsync:page={page}";
         
         var cached = await _cache.GetAsync<List<UserDTO>>(cacheKey);
         if (cached != null) { return new UserTransferGridDTO(ActionStatusType.Ok, cached!); }
@@ -52,7 +56,7 @@ public class UserService : BaseService, IUserService
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(nameof(GetRecordByIdAsync));
         activity?.SetTag("id", id);
 
-        var cacheKey = $"crud:GetRecordByIdAsync:id={id}";
+        var cacheKey = $"user:GetRecordByIdAsync:id={id}";
         
         var cached = await _cache.GetAsync<UserDTO>(cacheKey);
         if (cached != null && cached.Id > 0) { return new UserTransferDTO(ActionStatusType.Ok, cached); }
@@ -68,25 +72,27 @@ public class UserService : BaseService, IUserService
     public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto)
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(nameof(CreateRecordAsync));
+        activity?.SetTag("dto", SerializePayload(dto));
         activity?.SetTag("dto.type", nameof(CreateUserDTO));
 
         var result = await _repo.CreateRecordAsync(dto);
         if (result == null || !result.Success) { return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); }
-        await _cache.RemoveAsync("crud:GetAllRecordsAsync");
+        await _cache.RemoveAsync("user:GetAllRecordsAsync");
         return result;
     }
 
     public async Task<TransferDTO> UpdateRecordAsync(UpdateUserDTO dto)
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(nameof(UpdateRecordAsync));
+        activity?.SetTag("dto", SerializePayload(dto));
         activity?.SetTag("dto.Id", dto.Id);
         activity?.SetTag("dto.type", nameof(UpdateUserDTO));
 
         var result = await _repo.UpdateRecordAsync(dto);
         if (result == null || !result.Success) { return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); }
 
-        await _cache.RemoveAsync("crud:GetAllRecordsAsync");
-        await _cache.RemoveAsync($"crud:GetRecordByIdAsync:id={dto.Id}");
+        await _cache.RemoveAsync("user:GetAllRecordsAsync");
+        await _cache.RemoveAsync($"user:GetRecordByIdAsync:id={dto.Id}");
         return result;
     }
 
@@ -96,9 +102,12 @@ public class UserService : BaseService, IUserService
         activity?.SetTag("id", id);
 
         var result = await _repo.DeleteRecordByIdAsync(id);
-        await _cache.RemoveAsync("crud:GetAllRecordsAsync");
-        await _cache.RemoveAsync($"crud:GetRecordByIdAsync:id={id}");
+        await _cache.RemoveAsync("user:GetAllRecordsAsync");
+        await _cache.RemoveAsync($"user:GetRecordByIdAsync:id={id}");
         return result;
     }
- 
+    private static string SerializePayload(object payload)
+    {
+        return Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+    }
 }
