@@ -92,7 +92,7 @@ public class UserRepo : BaseRepo, IUserRepo
                 return TransferFactory.GetTransferFailure(TransferEnum.EntityNotExist);    
             }
 
-            var emailExists = await _dBContext.User.AnyAsync(x => x.Email == dto.Email);
+            var emailExists = await _dBContext.User.AnyAsync(x => x.Email == dto.Email && x.Id != dto.Id);
 
             if (emailExists)
             {

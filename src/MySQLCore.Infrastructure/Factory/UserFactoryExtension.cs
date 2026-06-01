@@ -42,10 +42,12 @@ public static class UserFactoryExtension
         UserName = dto.UserName,
         FirstName = dto.FirstName,
         LastName = dto.LastName,
+        Email = dto.Email,
+        DateOfBirth = dto.DateOfBirth,
+        IsActive = dto.IsActive,
         CreatedBy = dto.CreatedBy,
         CreatedDateTime = dto.CreatedDateTime,
         UpdatedBy = dto.UpdatedBy,
         UpdatedDateTime = dto.UpdatedDateTime,
     };
 }
-
