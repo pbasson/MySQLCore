@@ -19,14 +19,18 @@ public class UserService : BaseService, IUserService
         var cacheKey = $"user:GetAllRecordsAsync";
 
         var cached = await _cache.GetAsync<List<UserDTO>>(cacheKey);
-        if (cached != null) { 
-            _logger.LogInformation("Cache hit for {CacheKey}", cacheKey);
-            return new UserTransferGridDTO(ActionStatusType.Ok, cached!); }
+        if (cached != null) 
+        { 
+            _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(UserService), nameof(GetAllRecordsAsync), cacheKey);
+            return new UserTransferGridDTO(ActionStatusType.Ok, cached!); 
+        }
 
         var result = await _repo.GetAllRecordsAsync();
-        if (result == null || result.Count <= 0)  { 
-            _logger.LogWarning("No records found}");
-            return new UserTransferGridDTO(ActionStatusType.NotFound, []); }
+        if (result == null || result.Count <= 0)  
+        { 
+            _logger.LogWarning("{class}.{function}: No records found", nameof(UserService), nameof(GetAllRecordsAsync));
+            return new UserTransferGridDTO(ActionStatusType.NotFound, []); 
+        }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
         return new UserTransferGridDTO(ActionStatusType.Ok, result); 
@@ -41,10 +45,18 @@ public class UserService : BaseService, IUserService
         var cacheKey = $"user:GetAllRecordsPaginationAsync:page={page}";
         
         var cached = await _cache.GetAsync<List<UserDTO>>(cacheKey);
-        if (cached != null) { return new UserTransferGridDTO(ActionStatusType.Ok, cached!); }
+        if (cached != null) 
+        { 
+            _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(UserService), nameof(GetAllRecordsPaginationAsync), cacheKey);
+            return new UserTransferGridDTO(ActionStatusType.Ok, cached!); 
+        }
 
         var result = await _repo.GetAllRecordsPaginationAsync(page);
-        if (result == null || result.Count <= 0)  { return new UserTransferGridDTO(ActionStatusType.NotFound, []); }
+        if (result == null || result.Count <= 0)  
+        { 
+            _logger.LogWarning("{class}.{function}: No records found", nameof(UserService), nameof(GetAllRecordsPaginationAsync));
+            return new UserTransferGridDTO(ActionStatusType.NotFound, []); 
+        }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
         return new UserTransferGridDTO(ActionStatusType.Ok, result); 
@@ -59,11 +71,19 @@ public class UserService : BaseService, IUserService
         var cacheKey = $"user:GetRecordByIdAsync:id={id}";
         
         var cached = await _cache.GetAsync<UserDTO>(cacheKey);
-        if (cached != null && cached.Id > 0) { return new UserTransferDTO(ActionStatusType.Ok, cached); }
+        if (cached != null && cached.Id > 0) 
+        { 
+            _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(UserService), nameof(GetRecordByIdAsync), cacheKey);
+            return new UserTransferDTO(ActionStatusType.Ok, cached); 
+        }
         else if (cached != null) { await _cache.RemoveAsync(cacheKey); }
 
         var result = await _repo.GetRecordByIdAsync(id);
-        if (result == null || result.Id <= 0) { return new UserTransferDTO(ActionStatusType.NotFound, new()); }
+        if (result == null || result.Id <= 0) 
+        { 
+            _logger.LogWarning("{class}.{function}: No record found for {id}", nameof(UserService), nameof(GetRecordByIdAsync), id);
+            return new UserTransferDTO(ActionStatusType.NotFound, new()); 
+        }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
         return new UserTransferDTO(ActionStatusType.Ok, result); 
@@ -76,7 +96,11 @@ public class UserService : BaseService, IUserService
         activity?.SetTag("dto.type", nameof(CreateUserDTO));
 
         var result = await _repo.CreateRecordAsync(dto);
-        if (result == null || !result.Success) { return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); }
+        if (result == null || !result.Success) 
+        { 
+            _logger.LogWarning("{class}.{function}: {log}", nameof(UserService), nameof(CreateRecordAsync), "EntityNotCreated");
+            return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
+        }
         await _cache.RemoveAsync("user:GetAllRecordsAsync");
         return result;
     }
@@ -89,7 +113,11 @@ public class UserService : BaseService, IUserService
         activity?.SetTag("dto.type", nameof(UpdateUserDTO));
 
         var result = await _repo.UpdateRecordAsync(dto);
-        if (result == null || !result.Success) { return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); }
+        if (result == null || !result.Success) 
+        { 
+            _logger.LogWarning("{class}.{function}: {log} for {Id}", nameof(UserService), nameof(UpdateRecordAsync), "EntityNotCreated", dto.Id);
+            return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
+        }
 
         await _cache.RemoveAsync("user:GetAllRecordsAsync");
         await _cache.RemoveAsync($"user:GetRecordByIdAsync:id={dto.Id}");

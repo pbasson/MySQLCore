@@ -71,26 +71,26 @@ public class ImageGalleryController_Test : Base_Test
             new() { ImageTransactionID = 1, ImageType = "gallery" }
         };
         const int page = 1;
-        _service.Setup(x => x.GetAllRecordsPaginationAsync(page)).ReturnsAsync(response);
+        _service.Setup(x => x.GetRecordsByPaginationAsync(page)).ReturnsAsync(response);
 
         // Act
-        var result = await _controller.GetAllRecordsPaginationAsync(page);
+        var result = await _controller.GetRecordsByPaginationAsync(page);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var value = Assert.IsType<List<ImageTransactionDTO>>(okResult.Value);
         Assert.Same(response, value);
         Assert.NotEmpty(value);
-        _service.Verify(x => x.GetAllRecordsPaginationAsync(page), Times.Once);
+        _service.Verify(x => x.GetRecordsByPaginationAsync(page), Times.Once);
     }
 
     [Fact]
     public async Task GetAllRecordsPagination_WithZeroPage_ReturnsBadRequest()
     {
-        var result = await _controller.GetAllRecordsPaginationAsync(0);
+        var result = await _controller.GetRecordsByPaginationAsync(0);
 
         Assert.IsType<BadRequestResult>(result.Result);
-        _service.Verify(x => x.GetAllRecordsPaginationAsync(It.IsAny<int>()), Times.Never);
+        _service.Verify(x => x.GetRecordsByPaginationAsync(It.IsAny<int>()), Times.Never);
     }
 
     [Fact]

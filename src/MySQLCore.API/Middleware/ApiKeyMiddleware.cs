@@ -25,19 +25,22 @@ public class ApiKeyMiddleware
             if (!context.Request.Headers.TryGetValue(ApiKeyHeader, out var extractedApiKey))
             {
                 await ErrorStatus(context, 401, APIConstants.APIKey_NotFound);
+                _logger.LogWarning("APIKey: No API key provided in the request headers");
+
                 return;
             }
 
             if (getApiKey != null && !getApiKey.Equals(extractedApiKey))
             {
                 await ErrorStatus(context, 403, APIConstants.APIKey_Invalid);
+                _logger.LogWarning("APIKey: Provided API key is invalid");
                 return;
             }
 
             await _next(context);
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error occurred in API Key Middleware.");
+            _logger.LogError(ex, "APIKey: Error occurred in API Key Middleware.");
             throw;  
         }
     }

@@ -17,11 +17,11 @@ public class ImageTransactionController : BaseController
     }
 
     [HttpGet("by-page/{page:int}")]
-    public async Task<ActionResult<TransferImageTransactionGridDTO>> GetAllRecordsPaginationAsync(int page) 
+    public async Task<ActionResult<TransferImageTransactionGridDTO>> GetRecordsByPaginationAsync(int page) 
     {
         if (page.IsNotZero())  
         {
-            var result = await _service.GetAllRecordsPaginationAsync(page);
+            var result = await _service.GetRecordsByPaginationAsync(page);
             return TransferActionResult(result);
         }
         return BadRequest(); 
