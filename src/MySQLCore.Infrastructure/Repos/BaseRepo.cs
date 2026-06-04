@@ -1,6 +1,6 @@
 namespace MySQLCore.Infrastructure.Repos;
 
-public class BaseRepo(MySQLCoreDBContext dBContext)
+public abstract class BaseRepo(MySQLCoreDBContext dBContext)
 {
     public readonly MySQLCoreDBContext _dBContext = dBContext;
     public readonly SemaphoreSlim _semaphore = new(1, 1);
@@ -15,7 +15,6 @@ public class BaseRepo(MySQLCoreDBContext dBContext)
         var result = await _dBContext.SaveChangesAsync();
         return result > 0;
     } 
-
 
     protected bool IsDuplicateKeyException(DbUpdateException ex)
     {
