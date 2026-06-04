@@ -65,6 +65,8 @@ public static class RegisterConfigurations
         string logPath = Environment.GetEnvironmentVariable("LOG_PATH") ?? "/Logs/mysqlcore-log-.txt";
 
         Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Service", TracingConstants.SERVICE_NAME)
             .Filter.ByExcluding(logEvent =>
                 logEvent.RenderMessage().Contains("/metrics") || logEvent.RenderMessage().Contains("Prometheus metrics"))
             .WriteTo.Console().WriteTo.File(

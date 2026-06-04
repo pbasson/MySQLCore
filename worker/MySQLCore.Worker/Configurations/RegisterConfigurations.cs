@@ -32,6 +32,8 @@ public static class RegisterConfigurations
     {
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Service", "mysqlcore-worker")
             .WriteTo.Console()
             .WriteTo.Seq("http://seq")
             .CreateLogger();

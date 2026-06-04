@@ -51,7 +51,7 @@ public class ImageTransactionService : BaseService, IImageTransactionService
         var result = await _repo.GetRecordsByPaginationAsync(page);
         if (result == null || result.Count <= 0)  
         { 
-            _logger.LogWarning("{class}.{function}: No records found", nameof(UserService), nameof(GetRecordsByPaginationAsync));
+            _logger.LogWarning("{class}.{function}: No records found", nameof(ImageTransactionService), nameof(GetRecordsByPaginationAsync));
             return new TransferImageTransactionGridDTO(ActionStatusType.NotFound); 
         }
 
@@ -75,7 +75,11 @@ public class ImageTransactionService : BaseService, IImageTransactionService
         else if (cached != null) { await _cache.RemoveAsync(cacheKey); }
 
         var result = await _repo.GetRecordByIdAsync(id);
-        if (result == null || result.ImageTransactionID <= 0) { return new TransferImageTransactionDTO(ActionStatusType.NotFound); }
+        if (result == null || result.ImageTransactionID <= 0)
+        {
+            _logger.LogWarning("{class}.{function}: No record found for {Id}", nameof(ImageTransactionService), nameof(GetRecordByIdAsync), id);
+            return new TransferImageTransactionDTO(ActionStatusType.NotFound);
+        }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
         return new TransferImageTransactionDTO(ActionStatusType.Ok, result); 
@@ -105,7 +109,7 @@ public class ImageTransactionService : BaseService, IImageTransactionService
         var result = await _repo.UpdateRecordAsync(dto);
         if (result == null || !result.Success) 
         { 
-            _logger.LogWarning("{class}.{function}: {log} for {Id}", nameof(ImageTransactionService), nameof(UpdateRecordAsync), "EntityNotCreated", dto.ImageTransactionID);
+            _logger.LogWarning("{class}.{function}: {log} for {Id}", nameof(ImageTransactionService), nameof(UpdateRecordAsync), "EntityNotUpdated", dto.ImageTransactionID);
             return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
         }
 
@@ -120,6 +124,11 @@ public class ImageTransactionService : BaseService, IImageTransactionService
         activity?.SetTag("id", id);
 
         var result = await _repo.DeleteRecordByIdAsync(id);
+        if (!result)
+        {
+            _logger.LogWarning("{class}.{function}: No record deleted for {Id}", nameof(ImageTransactionService), nameof(DeleteRecordByIdAsync), id);
+        }
+
         await _cache.RemoveAsync("image:GetAllRecordsAsync");
         await _cache.RemoveAsync($"image:GetRecordByIdAsync:id={id}");
         return result;

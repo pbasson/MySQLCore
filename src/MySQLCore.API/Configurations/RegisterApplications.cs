@@ -13,6 +13,8 @@ public static class RegisterApplications
             app.UseSwaggerUI();
         }
 
+        app.UseSerilogRequestLogging();
+
         // if(!isDev)
         // {
         //     app.UseHttpsRedirection();

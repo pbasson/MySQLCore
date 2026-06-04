@@ -15,7 +15,6 @@ public class UserRepo : BaseRepo, IUserRepo
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetAllRecordsAsync));
 
-        _logger.LogInformation($"{nameof(UserRepo)}.{nameof(GetAllRecordsAsync)}.");
         var results = await _dBContext.User.OrderByDescending(x => x.Id).AsNoTracking()
             .Select(x => x.ToMapped()).ToListAsync();
         return results ?? [];
@@ -84,7 +83,6 @@ public class UserRepo : BaseRepo, IUserRepo
 
         try
         {
-            _logger.LogInformation("{name}: Update Record ID {Id}", nameof(UserRepo), dto.Id);
             // await Task.Delay(1000); // Simulating long running operation, to test semaphore locking.
             User? existModel = await FindRecordByIdAsync(dto.Id);
             if(existModel == null ) 

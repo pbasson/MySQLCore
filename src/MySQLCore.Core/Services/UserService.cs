@@ -115,7 +115,7 @@ public class UserService : BaseService, IUserService
         var result = await _repo.UpdateRecordAsync(dto);
         if (result == null || !result.Success) 
         { 
-            _logger.LogWarning("{class}.{function}: {log} for {Id}", nameof(UserService), nameof(UpdateRecordAsync), "EntityNotCreated", dto.Id);
+            _logger.LogWarning("{class}.{function}: {log} for {Id}", nameof(UserService), nameof(UpdateRecordAsync), "EntityNotUpdated", dto.Id);
             return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
         }
 
@@ -130,6 +130,11 @@ public class UserService : BaseService, IUserService
         activity?.SetTag("id", id);
 
         var result = await _repo.DeleteRecordByIdAsync(id);
+        if (!result)
+        {
+            _logger.LogWarning("{class}.{function}: No record deleted for {Id}", nameof(UserService), nameof(DeleteRecordByIdAsync), id);
+        }
+
         await _cache.RemoveAsync("user:GetAllRecordsAsync");
         await _cache.RemoveAsync($"user:GetRecordByIdAsync:id={id}");
         return result;
