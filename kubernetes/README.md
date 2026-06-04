@@ -51,6 +51,8 @@ For local clusters such as Docker Desktop or Minikube, expose the API with:
 
 ```bash
 kubectl port-forward service/backend 5820:5820
+
+kubectl port-forward service/seq 5341:80
 ```
 
 Then browse to `http://localhost:5820/swagger`.

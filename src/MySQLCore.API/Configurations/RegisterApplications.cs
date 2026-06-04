@@ -23,6 +23,8 @@ public static class RegisterApplications
         
         app.UseHttpMetrics();
         app.MapMetrics();
+        app.MapHealthChecks("/health/live");
+        app.MapHealthChecks("/health/ready");
 
         app.UseMiddleware<ApiKeyMiddleware>( );
         app.UseAuthorization();

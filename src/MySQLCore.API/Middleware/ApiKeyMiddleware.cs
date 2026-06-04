@@ -14,7 +14,8 @@ public class ApiKeyMiddleware
     public async Task InvokeAsync(HttpContext context) {
         try 
         {
-            if (context.Request.Path.StartsWithSegments("/metrics"))
+            if (context.Request.Path.StartsWithSegments("/metrics") ||
+                context.Request.Path.StartsWithSegments("/health"))
             {
                 await _next(context);
                 return;

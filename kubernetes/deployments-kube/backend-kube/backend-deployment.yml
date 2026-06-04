@@ -82,12 +82,14 @@ spec:
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: http://otel-collector:4317
         livenessProbe:
-          tcpSocket:
+          httpGet:
+            path: /health/live
             port: 5820
           initialDelaySeconds: 20
           periodSeconds: 20
         readinessProbe:
-          tcpSocket:
+          httpGet:
+            path: /health/ready
             port: 5820
           initialDelaySeconds: 10
           periodSeconds: 10

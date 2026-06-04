@@ -31,6 +31,7 @@ public static class RegisterConfigurations
     {
         services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
         services.AddEndpointsApiExplorer();
+        services.AddHealthChecks();
     }
 
     public static ConfigureHostBuilder RegisterHost(this ConfigureHostBuilder configure)
