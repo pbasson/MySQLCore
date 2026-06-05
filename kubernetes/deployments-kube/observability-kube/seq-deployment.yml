@@ -34,6 +34,8 @@ spec:
           value: "Y"
         - name: SEQ_FIRSTRUN_NOAUTHENTICATION
           value: "true"
+        - name: SEQ_STORAGE_DISABLEFREEDISKSPACECHECKING
+          value: "true"
         volumeMounts:
         - name: seq-persistent-storage
           mountPath: /data

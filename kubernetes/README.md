@@ -16,30 +16,43 @@ Build the local app images first:
 ```bash
 docker build -t mysqlcore-api:latest -f src/MySQLCore.API/Dockerfile . 
 docker build -t mysqlcore-worker:latest -f worker/MySQLCore.Worker/Dockerfile .
+
+minikube image build -t mysqlcore-api:latest -f src/MySQLCore.API/Dockerfile .
+minikube image build -t mysqlcore-worker:latest -f worker/MySQLCore.Worker/Dockerfile .
 ```
 
-Then apply the manifests:
+
+Apply Persistent Volume:
 
 ```bash
-kubectl apply -f env/kubernetes-env/mysqlcore-configmap.dev.yml
-kubectl apply -f env/kubernetes-env/mysqlcore-secret.dev.yml
+kubectl apply -f env/kubernetes-env/configmap-env/mysqlcore-configmap.dev.yml
+kubectl apply -f env/kubernetes-env/secret-env/mysqlcore-secret.dev.yml
 
-kubectl apply -f kubernetes/database-kube/mysql-pv.yml
-kubectl apply -f kubernetes/database-kube/mysql-deployment.yml
+kubectl apply -f kubernetes/persistentvolume-kube/database-kube/mysql-pv.yml
 
-kubectl apply -f kubernetes/middleware-kube/
-kubectl apply -f kubernetes/observability-kube/seq-pv.yml
-kubectl apply -f kubernetes/observability-kube/tempo-pv.yml
-kubectl apply -f kubernetes/observability-kube/grafana-pv.yml
-kubectl apply -f kubernetes/observability-kube/prometheus-pv.yml
-kubectl apply -f kubernetes/observability-kube/
-kubectl apply -f kubernetes/backend-kube/
+kubectl apply -f kubernetes/persistentvolume-kube/observability-kube/seq-pv.yml
+kubectl apply -f kubernetes/persistentvolume-kube/observability-kube/tempo-pv.yml
+kubectl apply -f kubernetes/persistentvolume-kube/observability-kube/grafana-pv.yml
+kubectl apply -f kubernetes/persistentvolume-kube/observability-kube/prometheus-pv.yml
+
+```
+
+Apply Deployments:
+
+```bash
+kubectl apply -f kubernetes/deployments-kube/database-kube/mysql-deployment.yml
+kubectl apply -f kubernetes/deployments-kube/database-kube/
+kubectl apply -f kubernetes/deployments-kube/middleware-kube/
+kubectl apply -f kubernetes/deployments-kube/observability-kube/
+kubectl apply -f kubernetes/deployments-kube/backend-kube/
 ```
 
 For local clusters such as Docker Desktop or Minikube, expose the API with:
 
 ```bash
 kubectl port-forward service/backend 5820:5820
+
+kubectl port-forward service/seq 5341:80
 ```
 
 Then browse to `http://localhost:5820/swagger`.

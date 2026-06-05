@@ -53,6 +53,7 @@ services:
       - mysqlcore.db
       - rabbitmq
       - seq
+      - otel-collector
     networks:
       - mysqlcore_network
     volumes:

@@ -66,4 +66,5 @@ public enum TransferEnum
     EntityNotCreated = 1,
     SaveChangesNotExecuted = 2,
     EntityNotExist = 3,
+    Conflict = 4,
 }

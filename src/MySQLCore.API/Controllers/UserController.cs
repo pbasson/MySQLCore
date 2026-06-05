@@ -1,35 +1,35 @@
 namespace MySQLCore.API.Controllers;
 
-[Route("api/crud-transactions")]
+[Route("api/user")]
 [ApiController]
-public class CRUDTransactionController : BaseController
+public class UserController : BaseController
 {
-    private readonly ICRUDTransactionService _service;
-    public CRUDTransactionController(ICRUDTransactionService service, ILogger<CRUDTransactionController> logger) : base(logger) 
+    private readonly IUserService _service;
+    public UserController(IUserService service, ILogger<UserController> logger) : base(logger) 
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     [HttpGet]
-    public async Task<ActionResult<TransferCRUDTransactionGridDTO>> GetAllRecords() 
+    public async Task<ActionResult<UserTransferGridDTO>> GetAllRecords() 
     {
         var result = await _service.GetAllRecordsAsync();
         return TransferActionResult(result);
     }
 
     [HttpGet("by-page/{page:int}")]
-    public async Task<ActionResult<TransferCRUDTransactionGridDTO>> GetAllRecordsPagination(int page) 
+    public async Task<ActionResult<UserTransferGridDTO>> GetRecordsByPagination(int page) 
     {
         if ( page.IsNotZero() )  
         {
-            var result = await _service.GetAllRecordsPaginationAsync(page);
+            var result = await _service.GetRecordsByPaginationAsync(page);
             return TransferActionResult(result);
         }
         return BadRequest(); 
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<TransferCRUDTransactionDTO>> GetRecordById(int id) 
+    public async Task<ActionResult<UserTransferDTO>> GetRecordById(int id) 
     {
         if ( id.IsNotZero() )  
         {
@@ -40,7 +40,7 @@ public class CRUDTransactionController : BaseController
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateCRUDTransactionDTO dto) 
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateUserDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.CreateRecordAsync(dto);
@@ -48,7 +48,7 @@ public class CRUDTransactionController : BaseController
     }
 
     [HttpPut("update")]
-    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateCRUDTransactionDTO dto) 
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateUserDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.UpdateRecordAsync(dto);

@@ -21,4 +21,8 @@ public readonly struct AppSettings
     public static readonly string MySQL_Password = "MYSQL_PASSWORD";        
     public static readonly string MySQL_Root_User = "MYSQL_ROOT_USER";
     public static readonly string MySQL_Root_Password = "MYSQL_ROOT_PASSWORD";
+    public static readonly string SEQ_URL = "SEQ_URL";
+    public static readonly string LOG_PATH = "SEQ_URL";
+    public static readonly string OTEL_EXPORTER_OTLP_ENDPOINT = "OTEL_EXPORTER_OTLP_ENDPOINT";
 }
+

@@ -3,7 +3,7 @@ namespace MySQLCore.Core.Interfaces.Repos;
 public interface IImageTransactionRepo
 {
     Task<List<ImageTransactionDTO>> GetAllRecordsAsync();
-    Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page);
+    Task<List<ImageTransactionDTO>> GetRecordsByPaginationAsync(int page);
     Task<ImageTransactionDTO?> GetRecordByIdAsync(int id);
     Task<TransferDTO> CreateRecordAsync(CreateImageTransactionDTO dto);
     Task<TransferDTO> UpdateRecordAsync(UpdateImageTransactionDTO dto);

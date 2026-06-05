@@ -1,25 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: mysqlcore-app
+  type: LoadBalancer
+  ports:
+    - port: 5820
+      targetPort: 5820
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysqlcore-worker-deployment
+  name: mysqlcore-app-deployment
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: mysqlcore-worker
+      app: mysqlcore-app
+      tier: backend
   template:
     metadata:
       labels:
-        app: mysqlcore-worker
+        app: mysqlcore-app
         tier: backend
     spec:
       containers:
-      - name: mysqlcore-worker
-        image: mysqlcore-worker:latest
+      - name: mysqlcore-api
+        image: mysqlcore-api:latest
         imagePullPolicy: Never
         ports:
-        - containerPort: 9100
-          name: metrics
+        - containerPort: 5820
         resources:
           limits:
             memory: "512Mi"
@@ -27,73 +38,58 @@ spec:
           requests:
             memory: "256Mi"
             cpu: "100m"
-        env:
+        env: 
         - name: ASPNETCORE_ENVIRONMENT
           valueFrom:
             configMapKeyRef:
               name: mysqlcore-configmap-dev
-              key: core_environment
+              key: core_environment 
         - name: DB_HOST
           valueFrom:
             configMapKeyRef:
               name: mysqlcore-configmap-dev
-              key: db_host
+              key: db_host 
         - name: DB_PORT
           valueFrom:
             configMapKeyRef:
               name: mysqlcore-configmap-dev
-              key: db_port
+              key: db_port 
         - name: MYSQL_DATABASE
           valueFrom:
             configMapKeyRef:
               name: mysqlcore-configmap-dev
-              key: mysql_database
+              key: mysql_database 
         - name: MYSQL_ROOT_USER
           valueFrom:
             secretKeyRef:
               name: mysqlcore-secret-dev
-              key: mysql_root_user
+              key: mysql_root_user 
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mysqlcore-secret-dev
-              key: mysql_root_password
-        - name: RabbitMQ__UserName
+              key: mysql_root_password 
+        - name: X-API-KEY
           valueFrom:
             secretKeyRef:
               name: mysqlcore-secret-dev
-              key: rabbitmq_user
-        - name: RabbitMQ__Password
-          valueFrom:
-            secretKeyRef:
-              name: mysqlcore-secret-dev
-              key: rabbitmq_password
-        - name: RabbitMQ__QueueName
+              key: x_api_key
+        - name: SEQ_URL
           valueFrom:
             configMapKeyRef:
               name: mysqlcore-configmap-dev
-              key: rabbitmq_queue_name
-        - name: RabbitMQ__DeadLetterQueueName
-          valueFrom:
-            configMapKeyRef:
-              name: mysqlcore-configmap-dev
-              key: rabbitmq_dead_letter_queue_name
-        - name: RabbitMQ__MaxRetryCount
-          valueFrom:
-            configMapKeyRef:
-              name: mysqlcore-configmap-dev
-              key: rabbitmq_max_retry_count
+              key: seq_url
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: http://otel-collector:4317
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mysqlcore-worker
-spec:
-  selector:
-    app: mysqlcore-worker
-  ports:
-  - name: metrics
-    port: 9100
-    targetPort: 9100
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 5820
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 5820
+          initialDelaySeconds: 10
+          periodSeconds: 10

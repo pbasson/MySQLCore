@@ -14,9 +14,9 @@ public class ImageTransactionRepo : BaseRepo, IImageTransactionRepo
         return results ?? [];
     }
 
-    public async Task<List<ImageTransactionDTO>> GetAllRecordsPaginationAsync(int page) 
+    public async Task<List<ImageTransactionDTO>> GetRecordsByPaginationAsync(int page) 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<ImageTransactionRepo>(nameof(GetAllRecordsPaginationAsync));
+        using Activity? activity = TracingConstants.StartApiActivity<ImageTransactionRepo>(nameof(GetRecordsByPaginationAsync));
         activity?.SetTag("page", page);
 
         var settings = new PageSettings();

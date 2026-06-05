@@ -13,7 +13,7 @@ public static class RegisterServices
 
     private static void RegisterCoreServices(IServiceCollection services)
     {
-        services.AddScoped<ICRUDTransactionService,CRUDTransactionService>();
+        services.AddScoped<IUserService,UserService>();
         services.AddScoped<IImageTransactionService,ImageTransactionService>();
         services.AddScoped<ICacheService,RedisCacheService>();
         services.AddScoped<IProcessedMessageService,ProcessedMessageService>();
@@ -22,7 +22,7 @@ public static class RegisterServices
 
     private static void RegisterCoreRepos(IServiceCollection services)
     {
-        services.AddScoped<ICRUDTransactionRepo, CRUDTransactionRepo>();
+        services.AddScoped<IUserRepo, UserRepo>();
         services.AddScoped<IImageTransactionRepo, ImageTransactionRepo>();
         services.AddScoped<IProcessedMessageRepo, ProcessedMessageRepo>();
         services.AddScoped<IOutboxMessagerRepo, OutboxMessagerRepo>();
