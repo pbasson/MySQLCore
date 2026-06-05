@@ -20,9 +20,9 @@ public class UserRepo : BaseRepo, IUserRepo
         return results ?? [];
     }
 
-    public async Task<List<UserDTO>> GetAllRecordsPaginationAsync(int page) 
+    public async Task<List<UserDTO>> GetRecordsByPaginationAsync(int page) 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetAllRecordsPaginationAsync));
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetRecordsByPaginationAsync));
         activity?.SetTag("page", page);
         
         var settings = new PageSettings();

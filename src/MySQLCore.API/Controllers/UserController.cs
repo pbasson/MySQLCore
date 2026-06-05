@@ -18,11 +18,11 @@ public class UserController : BaseController
     }
 
     [HttpGet("by-page/{page:int}")]
-    public async Task<ActionResult<UserTransferGridDTO>> GetAllRecordsPagination(int page) 
+    public async Task<ActionResult<UserTransferGridDTO>> GetRecordsByPagination(int page) 
     {
         if ( page.IsNotZero() )  
         {
-            var result = await _service.GetAllRecordsPaginationAsync(page);
+            var result = await _service.GetRecordsByPaginationAsync(page);
             return TransferActionResult(result);
         }
         return BadRequest(); 

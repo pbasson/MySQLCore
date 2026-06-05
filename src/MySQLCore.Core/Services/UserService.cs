@@ -37,24 +37,24 @@ public class UserService : BaseService, IUserService
 
     }
 
-    public async Task<UserTransferGridDTO> GetAllRecordsPaginationAsync(int page)
+    public async Task<UserTransferGridDTO> GetRecordsByPaginationAsync(int page)
     {
-        using Activity? activity = TracingConstants.StartApiActivity<UserService>(nameof(GetAllRecordsPaginationAsync));
+        using Activity? activity = TracingConstants.StartApiActivity<UserService>(nameof(GetRecordsByPaginationAsync));
         activity?.SetTag("page", page);
 
-        var cacheKey = $"user:GetAllRecordsPaginationAsync:page={page}";
+        var cacheKey = $"user:GetRecordsByPaginationAsync:page={page}";
         
         var cached = await _cache.GetAsync<List<UserDTO>>(cacheKey);
         if (cached != null) 
         { 
-            _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(UserService), nameof(GetAllRecordsPaginationAsync), cacheKey);
+            _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(UserService), nameof(GetRecordsByPaginationAsync), cacheKey);
             return new UserTransferGridDTO(ActionStatusType.Ok, cached!); 
         }
 
-        var result = await _repo.GetAllRecordsPaginationAsync(page);
+        var result = await _repo.GetRecordsByPaginationAsync(page);
         if (result == null || result.Count <= 0)  
         { 
-            _logger.LogWarning("{class}.{function}: No records found", nameof(UserService), nameof(GetAllRecordsPaginationAsync));
+            _logger.LogWarning("{class}.{function}: No records found", nameof(UserService), nameof(GetRecordsByPaginationAsync));
             return new UserTransferGridDTO(ActionStatusType.NotFound, []); 
         }
 
