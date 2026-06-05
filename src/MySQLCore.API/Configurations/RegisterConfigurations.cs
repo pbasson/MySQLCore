@@ -62,14 +62,16 @@ public static class RegisterConfigurations
 
     private static void RegisterSeq( )
     {
-        string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL") ?? "http://seq";
-        string logPath = Environment.GetEnvironmentVariable("LOG_PATH") ?? "/Logs/mysqlcore-log-.txt";
+        string seqUrl = Environment.GetEnvironmentVariable(AppSettings.SEQ_URL) ?? "http://seq";
+        string logPath = Environment.GetEnvironmentVariable(AppSettings.LOG_PATH) ?? "/Logs/mysqlcore-log-.txt";
 
         Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
             .Enrich.FromLogContext()
             .Enrich.WithProperty("Service", TracingConstants.SERVICE_NAME)
             .Filter.ByExcluding(logEvent =>
-                logEvent.RenderMessage().Contains("/metrics") || logEvent.RenderMessage().Contains("Prometheus metrics"))
+                logEvent.RenderMessage().Contains("/metrics") ||
+                logEvent.RenderMessage().Contains("/health") ||
+                logEvent.RenderMessage().Contains("Prometheus metrics"))
             .WriteTo.Console().WriteTo.File(
                 path: logPath,
                 rollingInterval: RollingInterval.Day,
@@ -80,7 +82,7 @@ public static class RegisterConfigurations
 
     private static void RegisterOpenTelemetry(IServiceCollection services)
     {
-        string otelCollectorURL = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4317";
+        string otelCollectorURL = Environment.GetEnvironmentVariable(AppSettings.OTEL_EXPORTER_OTLP_ENDPOINT) ?? "http://otel-collector:4317";
 
         services.AddOpenTelemetry().ConfigureResource(resource => resource.AddService(serviceName: TracingConstants.SERVICE_NAME))
             .WithTracing(tracing => tracing

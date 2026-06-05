@@ -30,18 +30,20 @@ public static class RegisterConfigurations
 
     private static void RegisterSeq()
     {
+        string seqUrl = Environment.GetEnvironmentVariable(AppSettings.SEQ_URL) ?? "http://seq";
+
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .Enrich.FromLogContext()
             .Enrich.WithProperty("Service", "mysqlcore-worker")
             .WriteTo.Console()
-            .WriteTo.Seq("http://seq")
+            .WriteTo.Seq(seqUrl)
             .CreateLogger();
     }
 
     private static void RegisterOpenTelemetry(IServiceCollection services)
     {
-        string otelCollectorURL = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4317";
+        string otelCollectorURL = Environment.GetEnvironmentVariable(AppSettings.OTEL_EXPORTER_OTLP_ENDPOINT) ?? "http://otel-collector:4317";
 
         services.AddOpenTelemetry().ConfigureResource(resource => resource.AddService(serviceName: "mysqlcore-worker"))
             .WithTracing(tracing => tracing
@@ -57,27 +59,8 @@ public static class RegisterConfigurations
 
     private static void RegisterMetrics(IServiceCollection services)
     {
-        services.AddMetricServer(options =>
-        {
-            options.Port = 9100;
-        });
+        services.AddMetricServer(options => { options.Port = 9100; });
     }
-
-    //     private static void RegisterSeq( )
-    // {
-    //     string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL") ?? "http://seq";
-    //     string logPath = Environment.GetEnvironmentVariable("LOG_PATH") ?? "/Logs/mysqlcore.worker-log-.txt";
-
-    //     Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
-    //         .Filter.ByExcluding(logEvent =>
-    //             logEvent.RenderMessage().Contains("/metrics") || logEvent.RenderMessage().Contains("Prometheus metrics"))
-    //         .WriteTo.Console().WriteTo.File(
-    //             path: logPath,
-    //             rollingInterval: RollingInterval.Day,
-    //             retainedFileCountLimit: 7)
-    //         .WriteTo.Seq(serverUrl: seqUrl)
-    //         .CreateLogger();
-    // }
 
     public static HostApplicationBuilder RegisterHost(this HostApplicationBuilder builder)
     {
