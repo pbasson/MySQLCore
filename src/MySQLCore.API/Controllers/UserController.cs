@@ -39,8 +39,8 @@ public class UserController : BaseController
         return BadRequest(); 
     }
 
-    [HttpGet("{username:string}")]
-    public async Task<ActionResult<UserTransferDTO>> GetRecordById(string username) 
+    [HttpGet("by-username/{username}")]
+    public async Task<ActionResult<UserTransferDTO>> GetUsernameAsync(string username) 
     {
         if ( !string.IsNullOrEmpty(username) )  
         {
