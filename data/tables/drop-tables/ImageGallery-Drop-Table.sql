@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS MySQLCore.ImageFile;
+
+DROP TABLE IF EXISTS MySQLCore.ImageGallery;
+

@@ -1,23 +1,23 @@
 namespace MySQLCore.API.Controllers;
 
-[Route("api/image-transactions")]
+[Route("api/image-gallery")]
 [ApiController]
-public class ImageTransactionController : BaseController
+public class ImageGalleryController : BaseController
 {
-    private readonly IImageTransactionService _service;
-    public ImageTransactionController(IImageTransactionService service, ILogger<ImageTransactionController> logger) : base(logger) {
+    private readonly IImageGalleryService _service;
+    public ImageGalleryController(IImageGalleryService service, ILogger<ImageGalleryController> logger) : base(logger) {
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     [HttpGet]
-    public async Task<ActionResult<TransferImageTransactionGridDTO>> GetAllRecordsAsync() 
+    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetAllRecordsAsync() 
     {
         var result = await _service.GetAllRecordsAsync();
         return TransferActionResult(result);
     }
 
     [HttpGet("by-page/{page:int}")]
-    public async Task<ActionResult<TransferImageTransactionGridDTO>> GetRecordsByPaginationAsync(int page) 
+    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetRecordsByPaginationAsync(int page) 
     {
         if (page.IsNotZero())  
         {
@@ -28,7 +28,7 @@ public class ImageTransactionController : BaseController
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<TransferImageTransactionDTO>> GetRecordByIdAsync(int id) 
+    public async Task<ActionResult<TransferImageGalleryDTO>> GetRecordByIdAsync(int id) 
     {
         if (id.IsNotZero())  
         {
@@ -39,7 +39,7 @@ public class ImageTransactionController : BaseController
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageTransactionDTO dto) 
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageGalleryDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.CreateRecordAsync(dto);
@@ -47,7 +47,7 @@ public class ImageTransactionController : BaseController
     }
 
     [HttpPut("update")]
-    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageTransactionDTO dto) 
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageGalleryDTO dto) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.UpdateRecordAsync(dto);

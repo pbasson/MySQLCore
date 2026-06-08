@@ -14,7 +14,7 @@ global using MySQLCore.Core.Interfaces.Repos;
 global using MySQLCore.Core.Interfaces.Services;
 global using MySQLCore.Core.Messager;
 global using MySQLCore.Core.Models.DTOs;
-global using MySQLCore.Core.Models.DTOs.ImageDTOs;
+global using MySQLCore.Core.Models.DTOs.Image_Gallery;
 global using MySQLCore.Core.Services;
 global using MySQLCore.Core.Services.UtilityServices;
 global using MySQLCore.Core.Utilities;

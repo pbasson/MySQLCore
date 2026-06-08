@@ -1,6 +1,6 @@
 namespace MySQLCore.Worker.BackgroundServices;
 
-public class BaseWorker<TMessage> : BackgroundService where TMessage: IMessage 
+public abstract class BaseWorker<TMessage> : BackgroundService where TMessage: IMessage 
 {
     public readonly ILogger<BaseWorker<TMessage>> _logger;
     public readonly RabbitMQSettings _settings;

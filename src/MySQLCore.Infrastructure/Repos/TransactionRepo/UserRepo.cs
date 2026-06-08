@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using MySQLCore.Infrastructure.Entities.User;
 
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 

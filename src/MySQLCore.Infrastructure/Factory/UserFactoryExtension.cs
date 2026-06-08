@@ -1,3 +1,5 @@
+using MySQLCore.Infrastructure.Entities.User;
+
 namespace MySQLCore.Infrastructure.Factory;
 
 public static class UserFactoryExtension

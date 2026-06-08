@@ -1,4 +1,4 @@
-namespace MySQLCore.Infrastructure.Entities.Tables;
+namespace MySQLCore.Infrastructure.Entities.User;
 
 public class User : BaseModel
 {
