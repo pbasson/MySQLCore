@@ -8,7 +8,7 @@ public class ImageFile
     [ForeignKey(nameof(ImageGallery))]
     public int ImageGalleryId { get; set; }
     public string? ImageName { get; set; }
-    public string? ImagePath { get; set; }
+    public int ImagePosition { get; set; }
 
     public virtual ImageGallery? ImageGallery {get; set;}
 }

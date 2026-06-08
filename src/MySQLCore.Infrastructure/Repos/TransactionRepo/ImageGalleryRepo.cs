@@ -1,5 +1,3 @@
-using MySQLCore.Infrastructure.Entities.Image_Gallery;
-
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
 public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
@@ -33,7 +31,8 @@ public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
         using Activity? activity = TracingConstants.StartApiActivity<ImageGalleryRepo>(nameof(GetRecordByIdAsync));
         activity?.SetTag("id", id);
 
-        var result = await _dBContext.ImageGallery.Include(x => x.ImageFile).FirstOrDefaultAsync(x => x.ImageGalleryId == id);
+        var result = await _dBContext.ImageGallery.Include(x => x.ImageFile!.OrderBy(x => x.ImagePosition))
+        .FirstOrDefaultAsync(x => x.ImageGalleryId == id);
         return result?.ToMapped();
     }
 
@@ -80,7 +79,7 @@ public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
         if ( dto.IsNull() ) { return TransferFactory.GetTransferFailure(TransferEnum.DTONull); }
 
         using Activity? activity = TracingConstants.StartApiActivity<ImageGalleryRepo>(nameof(UpdateRecordAsync));
-        activity?.SetTag("dto.ImageTransactionID", dto.ImageGalleryId);
+        activity?.SetTag("dto.ImageGalleryId", dto.ImageGalleryId);
         activity?.SetTag("dto.type", nameof(UpdateImageGalleryDTO));
 
         ImageGallery? existDTO = await FindRecord(dto.ImageGalleryId);
@@ -96,23 +95,25 @@ public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
             try
             {
                 existDTO.GalleryName = dto.GalleryName;
+                existDTO.GalleryPath = dto.GalleryPath;
 
                 var incomingFiles = dto.ImageFile ?? [];
-                var incomingExistingIds = incomingFiles.Where(IsImageGalleryValid()).Select(x => x.ImageGalleryId).ToHashSet();
+                var incomingExistingIds = incomingFiles.Where(IsImageFileValid()).Select(x => x.ImageFileId).ToHashSet();
 
-                var removeList = existDTO.ImageFile!.Where(x => !incomingExistingIds.Contains(x.ImageGalleryId)).ToList();
+                var removeList = existDTO.ImageFile!.Where(x => !incomingExistingIds.Contains(x.ImageFileId)).ToList();
                 if (removeList.Count > 0) { _dBContext.ImageFile.RemoveRange(removeList); }
 
-                foreach (var incomingGallery in incomingFiles.Where(IsImageGalleryValid()))
+                foreach (var incomingFile in incomingFiles.Where(IsImageFileValid()))
                 {
-                    var existingGallery = existDTO.ImageFile!.FirstOrDefault(x => x.ImageGalleryId == incomingGallery.ImageGalleryId);
-                    if (existingGallery == null) { continue; }
+                    var existingFile = existDTO.ImageFile!.FirstOrDefault(x => x.ImageFileId == incomingFile.ImageFileId);
+                    if (existingFile == null) { continue; }
 
-                    existingGallery.ImagePath = incomingGallery.ImagePath;
+                    existingFile.ImageName = incomingFile.ImageName;
+                    existingFile.ImagePosition = incomingFile.ImagePosition;
                 }
 
-                var addList = incomingFiles.Where(x => x.ImageGalleryId == 0)
-                    .Select(x => ToEntity(existDTO.ImageGalleryId, x.ImageName, x.ImagePath)).ToList();
+                var addList = incomingFiles.Where(x => x.ImageFileId == 0)
+                    .Select(x => ToEntity(existDTO.ImageGalleryId, x.ImageName, x.ImagePosition)).ToList();
 
                 if (addList.Count > 0) { _dBContext.ImageFile.AddRange(addList); }
                 await SaveChangesAsync();
@@ -124,9 +125,7 @@ public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
 
                 await transaction.CommitAsync();
 
-                return new TransferDTO(existDTO.ImageGalleryId
-                
-                , string.Empty, ServiceResultType.Success, exportMessage.MessageId);
+                return new TransferDTO(existDTO.ImageGalleryId, string.Empty, ServiceResultType.Success, exportMessage.MessageId);
             }
             catch (Exception)
             {
@@ -136,7 +135,7 @@ public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
         });
     }
     
-    private static Func<ImageFileDTO, bool> IsImageGalleryValid()
+    private static Func<ImageFileDTO, bool> IsImageFileValid()
     {
         return x => x.ImageFileId > 0;
     }
@@ -173,11 +172,11 @@ public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
         return result.IsNotNull() ? result : null;
     }
     
-    private ImageFile ToEntity(int id, string? imageName, string? imagePath) => new()
+    private ImageFile ToEntity(int id, string? imageName, int imagePosition) => new()
     {
         ImageFileId = 0,
         ImageGalleryId = id,
         ImageName = imageName,
-        ImagePath = imagePath,
+        ImagePosition = imagePosition,
     };
 }
