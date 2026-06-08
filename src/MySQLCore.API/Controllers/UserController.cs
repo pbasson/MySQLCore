@@ -39,6 +39,17 @@ public class UserController : BaseController
         return BadRequest(); 
     }
 
+    [HttpGet("{username:string}")]
+    public async Task<ActionResult<UserTransferDTO>> GetRecordById(string username) 
+    {
+        if ( !string.IsNullOrEmpty(username) )  
+        {
+            var result = await _service.GetUsernameAsync(username);
+            return TransferActionResult(result);
+        }
+        return BadRequest(); 
+    }
+
     [HttpPost("create")]
     public async Task<ActionResult<TransferDTO>> CreateRecord(CreateUserDTO dto) 
     {

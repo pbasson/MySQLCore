@@ -40,6 +40,16 @@ public class UserRepo : BaseRepo, IUserRepo
         return result?.ToMapped();
     }
 
+    public async Task<UserDTO?> GetUsernameAsync(string username) 
+    {
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetUsernameAsync));
+        activity?.SetTag("username", username);
+
+        var result = await _dBContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.UserName == username);
+        return result?.ToMapped();
+    }
+
+
     public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(CreateRecordAsync));

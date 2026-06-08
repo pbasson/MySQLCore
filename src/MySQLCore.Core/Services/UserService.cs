@@ -89,6 +89,32 @@ public class UserService : BaseService, IUserService
         return new UserTransferDTO(ActionStatusType.Ok, result); 
     }
 
+    public async Task<UserTransferDTO> GetUsernameAsync(string username)
+     {
+        using Activity? activity = TracingConstants.StartApiActivity<UserService>(nameof(GetUsernameAsync));
+        activity?.SetTag("username", username);
+
+        var cacheKey = $"user:GetUsernameAsync:id={username}";
+        
+        var cached = await _cache.GetAsync<UserDTO>(cacheKey);
+        if (cached != null && cached.Id > 0) 
+        { 
+            _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(UserService), nameof(GetUsernameAsync), cacheKey);
+            return new UserTransferDTO(ActionStatusType.Ok, cached); 
+        }
+        else if (cached != null) { await _cache.RemoveAsync(cacheKey); }
+
+        var result = await _repo.GetUsernameAsync(username);
+        if (result == null || result.Id <= 0) 
+        { 
+            _logger.LogWarning("{class}.{function}: No record found for {id}", nameof(UserService), nameof(GetUsernameAsync), username);
+            return new UserTransferDTO(ActionStatusType.NotFound, new()); 
+        }
+
+        await _cache.SetAsync(cacheKey, result, timeSpan);
+        return new UserTransferDTO(ActionStatusType.Ok, result); 
+    }
+
     public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto)
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(nameof(CreateRecordAsync));
