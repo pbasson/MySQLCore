@@ -40,12 +40,24 @@ kubectl apply -f kubernetes/persistentvolume-kube/observability-kube/prometheus-
 Apply Deployments:
 
 ```bash
-kubectl apply -f kubernetes/deployments-kube/database-kube/mysql-deployment.yml
+# kubectl apply -f kubernetes/deployments-kube/database-kube/mysql-deployment.yml
 kubectl apply -f kubernetes/deployments-kube/database-kube/
 kubectl apply -f kubernetes/deployments-kube/middleware-kube/
 kubectl apply -f kubernetes/deployments-kube/observability-kube/
 kubectl apply -f kubernetes/deployments-kube/backend-kube/
 ```
+
+Delete Deployments:
+
+```bash
+kubectl delete -f kubernetes/deployments-kube/database-kube/
+kubectl delete -f kubernetes/deployments-kube/middleware-kube/
+kubectl delete -f kubernetes/deployments-kube/observability-kube/
+kubectl delete -f kubernetes/deployments-kube/backend-kube/
+```
+
+
+
 
 Apply local dev Ingress routes:
 
