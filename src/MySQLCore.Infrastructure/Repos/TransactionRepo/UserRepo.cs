@@ -1,5 +1,3 @@
-using MySQLCore.Core.Interfaces.Repos.User;
-
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
 public class UserRepo : BaseRepo, IUserRepo 

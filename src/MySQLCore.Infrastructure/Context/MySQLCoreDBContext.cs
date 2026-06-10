@@ -1,5 +1,3 @@
-using MySQLCore.Core.Messager.Models;
-
 namespace MySQLCore.Infrastructure.Context;
 
 public class MySQLCoreDBContext(DbContextOptions<MySQLCoreDBContext> option) : DbContext(option)

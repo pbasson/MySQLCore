@@ -1,6 +1,3 @@
-using MySQLCore.Core.Interfaces.Repos.ImageGallery;
-using MySQLCore.Core.Messager.Models;
-
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
 public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo

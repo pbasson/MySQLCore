@@ -1,6 +1,3 @@
-using MySQLCore.Core.Interfaces.Messager.Repo;
-using MySQLCore.Core.Interfaces.Messager.Service;
-
 namespace MySQLCore.Core.Messager.Services;
 
 public class OutboxMessagerService : IOutboxMessagerService

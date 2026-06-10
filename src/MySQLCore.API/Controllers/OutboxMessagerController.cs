@@ -1,5 +1,3 @@
-using MySQLCore.Core.Interfaces.Messager.Service;
-
 namespace MySQLCore.API.Controllers;
 
 [ApiController]

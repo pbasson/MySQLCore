@@ -1,5 +1,3 @@
-using MySQLCore.Core.Interfaces.Services.ImageGallery;
-
 namespace MySQLCore.API.Controllers;
 
 [Route("api/image-gallery")]
