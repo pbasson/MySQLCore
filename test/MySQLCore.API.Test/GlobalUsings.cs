@@ -1,4 +1,3 @@
-global using AutoFixture;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.Extensions.Logging;
@@ -7,6 +6,6 @@ global using MySQLCore.API.Controllers;
 global using MySQLCore.Core.Enums;
 global using MySQLCore.Core.Interfaces.Services;
 global using MySQLCore.Core.Models.DTOs;
-global using MySQLCore.Core.Models.DTOs.ImageDTOs;
+global using MySQLCore.Core.Models.DTOs.Image_Gallery;
 global using MySQLCore.Core.Test.Helpers;
 global using Xunit;

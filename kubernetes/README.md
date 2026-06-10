@@ -40,22 +40,61 @@ kubectl apply -f kubernetes/persistentvolume-kube/observability-kube/prometheus-
 Apply Deployments:
 
 ```bash
-kubectl apply -f kubernetes/deployments-kube/database-kube/mysql-deployment.yml
+# kubectl apply -f kubernetes/deployments-kube/database-kube/mysql-deployment.yml
 kubectl apply -f kubernetes/deployments-kube/database-kube/
 kubectl apply -f kubernetes/deployments-kube/middleware-kube/
 kubectl apply -f kubernetes/deployments-kube/observability-kube/
 kubectl apply -f kubernetes/deployments-kube/backend-kube/
 ```
 
-For local clusters such as Docker Desktop or Minikube, expose the API with:
+Delete Deployments:
+
+```bash
+kubectl delete -f kubernetes/deployments-kube/database-kube/
+kubectl delete -f kubernetes/deployments-kube/middleware-kube/
+kubectl delete -f kubernetes/deployments-kube/observability-kube/
+kubectl delete -f kubernetes/deployments-kube/backend-kube/
+```
+
+
+
+
+Apply local dev Ingress routes:
+
+```bash
+kubectl apply -f kubernetes/ingress-kube/
+```
+
+For Minikube, enable the ingress addon if needed:
+
+```bash
+minikube addons enable ingress
+```
+
+Add local host entries using the output from `minikube ip`:
+
+```text
+<minikube-ip> mysqlcore.local
+<minikube-ip> grafana.mysqlcore.local
+<minikube-ip> seq.mysqlcore.local
+```
+
+Then browse to:
+
+```text
+http://mysqlcore.local/swagger
+http://grafana.mysqlcore.local
+http://seq.mysqlcore.local
+```
+
+
+If you prefer port-forwarding instead of Ingress:
 
 ```bash
 kubectl port-forward service/backend 5820:5820
-
+kubectl port-forward service/grafana 3000:3000
 kubectl port-forward service/seq 5341:80
 ```
-
-Then browse to `http://localhost:5820/swagger`.
 
 Notes:
 

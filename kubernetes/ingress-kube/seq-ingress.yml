@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: seq-ingress
+spec:
+  rules:
+  - host: seq.mysqlcore.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: seq
+            port:
+              number: 80

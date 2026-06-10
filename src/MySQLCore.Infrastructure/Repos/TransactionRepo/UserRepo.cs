@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
 public class UserRepo : BaseRepo, IUserRepo 
@@ -39,6 +37,16 @@ public class UserRepo : BaseRepo, IUserRepo
         var result = await _dBContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         return result?.ToMapped();
     }
+
+    public async Task<UserDTO?> GetUsernameAsync(string username) 
+    {
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetUsernameAsync));
+        activity?.SetTag("username", username);
+
+        var result = await _dBContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.UserName == username);
+        return result?.ToMapped();
+    }
+
 
     public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto) 
     {

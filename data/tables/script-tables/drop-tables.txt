@@ -3,7 +3,7 @@ source /var/lib/mysql-files/data/databases/drop-databases/MySQLCore-Drop-Databas
 
 -- Drop Tables
 source /var/lib/mysql-files/data/tables/drop-tables/User-Drop-Table.sql
-source /var/lib/mysql-files/data/tables/drop-tables/ImageTransaction-Drop-Table.sql
+source /var/lib/mysql-files/data/tables/drop-tables/ImageGallery-Drop-Table.sql
 
 source /var/lib/mysql-files/data/tables/drop-tables/OutboxMessage-Drop-Table.sql
 source /var/lib/mysql-files/data/tables/drop-tables/ProcessMessage-Drop-Table.sql

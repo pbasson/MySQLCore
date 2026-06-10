@@ -3,8 +3,8 @@ namespace MySQLCore.Infrastructure.Context;
 public class MySQLCoreDBContext(DbContextOptions<MySQLCoreDBContext> option) : DbContext(option)
 {
     public virtual DbSet<User> User {get; set;}
-    public virtual DbSet<ImageTransaction> ImageTransaction {get; set;}
     public virtual DbSet<ImageGallery> ImageGallery {get; set;}
+    public virtual DbSet<ImageFile> ImageFile {get; set;}
     public virtual DbSet<ProcessedMessage> ProcessedMessage {get; set;}
     public virtual DbSet<OutboxMessage> OutboxMessage {get; set;}
 

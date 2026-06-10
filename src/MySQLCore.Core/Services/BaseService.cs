@@ -3,9 +3,7 @@ namespace MySQLCore.Core.Services;
 public abstract class BaseService
 {
     protected readonly ILogger<BaseService> _logger = default!;
-
     protected readonly ICacheService _cache = default!;
-
     protected readonly TimeSpan timeSpan = TimeSpan.FromMinutes(5);
 
     public BaseService(ILogger<BaseService> logger, ICacheService cache)
