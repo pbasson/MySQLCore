@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Models.DTOs;
+namespace MySQLCore.Core.Models.DTOs.User;
 
 public class UserDTO : BaseDTO, IEntity
 {

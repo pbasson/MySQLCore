@@ -1,6 +1,4 @@
-using MySQLCore.Infrastructure.Entities;
-using MySQLCore.Infrastructure.Entities.Image_Gallery;
-using MySQLCore.Infrastructure.Entities.User;
+using MySQLCore.Core.Messager.Models;
 
 namespace MySQLCore.Infrastructure.Context;
 

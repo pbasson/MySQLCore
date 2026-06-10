@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Interfaces.Repos;
+namespace MySQLCore.Core.Interfaces.Repos.User;
 
 public interface IUserRepo
 {

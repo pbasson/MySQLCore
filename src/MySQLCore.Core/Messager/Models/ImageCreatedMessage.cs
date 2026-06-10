@@ -1,4 +1,6 @@
-namespace MySQLCore.Core.Messager;
+using MySQLCore.Core.Interfaces.Messager.Models;
+
+namespace MySQLCore.Core.Messager.Models;
 
 public class ImageCreatedMessage : IMessage
 {

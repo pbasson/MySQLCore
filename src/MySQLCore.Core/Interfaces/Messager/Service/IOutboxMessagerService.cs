@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Interfaces.Messager;
+namespace MySQLCore.Core.Interfaces.Messager.Service;
 
 public interface IOutboxMessagerService
 {

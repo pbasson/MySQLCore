@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Services;
+namespace MySQLCore.Core.Services.ImageGallery;
 
 public class ImageGalleryService : BaseService, IImageGalleryService
 {
@@ -83,6 +83,32 @@ public class ImageGalleryService : BaseService, IImageGalleryService
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
         return new TransferImageGalleryDTO(ActionStatusType.Ok, result); 
+    }
+
+
+    public async Task<TransferImageGalleryGridDTO> GetRecordsByGalleryNameAsync(string galleryName)
+    {
+        using Activity? activity = TracingConstants.StartApiActivity<ImageGalleryService>(nameof(GetRecordsByGalleryNameAsync));
+        activity?.SetTag("page", galleryName);
+
+        var cacheKey = $"image:GetRecordsByGalleryNameAsync:page={galleryName}";
+        
+        var cached = await _cache.GetAsync<List<ImageGalleryDTO>>(cacheKey);
+        if (cached != null) 
+        { 
+            _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(ImageGalleryService), nameof(GetRecordsByGalleryNameAsync), cacheKey);
+            return new TransferImageGalleryGridDTO(ActionStatusType.Ok, cached!); 
+        }
+
+        var result = await _repo.GetRecordsByGalleryNameAsync(galleryName);
+        if (result == null || result.Count <= 0)  
+        { 
+            _logger.LogWarning("{class}.{function}: No records found", nameof(ImageGalleryService), nameof(GetRecordsByGalleryNameAsync));
+            return new TransferImageGalleryGridDTO(ActionStatusType.NotFound); 
+        }
+
+        await _cache.SetAsync(cacheKey, result, timeSpan);
+        return new TransferImageGalleryGridDTO(ActionStatusType.Ok, result); 
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateImageGalleryDTO dto)

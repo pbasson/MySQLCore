@@ -1,3 +1,5 @@
+using MySQLCore.Core.Interfaces.Services.User;
+
 namespace MySQLCore.API.Controllers;
 
 [Route("api/user")]

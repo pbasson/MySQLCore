@@ -1,5 +1,3 @@
-using MySQLCore.Infrastructure.Entities.Image_Gallery;
-
 namespace MySQLCore.Infrastructure.Factory;
 
 public static class ImageGalleryExtension

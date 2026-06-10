@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Services;
+namespace MySQLCore.Core.Services.User;
 
 public class UserService : BaseService, IUserService 
 {

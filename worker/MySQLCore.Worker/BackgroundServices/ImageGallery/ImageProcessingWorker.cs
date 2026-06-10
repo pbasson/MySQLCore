@@ -1,4 +1,4 @@
-namespace MySQLCore.Worker.BackgroundServices;
+namespace MySQLCore.Worker.BackgroundServices.ImageGallery;
 
 public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 {

@@ -1,3 +1,13 @@
+using MySQLCore.Core.Interfaces.Messager.Repo;
+using MySQLCore.Core.Interfaces.Messager.Service;
+using MySQLCore.Core.Interfaces.Repos.ImageGallery;
+using MySQLCore.Core.Interfaces.Repos.User;
+using MySQLCore.Core.Interfaces.Services.ImageGallery;
+using MySQLCore.Core.Interfaces.Services.User;
+using MySQLCore.Core.Messager.Services;
+using MySQLCore.Core.Services.ImageGallery;
+using MySQLCore.Core.Services.User;
+
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterServices 

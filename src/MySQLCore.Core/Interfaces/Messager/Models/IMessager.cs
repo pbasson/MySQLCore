@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Interfaces.Messager;
+namespace MySQLCore.Core.Interfaces.Messager.Models;
 
 public interface IMessage
 {

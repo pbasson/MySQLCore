@@ -1,5 +1,3 @@
-using MySQLCore.Worker.Enums;
-
 namespace MySQLCore.Worker.Messager;
 
 public class ProcessWorkerService

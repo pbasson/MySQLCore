@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Interfaces.Services;
+namespace MySQLCore.Core.Interfaces.Services.User;
 
 public interface IUserService
 {

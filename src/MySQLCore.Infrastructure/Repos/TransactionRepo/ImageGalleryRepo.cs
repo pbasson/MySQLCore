@@ -1,3 +1,6 @@
+using MySQLCore.Core.Interfaces.Repos.ImageGallery;
+using MySQLCore.Core.Messager.Models;
+
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
 public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
@@ -34,6 +37,17 @@ public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
         var result = await _dBContext.ImageGallery.Include(x => x.ImageFile!.OrderBy(x => x.ImagePosition))
         .FirstOrDefaultAsync(x => x.ImageGalleryId == id);
         return result?.ToMapped();
+    }
+
+    public async Task<List<ImageGalleryDTO>> GetRecordsByGalleryNameAsync(string galleryName) 
+    {
+        using Activity? activity = TracingConstants.StartApiActivity<ImageGalleryRepo>(nameof(GetRecordsByPaginationAsync));
+        activity?.SetTag("page", galleryName);
+
+        var settings = new PageSettings();
+        var results = await _dBContext.ImageGallery.Where(x => !string.IsNullOrEmpty(x.GalleryName) && x.GalleryName.Contains( galleryName)).OrderBy(x => x.GalleryName)
+            .Select(x => x.ToMapped()).ToListAsync();
+        return results ?? [];
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateImageGalleryDTO dto)

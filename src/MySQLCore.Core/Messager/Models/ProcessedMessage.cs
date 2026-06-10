@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Messager;
+namespace MySQLCore.Core.Messager.Models;
 
 public class ProcessedMessage
 {

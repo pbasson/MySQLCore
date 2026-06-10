@@ -1,4 +1,4 @@
-namespace MySQLCore.Worker.BackgroundServices;
+namespace MySQLCore.Worker.BackgroundServices.Outbox;
 
 public class OutboxPublisherWorker : BackgroundService
 {

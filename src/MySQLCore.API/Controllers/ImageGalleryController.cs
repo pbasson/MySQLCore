@@ -1,3 +1,5 @@
+using MySQLCore.Core.Interfaces.Services.ImageGallery;
+
 namespace MySQLCore.API.Controllers;
 
 [Route("api/image-gallery")]
@@ -33,6 +35,17 @@ public class ImageGalleryController : BaseController
         if (id.IsNotZero())  
         {
             var result = await _service.GetRecordByIdAsync(id);
+            return TransferActionResult(result);
+        }
+        return BadRequest(); 
+    }
+
+    [HttpGet("by-name/{galleryName}")]
+    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetRecordsByGalleryNameAsync(string galleryName) 
+    {
+        if (galleryName.Length > 3)  
+        {
+            var result = await _service.GetRecordsByGalleryNameAsync(galleryName);
             return TransferActionResult(result);
         }
         return BadRequest(); 

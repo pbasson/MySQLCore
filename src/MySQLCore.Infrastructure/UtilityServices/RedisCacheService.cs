@@ -1,8 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
-using MySQLCore.Core.Interfaces.Services;
 
-namespace MySQLCore.Core.Services.UtilityServices;
+namespace MySQLCore.Infrastructure.UtilityServices;
 
 public class RedisCacheService : ICacheService
 {

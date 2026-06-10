@@ -1,3 +1,6 @@
+using MySQLCore.Core.Interfaces.Messager.Repo;
+using MySQLCore.Core.Messager.Models;
+
 namespace MySQLCore.Infrastructure.Repos.MessagerRepo;
 
 public class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
