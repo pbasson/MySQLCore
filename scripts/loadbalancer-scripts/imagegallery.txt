@@ -1,0 +1,33 @@
+
+# ImageGallery: GetAllRecords
+k6 run \
+-e X_API_KEY="" \
+test/MySQLCore.API.Test/LoadBalancer/ImageGallery/ImageGallery-GetAllRecords.js
+
+# ImageGallery: GetRecordsByPagination
+k6 run \
+-e X_API_KEY="" \
+-e PAGE=1 \
+test/MySQLCore.API.Test/LoadBalancer/ImageGallery/ImageGallery-GetRecordsByPagination.js
+
+# ImageGallery: GetRecordById
+k6 run \
+-e X_API_KEY="" \
+-e IMAGE_GALLERY_ID=1 \
+test/MySQLCore.API.Test/LoadBalancer/ImageGallery/ImageGallery-GetRecordById.js
+
+# ImageGallery: GetRecordsByGalleryName
+k6 run \
+-e X_API_KEY="" \
+-e GALLERY_NAME="batm" \
+test/MySQLCore.API.Test/LoadBalancer/ImageGallery/ImageGallery-GetRecordsByGalleryName.js
+
+# ImageGallery: CreateRecord
+k6 run \
+-e X_API_KEY="" \
+test/MySQLCore.API.Test/LoadBalancer/ImageGallery/ImageGallery-CreateRecord.js
+
+# ImageGallery: UpdateRecord
+k6 run \
+-e X_API_KEY="" \
+test/MySQLCore.API.Test/LoadBalancer/ImageGallery/ImageGallery-UpdateRecord.js
