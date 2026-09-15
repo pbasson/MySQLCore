@@ -2,12 +2,12 @@ namespace MySQLCore.Core.Interfaces.Services.User;
 
 public interface IUserService
 {
-    Task<UserTransferGridDTO> GetAllRecordsAsync();
-    Task<UserTransferGridDTO> GetRecordsByPaginationAsync(int page);
-    Task<UserTransferGridDTO> GetLatestRecordsAsync();
-    Task<UserTransferDTO> GetRecordByIdAsync(int id);
-    Task<UserTransferDTO> GetUsernameAsync(string username);
-    Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto);
-    Task<TransferDTO> UpdateRecordAsync(UpdateUserDTO dto);
-    Task<bool> DeleteRecordByIdAsync(int id);
+    Task<UserTransferGridDTO> GetAllRecordsAsync(CancellationToken cancellationToken);
+    Task<UserTransferGridDTO> GetRecordsByPaginationAsync(int page, CancellationToken cancellationToken);
+    Task<UserTransferGridDTO> GetLatestRecordsAsync(CancellationToken cancellationToken);
+    Task<UserTransferDTO> GetRecordByIdAsync(int id, CancellationToken cancellationToken);
+    Task<UserTransferDTO> GetUsernameAsync(string username, CancellationToken cancellationToken);
+    Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto, CancellationToken cancellationToken);
+    Task<TransferDTO> UpdateRecordAsync(UpdateUserDTO dto, CancellationToken cancellationToken);
+    Task<bool> DeleteRecordByIdAsync(int id, CancellationToken cancellationToken);
 }

@@ -1,16 +1,20 @@
+using MySQLCore.Core.Models.Validators;
+
 namespace MySQLCore.Core.Services.User;
 
 public class UserService : BaseService, IUserService 
 {
+    private readonly UserValidator _validator = default!;
     private readonly IUserRepo _repo = default!;
     public const string module = "user";
 
-    public UserService(ILogger<UserService> logger, ICacheService cache,IUserRepo repo): base(logger, cache, module)
+    public UserService(ILogger<UserService> logger, ICacheService cache,IUserRepo repo, UserValidator validator): base(logger, cache, module)
     {
         _repo = repo;
+        _validator = validator;
     }
 
-    public async Task<UserTransferGridDTO> GetAllRecordsAsync()
+    public async Task<UserTransferGridDTO> GetAllRecordsAsync(CancellationToken cancellationToken)
     {
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(GetAllRecordsAsync));
 
@@ -25,7 +29,7 @@ public class UserService : BaseService, IUserService
             return new UserTransferGridDTO(ActionStatusType.Ok, cached!); 
         }
 
-        var result = await _repo.GetAllRecordsAsync();
+        var result = await _repo.GetAllRecordsAsync(cancellationToken);
         if (result == null || result.Count <= 0)
         {
             LogWarningNoRecord(loggingHolder);
@@ -37,7 +41,7 @@ public class UserService : BaseService, IUserService
 
     }
 
-    public async Task<UserTransferGridDTO> GetRecordsByPaginationAsync(int page)
+    public async Task<UserTransferGridDTO> GetRecordsByPaginationAsync(int page, CancellationToken cancellationToken)
     {
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(GetRecordsByPaginationAsync));
 
@@ -53,7 +57,7 @@ public class UserService : BaseService, IUserService
             return new UserTransferGridDTO(ActionStatusType.Ok, cached!); 
         }
 
-        var result = await _repo.GetRecordsByPaginationAsync(page);
+        var result = await _repo.GetRecordsByPaginationAsync(page, cancellationToken);
         if (result == null || result.Count <= 0)  
         { 
             LogWarningNoRecord(loggingHolder);
@@ -64,7 +68,7 @@ public class UserService : BaseService, IUserService
         return new UserTransferGridDTO(ActionStatusType.Ok, result); 
     }
 
-    public async Task<UserTransferGridDTO> GetLatestRecordsAsync()
+    public async Task<UserTransferGridDTO> GetLatestRecordsAsync(CancellationToken cancellationToken)
     {
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(GetLatestRecordsAsync));
         
@@ -79,7 +83,7 @@ public class UserService : BaseService, IUserService
             return new UserTransferGridDTO(ActionStatusType.Ok, cached!); 
         }
 
-        var result = await _repo.GetLatestRecordsAsync();
+        var result = await _repo.GetLatestRecordsAsync(cancellationToken);
         if (result == null || result.Count <= 0)  
         { 
             LogWarningNoRecord(loggingHolder);
@@ -90,8 +94,7 @@ public class UserService : BaseService, IUserService
         return new UserTransferGridDTO(ActionStatusType.Ok, result); 
     }
 
-
-    public async Task<UserTransferDTO> GetRecordByIdAsync(int id)
+    public async Task<UserTransferDTO> GetRecordByIdAsync(int id, CancellationToken cancellationToken)
     {
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(GetRecordByIdAsync));
 
@@ -108,7 +111,7 @@ public class UserService : BaseService, IUserService
         }
         else if (cached != null) { await _cache.RemoveAsync(cacheKey); }
 
-        var result = await _repo.GetRecordByIdAsync(id);
+        var result = await _repo.GetRecordByIdAsync(id, cancellationToken);
         if (result == null || result.Id <= 0) 
         { 
             _logger.LogWarning("{class}.{function}: No record found for {id}", nameof(UserService), loggingHolder.Function, id);
@@ -119,7 +122,7 @@ public class UserService : BaseService, IUserService
         return new UserTransferDTO(ActionStatusType.Ok, result); 
     }
 
-    public async Task<UserTransferDTO> GetUsernameAsync(string username)
+    public async Task<UserTransferDTO> GetUsernameAsync(string username, CancellationToken cancellationToken)
     {
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(GetUsernameAsync));
 
@@ -136,7 +139,7 @@ public class UserService : BaseService, IUserService
         }
         else if (cached != null) { await _cache.RemoveAsync(cacheKey); }
 
-        var result = await _repo.GetUsernameAsync(username);
+        var result = await _repo.GetUsernameAsync(username, cancellationToken);
         if (result == null || result.Id <= 0) 
         { 
             _logger.LogWarning("{class}.{function}: No record found for {id}", loggingHolder.Class, loggingHolder.Function, username);
@@ -147,15 +150,21 @@ public class UserService : BaseService, IUserService
         return new UserTransferDTO(ActionStatusType.Ok, result); 
     }
 
-    public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto)
+    public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto, CancellationToken cancellationToken)
     {
+        var validation = await _validator.ValidateAsync(dto, cancellationToken);
+        if (!validation.IsValid)
+        {
+            throw new FluentValidation.ValidationException(validation.Errors);
+        }
+
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(CreateRecordAsync));
 
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(loggingHolder.Function);
         activity?.SetTag("dto", SerializePayload(dto));
         activity?.SetTag("dto.type", nameof(CreateUserDTO));
 
-        var result = await _repo.CreateRecordAsync(dto);
+        var result = await _repo.CreateRecordAsync(dto, cancellationToken);
         if (result == null || !result.Success) 
         { 
             _logger.LogWarning("{class}.{function}: {log}", loggingHolder.Class, loggingHolder.Function, "EntityNotCreated");
@@ -165,7 +174,7 @@ public class UserService : BaseService, IUserService
         return result;
     }
 
-    public async Task<TransferDTO> UpdateRecordAsync(UpdateUserDTO dto)
+    public async Task<TransferDTO> UpdateRecordAsync(UpdateUserDTO dto, CancellationToken cancellationToken)
     {
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(UpdateRecordAsync));
 
@@ -174,7 +183,7 @@ public class UserService : BaseService, IUserService
         activity?.SetTag("dto.Id", dto.Id);
         activity?.SetTag("dto.type", nameof(UpdateUserDTO));
 
-        var result = await _repo.UpdateRecordAsync(dto);
+        var result = await _repo.UpdateRecordAsync(dto, cancellationToken);
         if (result == null || !result.Success) 
         { 
             _logger.LogWarning("{class}.{function}: {log} for {Id}", loggingHolder.Class, loggingHolder.Function, "EntityNotUpdated", dto.Id);
@@ -186,14 +195,14 @@ public class UserService : BaseService, IUserService
         return result;
     }
 
-    public async Task<bool> DeleteRecordByIdAsync(int id)
+    public async Task<bool> DeleteRecordByIdAsync(int id, CancellationToken cancellationToken)
     {
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(DeleteRecordByIdAsync));
 
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(loggingHolder.Function);
         activity?.SetTag("id", id);
 
-        var result = await _repo.DeleteRecordByIdAsync(id);
+        var result = await _repo.DeleteRecordByIdAsync(id, cancellationToken);
         if (!result)
         {
             _logger.LogWarning("{class}.{function}: No record deleted for {Id}", nameof(UserService), nameof(DeleteRecordByIdAsync), id);

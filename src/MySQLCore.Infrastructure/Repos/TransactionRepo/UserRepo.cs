@@ -9,7 +9,7 @@ public class UserRepo : BaseRepo, IUserRepo
         _logger = logger;
     }
 
-    public async Task<List<UserDTO>> GetAllRecordsAsync() 
+    public async Task<List<UserDTO>> GetAllRecordsAsync(CancellationToken cancellationToken) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetAllRecordsAsync));
 
@@ -18,7 +18,7 @@ public class UserRepo : BaseRepo, IUserRepo
         return results ?? [];
     }
 
-    public async Task<List<UserDTO>> GetRecordsByPaginationAsync(int page) 
+    public async Task<List<UserDTO>> GetRecordsByPaginationAsync(int page, CancellationToken cancellationToken) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetRecordsByPaginationAsync));
         activity?.SetTag("page", page);
@@ -29,7 +29,7 @@ public class UserRepo : BaseRepo, IUserRepo
         return results ?? [];
     }
 
-    public async Task<List<UserDTO>> GetLatestRecordsAsync() 
+    public async Task<List<UserDTO>> GetLatestRecordsAsync(CancellationToken cancellationToken) 
     {
         int takeCount = 30;
 
@@ -40,7 +40,7 @@ public class UserRepo : BaseRepo, IUserRepo
         return results ?? [];
     }
 
-    public async Task<UserDTO?> GetRecordByIdAsync(int id) 
+    public async Task<UserDTO?> GetRecordByIdAsync(int id, CancellationToken cancellationToken) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetRecordByIdAsync));
         activity?.SetTag("id", id);
@@ -49,7 +49,7 @@ public class UserRepo : BaseRepo, IUserRepo
         return result?.ToMapped();
     }
 
-    public async Task<UserDTO?> GetUsernameAsync(string username) 
+    public async Task<UserDTO?> GetUsernameAsync(string username, CancellationToken cancellationToken = default) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetUsernameAsync));
         activity?.SetTag("username", username);
@@ -58,8 +58,15 @@ public class UserRepo : BaseRepo, IUserRepo
         return result?.ToMapped();
     }
 
+    public async Task<bool> CheckEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(CheckEmailAsync));
+        activity?.SetTag("email", email);
 
-    public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto) 
+        return await _dBContext.User.AsNoTracking().AnyAsync(x => x.Email == email, cancellationToken);
+    }
+
+    public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto, CancellationToken cancellationToken) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(CreateRecordAsync));
         activity?.SetTag("dto.type", nameof(CreateUserDTO));
@@ -86,7 +93,7 @@ public class UserRepo : BaseRepo, IUserRepo
         }
     }
 
-    public async Task<TransferDTO> UpdateRecordAsync(UpdateUserDTO dto) 
+    public async Task<TransferDTO> UpdateRecordAsync(UpdateUserDTO dto, CancellationToken cancellationToken) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(UpdateRecordAsync));
         activity?.SetTag("dto.ImageTransactionID", dto.Id);
@@ -102,25 +109,17 @@ public class UserRepo : BaseRepo, IUserRepo
 
         try
         {
-            // await Task.Delay(1000); // Simulating long running operation, to test semaphore locking.
-            User? existModel = await FindRecordByIdAsync(dto.Id);
-            if(existModel == null ) 
-            { 
-                return TransferFactory.GetTransferFailure(TransferEnum.EntityNotExist);    
-            }
-
-            var emailExists = await _dBContext.User.AnyAsync(x => x.Email == dto.Email && x.Id != dto.Id);
-
-            if (emailExists)
+            User? existModel = await FindRecordByIdAsync(dto.Id, cancellationToken);
+            if (existModel == null)
             {
-                return TransferFactory.GetTransferFailure(TransferEnum.Conflict);
+                return TransferFactory.GetTransferFailure(TransferEnum.EntityNotExist);
             }
-                
+
             var mapped = dto.ToEntity();
             existModel.SetCreated(mapped);
             UpdateEntity(existModel, mapped);
             await SaveChangesAsync();
-            return new TransferDTO( mapped.Id, string.Empty, ServiceResultType.Success );
+            return new TransferDTO(mapped.Id, string.Empty, ServiceResultType.Success);
         }
         catch (DbUpdateException ex) when (IsDuplicateKeyException(ex))
         {
@@ -133,7 +132,8 @@ public class UserRepo : BaseRepo, IUserRepo
         }
     }
 
-    public async Task<bool> DeleteRecordByIdAsync(int id) 
+
+    public async Task<bool> DeleteRecordByIdAsync(int id, CancellationToken cancellationToken) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(DeleteRecordByIdAsync));
         activity?.SetTag("id", id);
@@ -142,7 +142,7 @@ public class UserRepo : BaseRepo, IUserRepo
 
         try
         {
-            User? existModel = await FindRecordByIdAsync(id);
+            User? existModel = await FindRecordByIdAsync(id, cancellationToken);
             if(existModel.IsNull() ) { return false; }
             else if (existModel != null) {
                 _dBContext.User.Remove(existModel);
@@ -157,8 +157,10 @@ public class UserRepo : BaseRepo, IUserRepo
         }
     }
     
-    private async Task<User?> FindRecordByIdAsync(int id) {
-        var result = await _dBContext.User.FindAsync(id);
+    private async Task<User?> FindRecordByIdAsync(int id, CancellationToken cancellationToken) 
+    {
+        var result = await _dBContext.User.FindAsync(id, cancellationToken);
         return result.IsNotNull() ? result : null;
     }
+
 }

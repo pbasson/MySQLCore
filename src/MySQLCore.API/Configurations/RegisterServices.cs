@@ -1,3 +1,5 @@
+
+
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterServices 
@@ -18,6 +20,7 @@ public static class RegisterServices
         services.AddScoped<ICacheService,RedisCacheService>();
         services.AddScoped<IProcessedMessageService,ProcessedMessageService>();
         services.AddScoped<IOutboxMessagerService,OutboxMessagerService>();
+        services.AddScoped<IValidator<CreateUserDTO>, UserValidator>();
     }
 
     private static void RegisterCoreRepos(IServiceCollection services)

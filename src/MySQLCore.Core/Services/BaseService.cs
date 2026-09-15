@@ -7,7 +7,6 @@ public abstract class BaseService
     protected readonly TimeSpan timeSpan = TimeSpan.FromMinutes(5);
     protected readonly string CacheKey = "NO_CACHE_KEY";
 
-
     public BaseService(ILogger<BaseService> logger, ICacheService cache, string cacheKey = "NO_CACHE_KEY")
     {
         _logger = logger;

@@ -24,14 +24,21 @@ public class UserController : BaseController
     /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("by-page/{page:int}")]
-    public async Task<ActionResult<UserTransferGridDTO>> GetRecordsByPagination(int page) 
+    public async Task<ActionResult<UserTransferGridDTO>> GetRecordsByPagination(int page, CancellationToken cancellationToken) 
     {
         if ( page.IsNotZero() )  
         {
-            var result = await _service.GetRecordsByPaginationAsync(page);
+            var result = await _service.GetRecordsByPaginationAsync(page, cancellationToken);
             return TransferActionResult(result);
         }
         return BadRequest(); 
+    }
+
+    [HttpGet("latest")]
+    public async Task<ActionResult<UserTransferGridDTO>> GetLatestRecordsAsync(CancellationToken cancellationToken) 
+    {
+        var result = await _service.GetLatestRecordsAsync(cancellationToken);
+        return TransferActionResult(result);
     }
 
     /// <summary>
@@ -40,15 +47,17 @@ public class UserController : BaseController
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<UserTransferDTO>> GetRecordById(int id) 
+    public async Task<ActionResult<UserTransferDTO>> GetRecordById(int id, CancellationToken cancellationToken) 
     {
         if ( id.IsNotZero() )  
         {
-            var result = await _service.GetRecordByIdAsync(id);
+            var result = await _service.GetRecordByIdAsync(id, cancellationToken);
             return TransferActionResult(result);
         }
         return BadRequest(); 
     }
+
+
 
     /// <summary>
     /// Get record by username
@@ -56,11 +65,11 @@ public class UserController : BaseController
     /// <param name="username"></param>
     /// <returns></returns>
     [HttpGet("by-username/{username}")]
-    public async Task<ActionResult<UserTransferDTO>> GetUsernameAsync(string username) 
+    public async Task<ActionResult<UserTransferDTO>> GetUsernameAsync(string username, CancellationToken cancellationToken) 
     {
         if ( !string.IsNullOrEmpty(username) )  
         {
-            var result = await _service.GetUsernameAsync(username);
+            var result = await _service.GetUsernameAsync(username, cancellationToken);
             return TransferActionResult(result);
         }
         return BadRequest(); 
@@ -72,10 +81,10 @@ public class UserController : BaseController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("create")]
-    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateUserDTO dto) 
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateUserDTO dto, CancellationToken cancellationToken) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
-        var result = await _service.CreateRecordAsync(dto);
+        var result = await _service.CreateRecordAsync(dto, cancellationToken);
         return TransferActionResult(result);
     }
 
@@ -85,10 +94,10 @@ public class UserController : BaseController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPut("update")]
-    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateUserDTO dto) 
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateUserDTO dto, CancellationToken cancellationToken) 
     {
         if (!ModelState.IsValid) { return BadRequest(); }
-        var result = await _service.UpdateRecordAsync(dto);
+        var result = await _service.UpdateRecordAsync(dto, cancellationToken);
         return TransferActionResult(result);
     }
 
@@ -98,11 +107,11 @@ public class UserController : BaseController
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpDelete("delete/{id:int}")]
-    public async Task<ActionResult<bool>> DeleteRecord(int id) 
+    public async Task<ActionResult<bool>> DeleteRecord(int id, CancellationToken cancellationToken) 
     {
         if (id.IsNotZero()) 
         {
-            var result = await _service.DeleteRecordByIdAsync(id);
+            var result = await _service.DeleteRecordByIdAsync(id, cancellationToken);
             return result.IsNotNull() ? Ok(result) : BadRequest();
         }
         return BadRequest();
