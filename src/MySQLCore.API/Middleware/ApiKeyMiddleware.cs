@@ -3,7 +3,7 @@ namespace MySQLCore.API.Middleware;
 public class ApiKeyMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly string ApiKeyHeader = AppSettings.API_KEY;
+    private const string ApiKeyHeader = AppSettings.API_KEY;
     private readonly ILogger<ApiKeyMiddleware> _logger;
 
     public ApiKeyMiddleware(RequestDelegate next, ILogger<ApiKeyMiddleware> logger) {

@@ -41,23 +41,30 @@ public static class RegisterConfigurations
     }
 
     private static void RegisterSwagger(IServiceCollection services)
-    {
-        services.AddSwaggerGen( x => {
-            x.SwaggerDoc("v1", new OpenApiInfo{ Title = "MySQL Core System", Version = "v1"}); 
-            x.AddSecurityDefinition(AppSettings.API_KEY, new OpenApiSecurityScheme() {
-                Description = $"{AppSettings.API_KEY} Required",
-                Name = AppSettings.API_KEY,
-                Scheme = "ApiScheme",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey
-            });   
-            x.AddSecurityRequirement(new () { { new () { 
-                Reference = new () { Type = ReferenceType.SecurityScheme, Id = AppSettings.API_KEY },
-                In = ParameterLocation.Header }, []
-                }
-            });
-            }
-        );
+    { 
+        const string title = "MySQL Core System", version = "v1";
+
+        services.AddSwaggerGen( x =>
+        {
+            x.SwaggerDoc("v1", new OpenApiInfo { Title = title, Version = version });
+            x.AddSecurityDefinition(AppSettings.API_KEY, SetScheme());
+            x.AddSecurityRequirement(SetRequirement());
+        } );
+
+        static OpenApiSecurityScheme SetScheme() => new()
+        {
+            Description = $"{AppSettings.API_KEY} Required",
+            Name = AppSettings.API_KEY,
+            Scheme = "ApiScheme",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey
+        };
+
+        static OpenApiSecurityRequirement SetRequirement() => new() { { new OpenApiSecurityScheme()
+        {
+            Reference = new () { Type = ReferenceType.SecurityScheme, Id = AppSettings.API_KEY },
+            In = ParameterLocation.Header
+        }, [] } };
     }
 
     private static void RegisterSeq( )
