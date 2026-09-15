@@ -29,6 +29,17 @@ public class UserRepo : BaseRepo, IUserRepo
         return results ?? [];
     }
 
+    public async Task<List<UserDTO>> GetLatestRecordsAsync() 
+    {
+        int takeCount = 30;
+
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetLatestRecordsAsync));
+
+        var results = await _dBContext.User.OrderByDescending(x => x.Id).Take(takeCount).AsNoTracking()
+            .Select(x => x.ToMapped()).ToListAsync();
+        return results ?? [];
+    }
+
     public async Task<UserDTO?> GetRecordByIdAsync(int id) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetRecordByIdAsync));

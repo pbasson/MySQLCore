@@ -4,6 +4,7 @@ public interface IUserService
 {
     Task<UserTransferGridDTO> GetAllRecordsAsync();
     Task<UserTransferGridDTO> GetRecordsByPaginationAsync(int page);
+    Task<UserTransferGridDTO> GetLatestRecordsAsync();
     Task<UserTransferDTO> GetRecordByIdAsync(int id);
     Task<UserTransferDTO> GetUsernameAsync(string username);
     Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto);

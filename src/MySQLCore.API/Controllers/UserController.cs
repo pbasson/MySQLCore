@@ -10,13 +10,19 @@ public class UserController : BaseController
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
-    [HttpGet]
-    public async Task<ActionResult<UserTransferGridDTO>> GetAllRecords() 
-    {
-        var result = await _service.GetAllRecordsAsync();
-        return TransferActionResult(result);
-    }
+    // [HttpGet]
+    // public async Task<ActionResult<UserTransferGridDTO>> GetAllRecords() 
+    // {
+    //     var result = await _service.GetAllRecordsAsync();
+    //     return TransferActionResult(result);
+    // }
 
+
+    /// <summary>
+    /// Get records by pagination 
+    /// </summary>
+    /// <param name="page"></param>
+    /// <returns></returns>
     [HttpGet("by-page/{page:int}")]
     public async Task<ActionResult<UserTransferGridDTO>> GetRecordsByPagination(int page) 
     {
@@ -28,6 +34,11 @@ public class UserController : BaseController
         return BadRequest(); 
     }
 
+    /// <summary>
+    /// Get record by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id:int}")]
     public async Task<ActionResult<UserTransferDTO>> GetRecordById(int id) 
     {
@@ -39,6 +50,11 @@ public class UserController : BaseController
         return BadRequest(); 
     }
 
+    /// <summary>
+    /// Get record by username
+    /// </summary>
+    /// <param name="username"></param>
+    /// <returns></returns>
     [HttpGet("by-username/{username}")]
     public async Task<ActionResult<UserTransferDTO>> GetUsernameAsync(string username) 
     {
@@ -50,6 +66,11 @@ public class UserController : BaseController
         return BadRequest(); 
     }
 
+    /// <summary>
+    /// Create a new User record
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("create")]
     public async Task<ActionResult<TransferDTO>> CreateRecord(CreateUserDTO dto) 
     {
@@ -58,6 +79,11 @@ public class UserController : BaseController
         return TransferActionResult(result);
     }
 
+    /// <summary>
+    /// Update an existing User record
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPut("update")]
     public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateUserDTO dto) 
     {
@@ -66,6 +92,11 @@ public class UserController : BaseController
         return TransferActionResult(result);
     }
 
+    /// <summary>
+    /// Delete a User record by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("delete/{id:int}")]
     public async Task<ActionResult<bool>> DeleteRecord(int id) 
     {
