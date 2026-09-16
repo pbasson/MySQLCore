@@ -13,7 +13,7 @@ public class ImageGalleryController : BaseController
     public async Task<ActionResult<TransferImageGalleryGridDTO>> GetAllRecordsAsync(CancellationToken cancellationToken) 
     {
         var result = await _service.GetAllRecordsAsync(cancellationToken);
-        return result.IsNotNull() && result.Records != null && result.Records.Count > 0 ? Ok(result) : NotFound();
+        return result.IsNotNull() && result.Records != null && result.Records.Count > 0 ? Ok(result) : NoContent();
     }
 
     [HttpGet("by-page/{page:int}")]
@@ -22,7 +22,7 @@ public class ImageGalleryController : BaseController
         if ( !page.IsNotZero() ) return BadRequest(); 
 
         var result = await _service.GetRecordsByPaginationAsync(page, cancellationToken);
-        return result.IsNotNull() && result.Records != null && result.Records.Count > 0 ? Ok(result) : NotFound();
+        return result.IsNotNull() && result.Records != null && result.Records.Count > 0 ? Ok(result) : NoContent();
     }
 
     [HttpGet("{id:int}")]
@@ -31,7 +31,7 @@ public class ImageGalleryController : BaseController
         if ( !id.IsNotZero() ) return BadRequest(); 
 
         var result = await _service.GetRecordByIdAsync(id, cancellationToken);
-        return result.IsNotNull() && result.Record != null ? Ok(result) : NoContent();
+        return result.IsNotNull() && result.Record != null ? Ok(result) : NotFound();
     }
 
     [HttpGet("by-name/{galleryName}")]
@@ -62,6 +62,6 @@ public class ImageGalleryController : BaseController
         if ( !id.IsNotZero() ) return BadRequest(); 
 
         var result = await _service.DeleteRecordByIdAsync(id, cancellationToken);
-        return result.IsNotNull() ? Ok(result) : BadRequest();
+        return result ? Ok(result) : BadRequest();
     }
 }

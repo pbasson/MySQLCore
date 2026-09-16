@@ -157,7 +157,6 @@ public class UserService : BaseService, IUserService
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(CreateRecordAsync));
 
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(loggingHolder.Function);
-        activity?.SetTag("dto", SerializePayload(dto));
         activity?.SetTag("dto.type", nameof(CreateUserDTO));
 
         var result = await _repo.CreateRecordAsync(dto, cancellationToken);
@@ -177,7 +176,6 @@ public class UserService : BaseService, IUserService
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(UpdateRecordAsync));
 
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(loggingHolder.Function);
-        activity?.SetTag("dto", SerializePayload(dto));
         activity?.SetTag("dto.Id", dto.Id);
         activity?.SetTag("dto.type", nameof(UpdateUserDTO));
 

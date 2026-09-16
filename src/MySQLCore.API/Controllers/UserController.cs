@@ -21,14 +21,14 @@ public class UserController : BaseController
         if ( !page.IsNotZero() ) return BadRequest(); 
 
         var result = await _service.GetRecordsByPaginationAsync(page, cancellationToken);
-        return result.IsNotNull() && result.TotalRecords > 0 ? Ok(result) : NotFound();
+        return result.IsNotNull() && result.TotalRecords > 0 ? Ok(result) : NoContent();
     }
 
     [HttpGet("latest")]
     public async Task<ActionResult<UserTransferGridDTO>> GetLatestRecordsAsync(CancellationToken cancellationToken) 
     {
         var result = await _service.GetLatestRecordsAsync(cancellationToken);
-        return result.IsNotNull() && result.TotalRecords > 0 ? Ok(result) : NotFound();
+        return result.IsNotNull() && result.TotalRecords > 0 ? Ok(result) : NoContent();
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public class UserController : BaseController
         if ( !id.IsNotZero() ) return BadRequest(); 
         
         var result = await _service.GetRecordByIdAsync(id, cancellationToken);
-        return result.IsNotNull() && result.CheckRecord() ? Ok(result) : NoContent();
+        return result.IsNotNull() && result.CheckRecord() ? Ok(result) : NotFound();
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class UserController : BaseController
         if (string.IsNullOrEmpty(username)) return BadRequest(); 
 
         var result = await _service.GetUsernameAsync(username, cancellationToken);
-        return result.IsNotNull() && result.CheckRecord() ? Ok(result) : NoContent();        
+        return result.IsNotNull() && result.CheckRecord() ? Ok(result) : NotFound();        
     }
 
     /// <summary>
@@ -95,6 +95,6 @@ public class UserController : BaseController
         if ( !id.IsNotZero() ) return BadRequest(); 
 
         var result = await _service.DeleteRecordByIdAsync(id, cancellationToken);
-        return result.IsNotNull() ? Ok(result) : BadRequest();
+        return result ? Ok(result) : BadRequest();
     }
 }
