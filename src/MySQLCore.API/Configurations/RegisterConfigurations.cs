@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterConfigurations
@@ -9,7 +11,10 @@ public static class RegisterConfigurations
 
         RegisterSeq();
         RegisterOpenTelemetry(services);
+        
         RegisterAPIConfigure(services);
+        RegisterCORS(services, configuration);
+        RegisterRateLimiter(services);
 
         #region Register Services
         RegisterSwagger(services);
@@ -24,7 +29,18 @@ public static class RegisterConfigurations
         services.RegisterCache();
         #endregion
 
+
         return services;
+    }
+
+    private static void RegisterCORS(IServiceCollection services, IConfiguration configuration)
+    {
+        var corsOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("Frontend", policy => { policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod(); });
+        });
     }
 
     private static void RegisterAPIConfigure(IServiceCollection services)
@@ -109,6 +125,22 @@ public static class RegisterConfigurations
         {
             options.Configuration = "redis:6379";
             options.InstanceName = "MySQLCore:";
+        });
+    }
+
+    private static void RegisterRateLimiter(IServiceCollection services)
+    {
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            options.AddFixedWindowLimiter("fixed", limiterOptions =>
+            {
+                limiterOptions.PermitLimit = 50;
+                limiterOptions.Window = TimeSpan.FromMinutes(1);
+                limiterOptions.QueueLimit = 0;
+                limiterOptions.AutoReplenishment = true;
+            });
         });
     }
 }

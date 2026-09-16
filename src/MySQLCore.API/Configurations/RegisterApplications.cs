@@ -26,8 +26,9 @@ public static class RegisterApplications
         app.MapHealthChecks("/health/live");
         app.MapHealthChecks("/health/ready");
 
+        app.UseRateLimiter();
         app.UseMiddleware<ApiKeyMiddleware>( );
         app.UseAuthorization();
-        app.MapControllers();
+        app.MapControllers().RequireRateLimiting("fixed");
     }
 }
