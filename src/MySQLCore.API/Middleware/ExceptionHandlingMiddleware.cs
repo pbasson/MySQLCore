@@ -39,7 +39,7 @@ public sealed class ExceptionHandlingMiddleware
 
     private static int GetStatusCode(Exception exception) => exception switch
     {
-        ValidationException => (int)HttpStatusCode.BadRequest,
+        System.ComponentModel.DataAnnotations.ValidationException => (int)HttpStatusCode.BadRequest,
         // NotFoundException => (int)HttpStatusCode.NotFound,
         UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
         // DataPersistenceException => (int)HttpStatusCode.InternalServerError,

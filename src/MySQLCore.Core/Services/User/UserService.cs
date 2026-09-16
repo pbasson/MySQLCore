@@ -1,14 +1,15 @@
 using MySQLCore.Core.Models.Validators;
+using MySQLCore.Core.Validators;
 
 namespace MySQLCore.Core.Services.User;
 
 public class UserService : BaseService, IUserService 
 {
-    private readonly UserValidator _validator = default!;
+    private readonly IValidator<CreateUserDTO> _validator = default!;
     private readonly IUserRepo _repo = default!;
     public const string module = "user";
 
-    public UserService(ILogger<UserService> logger, ICacheService cache,IUserRepo repo, UserValidator validator): base(logger, cache, module)
+    public UserService(ILogger<UserService> logger, ICacheService cache,IUserRepo repo, IValidator<CreateUserDTO> validator): base(logger, cache, module)
     {
         _repo = repo;
         _validator = validator;
