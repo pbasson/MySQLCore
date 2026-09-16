@@ -11,8 +11,8 @@ public abstract class BaseRepo(MySQLCoreDBContext dBContext)
         _dBContext.Entry(mapped).State = EntityState.Modified;
     }
 
-    protected async Task<bool> SaveChangesAsync() {
-        var result = await _dBContext.SaveChangesAsync();
+    protected async Task<bool> SaveChangesAsync(CancellationToken cancellationToken) {
+        var result = await _dBContext.SaveChangesAsync(cancellationToken);
         return result > 0;
     } 
 

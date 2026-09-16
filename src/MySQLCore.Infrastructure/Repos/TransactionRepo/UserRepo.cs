@@ -79,7 +79,7 @@ public class UserRepo : BaseRepo, IUserRepo
         {
             var mapped = dto.ToEntity();
             _dBContext.User.Add(mapped);
-            await SaveChangesAsync();
+            await SaveChangesAsync(cancellationToken);
 
             return new TransferDTO( mapped.Id, string.Empty, ServiceResultType.Success);
         }
@@ -118,7 +118,7 @@ public class UserRepo : BaseRepo, IUserRepo
             var mapped = dto.ToEntity();
             existModel.SetCreated(mapped);
             UpdateEntity(existModel, mapped);
-            await SaveChangesAsync();
+            await SaveChangesAsync(cancellationToken);
             return new TransferDTO(mapped.Id, string.Empty, ServiceResultType.Success);
         }
         catch (DbUpdateException ex) when (IsDuplicateKeyException(ex))
@@ -145,7 +145,7 @@ public class UserRepo : BaseRepo, IUserRepo
             if(existModel.IsNull() ) { return false; }
             else if (existModel != null) {
                 _dBContext.User.Remove(existModel);
-                return await SaveChangesAsync();
+                return await SaveChangesAsync(cancellationToken);
             }
 
             return false;

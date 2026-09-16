@@ -9,7 +9,7 @@ public class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
         using Activity? activity = TracingConstants.StartApiActivity<ProcessedMessageRepo>(nameof(AddAsync));
 
         _dBContext.ProcessedMessage.Add(message);
-        await SaveChangesAsync();
+        await SaveChangesAsync(cancellationToken: CancellationToken.None);
     }
 
     public async Task<bool> ExistsAsync(Guid messageId)
@@ -49,6 +49,7 @@ public class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
         message.ProcessedAt = DateTime.UtcNow;
 
         _dBContext.ProcessedMessage.Update(message);
-        return await SaveChangesAsync();
+        var test = CancellationToken.None;
+        return await SaveChangesAsync(cancellationToken: test);
     }
 }

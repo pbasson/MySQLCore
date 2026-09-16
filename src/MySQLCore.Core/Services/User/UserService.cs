@@ -2,14 +2,16 @@ namespace MySQLCore.Core.Services.User;
 
 public class UserService : BaseService, IUserService 
 {
-    private readonly IValidator<CreateUserDTO> _validator = default!;
+    private readonly IValidator<CreateUserDTO> _createValidator = default!;
+    private readonly IValidator<UpdateUserDTO> _updateValidator = default!;
     private readonly IUserRepo _repo = default!;
     public const string module = "user";
 
-    public UserService(ILogger<UserService> logger, ICacheService cache,IUserRepo repo, IValidator<CreateUserDTO> validator): base(logger, cache, module)
+    public UserService(ILogger<UserService> logger, ICacheService cache,IUserRepo repo, IValidator<CreateUserDTO> createValidator, IValidator<UpdateUserDTO> updateValidator): base(logger, cache, module)
     {
         _repo = repo;
-        _validator = validator;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
     }
 
     public async Task<UserTransferGridDTO> GetAllRecordsAsync(CancellationToken cancellationToken)
@@ -150,13 +152,7 @@ public class UserService : BaseService, IUserService
 
     public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto, CancellationToken cancellationToken)
     {
-        // var validation = await _validator.ValidateAsync(dto, cancellationToken);
-        // if (!validation.IsValid)
-        // {
-        //     throw new FluentValidation.ValidationException(validation.Errors);
-        // }
-
-        await _validator.ValidateAndThrowAsync(dto, cancellationToken);
+        await _createValidator.ValidateAndThrowAsync(dto, cancellationToken);
 
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(CreateRecordAsync));
 
@@ -176,6 +172,8 @@ public class UserService : BaseService, IUserService
 
     public async Task<TransferDTO> UpdateRecordAsync(UpdateUserDTO dto, CancellationToken cancellationToken)
     {
+        await _updateValidator.ValidateAndThrowAsync(dto, cancellationToken);
+
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(UpdateRecordAsync));
 
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(loggingHolder.Function);

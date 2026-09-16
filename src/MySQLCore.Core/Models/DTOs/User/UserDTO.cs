@@ -65,4 +65,6 @@ public class UserTransferDTO : BaseTransfer
         // this.ActionStatusType = ActionStatusType;
         this.Record = Record;
     }
+
+    public bool CheckRecord() => Record != null && Record.Id > 0;
 }

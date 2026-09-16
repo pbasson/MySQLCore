@@ -42,7 +42,7 @@ public class UserController : BaseController
         if ( !id.IsNotZero() ) return BadRequest(); 
         
         var result = await _service.GetRecordByIdAsync(id, cancellationToken);
-        return result.IsNotNull() && result.Record != null ? Ok(result) : NoContent();
+        return result.IsNotNull() && result.CheckRecord() ? Ok(result) : NoContent();
     }
 
     /// <summary>
@@ -53,10 +53,10 @@ public class UserController : BaseController
     [HttpGet("by-username/{username}")]
     public async Task<ActionResult<UserTransferDTO>> GetUsernameAsync(string username, CancellationToken cancellationToken) 
     {
-        if ( !string.IsNullOrEmpty(username) ) return BadRequest(); 
+        if (string.IsNullOrEmpty(username)) return BadRequest(); 
 
         var result = await _service.GetUsernameAsync(username, cancellationToken);
-        return result.IsNotNull() && result.Record != null ? Ok(result) : NoContent();        
+        return result.IsNotNull() && result.CheckRecord() ? Ok(result) : NoContent();        
     }
 
     /// <summary>
