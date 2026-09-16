@@ -1,13 +1,13 @@
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using FluentValidation;
+global using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.OpenApi.Models;
 global using MySQLCore.API.Configurations;
 global using MySQLCore.API.Middleware;
 global using MySQLCore.Core.Constants;
-global using MySQLCore.Core.Enums;
 global using MySQLCore.Core.Interfaces.Messager.Repo;
 global using MySQLCore.Core.Interfaces.Messager.Service;
 global using MySQLCore.Core.Interfaces.Repos.ImageGallery;

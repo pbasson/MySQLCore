@@ -133,4 +133,12 @@ public static class RegisterConfigurations
             });
         });
     }
+
+    private static void RegisterHealthChecks(IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("DefaultConnection") 
+            ?? throw new InvalidOperationException("Database connection string is not configured.");
+
+         services.AddHealthChecks().AddMySql(connectionString, name: "mysql", tags: ["ready"]);
+    }
 }
