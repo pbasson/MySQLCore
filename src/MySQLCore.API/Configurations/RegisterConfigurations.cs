@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace MySQLCore.API.Configurations;
 
@@ -28,7 +27,6 @@ public static class RegisterConfigurations
         services.RegisterData(configuration);
         #endregion
 
-
         return services;
     }
 
@@ -46,7 +44,6 @@ public static class RegisterConfigurations
     {
         services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
         services.AddEndpointsApiExplorer();
-        services.AddHealthChecks();
     }
 
     public static ConfigureHostBuilder RegisterHost(this ConfigureHostBuilder configure)
@@ -134,11 +131,4 @@ public static class RegisterConfigurations
         });
     }
 
-    private static void RegisterHealthChecks(IServiceCollection services, IConfiguration configuration)
-    {
-        var connectionString = configuration.GetConnectionString("DefaultConnection") 
-            ?? throw new InvalidOperationException("Database connection string is not configured.");
-
-         services.AddHealthChecks().AddMySql(connectionString, name: "mysql", tags: ["ready"]);
-    }
 }

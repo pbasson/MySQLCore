@@ -3,6 +3,7 @@ global using System.Text.Json.Serialization;
 global using FluentValidation;
 global using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.OpenApi.Models;
 global using MySQLCore.API.Configurations;

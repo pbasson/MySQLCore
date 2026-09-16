@@ -6,6 +6,7 @@ public static class RegisterDataServices
     {
         SetDBConnection<MySQLCoreDBContext>(services, configuration);
         RegisterCache(services, configuration);
+        RegisterHealthChecks(services, configuration);
         return services;        
     }
 
@@ -40,5 +41,11 @@ public static class RegisterDataServices
             options.Configuration = redisConnection;
             options.InstanceName = "MySQLCore:";
         });
+    }
+
+    private static void RegisterHealthChecks(IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = SetConnectionString(configuration);
+        services.AddHealthChecks().AddMySql(connectionString, name: "mysql", tags: ["ready"]);
     }
 }
