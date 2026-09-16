@@ -24,18 +24,18 @@ public class UserService : BaseService, IUserService
         if (cached != null) 
         { 
             _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", loggingHolder.Class, loggingHolder.Function, cacheKey);
-            return new UserTransferGridDTO(ActionStatusType.Ok, cached!); 
+            return new UserTransferGridDTO(cached!); 
         }
 
         var result = await _repo.GetAllRecordsAsync(cancellationToken);
         if (result == null || result.Count <= 0)
         {
             LogWarningNoRecord(loggingHolder);
-            return new UserTransferGridDTO(ActionStatusType.NotFound, []);
+            return new UserTransferGridDTO([]);
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new UserTransferGridDTO(ActionStatusType.Ok, result); 
+        return new UserTransferGridDTO( result); 
 
     }
 
@@ -52,18 +52,18 @@ public class UserService : BaseService, IUserService
         if (cached != null) 
         { 
             _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", loggingHolder.Class, loggingHolder.Function, cacheKey);
-            return new UserTransferGridDTO(ActionStatusType.Ok, cached!); 
+            return new UserTransferGridDTO(cached!); 
         }
 
         var result = await _repo.GetRecordsByPaginationAsync(page, cancellationToken);
         if (result == null || result.Count <= 0)  
         { 
             LogWarningNoRecord(loggingHolder);
-            return new UserTransferGridDTO(ActionStatusType.NotFound, []); 
+            return new UserTransferGridDTO([]); 
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new UserTransferGridDTO(ActionStatusType.Ok, result); 
+        return new UserTransferGridDTO(result); 
     }
 
     public async Task<UserTransferGridDTO> GetLatestRecordsAsync(CancellationToken cancellationToken)
@@ -78,18 +78,18 @@ public class UserService : BaseService, IUserService
         if (cached != null) 
         { 
             LogWarningNoRecord(loggingHolder);
-            return new UserTransferGridDTO(ActionStatusType.Ok, cached!); 
+            return new UserTransferGridDTO(cached!); 
         }
 
         var result = await _repo.GetLatestRecordsAsync(cancellationToken);
         if (result == null || result.Count <= 0)  
         { 
             LogWarningNoRecord(loggingHolder);
-            return new UserTransferGridDTO(ActionStatusType.NotFound, []); 
+            return new UserTransferGridDTO([]); 
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new UserTransferGridDTO(ActionStatusType.Ok, result); 
+        return new UserTransferGridDTO(result); 
     }
 
     public async Task<UserTransferDTO> GetRecordByIdAsync(int id, CancellationToken cancellationToken)
@@ -105,7 +105,7 @@ public class UserService : BaseService, IUserService
         if (cached != null && cached.Id > 0) 
         { 
             _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(UserService), loggingHolder.Function, cacheKey);
-            return new UserTransferDTO(ActionStatusType.Ok, cached); 
+            return new UserTransferDTO(cached); 
         }
         else if (cached != null) { await _cache.RemoveAsync(cacheKey); }
 
@@ -113,11 +113,11 @@ public class UserService : BaseService, IUserService
         if (result == null || result.Id <= 0) 
         { 
             _logger.LogWarning("{class}.{function}: No record found for {id}", nameof(UserService), loggingHolder.Function, id);
-            return new UserTransferDTO(ActionStatusType.NotFound, new()); 
+            return new UserTransferDTO(new()); 
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new UserTransferDTO(ActionStatusType.Ok, result); 
+        return new UserTransferDTO( result); 
     }
 
     public async Task<UserTransferDTO> GetUsernameAsync(string username, CancellationToken cancellationToken)
@@ -133,7 +133,7 @@ public class UserService : BaseService, IUserService
         if (cached != null && cached.Id > 0) 
         { 
             _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", loggingHolder.Class, loggingHolder.Function, cacheKey);
-            return new UserTransferDTO(ActionStatusType.Ok, cached); 
+            return new UserTransferDTO(cached); 
         }
         else if (cached != null) { await _cache.RemoveAsync(cacheKey); }
 
@@ -141,11 +141,11 @@ public class UserService : BaseService, IUserService
         if (result == null || result.Id <= 0) 
         { 
             _logger.LogWarning("{class}.{function}: No record found for {id}", loggingHolder.Class, loggingHolder.Function, username);
-            return new UserTransferDTO(ActionStatusType.NotFound, new()); 
+            return new UserTransferDTO(new()); 
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new UserTransferDTO(ActionStatusType.Ok, result); 
+        return new UserTransferDTO(result); 
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto, CancellationToken cancellationToken)

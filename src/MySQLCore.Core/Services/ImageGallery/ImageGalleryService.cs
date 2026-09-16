@@ -19,18 +19,18 @@ public class ImageGalleryService : BaseService, IImageGalleryService
         if (cached != null) 
         { 
             _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(ImageGalleryService), nameof(GetAllRecordsAsync), cacheKey);
-            return new TransferImageGalleryGridDTO(ActionStatusType.Ok, cached!); 
+            return new TransferImageGalleryGridDTO(cached!); 
         }
 
         var result = await _repo.GetAllRecordsAsync();
         if (result == null || result.Count <= 0) 
         { 
             _logger.LogWarning("{class}.{function}: No records found", nameof(ImageGalleryService), nameof(GetAllRecordsAsync));
-            return new TransferImageGalleryGridDTO(ActionStatusType.NotFound); 
+            return new TransferImageGalleryGridDTO(); 
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new TransferImageGalleryGridDTO(ActionStatusType.Ok, result);
+        return new TransferImageGalleryGridDTO( result);
     }
 
 
@@ -45,18 +45,18 @@ public class ImageGalleryService : BaseService, IImageGalleryService
         if (cached != null) 
         { 
             _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(ImageGalleryService), nameof(GetRecordsByPaginationAsync), cacheKey);
-            return new TransferImageGalleryGridDTO(ActionStatusType.Ok, cached!); 
+            return new TransferImageGalleryGridDTO(cached!); 
         }
 
         var result = await _repo.GetRecordsByPaginationAsync(page);
         if (result == null || result.Count <= 0)  
         { 
             _logger.LogWarning("{class}.{function}: No records found", nameof(ImageGalleryService), nameof(GetRecordsByPaginationAsync));
-            return new TransferImageGalleryGridDTO(ActionStatusType.NotFound); 
+            return new TransferImageGalleryGridDTO(); 
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new TransferImageGalleryGridDTO(ActionStatusType.Ok, result); 
+        return new TransferImageGalleryGridDTO(result); 
     }
 
     public async Task<TransferImageGalleryDTO> GetRecordByIdAsync(int id)
@@ -70,7 +70,7 @@ public class ImageGalleryService : BaseService, IImageGalleryService
         if (cached != null && cached.ImageGalleryId > 0) 
         { 
             _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(ImageGalleryService), nameof(GetRecordByIdAsync), cacheKey);
-            return new TransferImageGalleryDTO(ActionStatusType.Ok, cached); 
+            return new TransferImageGalleryDTO( cached); 
         }
         else if (cached != null) { await _cache.RemoveAsync(cacheKey); }
 
@@ -78,11 +78,11 @@ public class ImageGalleryService : BaseService, IImageGalleryService
         if (result == null || result.ImageGalleryId <= 0)
         {
             _logger.LogWarning("{class}.{function}: No record found for {Id}", nameof(ImageGalleryService), nameof(GetRecordByIdAsync), id);
-            return new TransferImageGalleryDTO(ActionStatusType.NotFound);
+            return new TransferImageGalleryDTO();
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new TransferImageGalleryDTO(ActionStatusType.Ok, result); 
+        return new TransferImageGalleryDTO(result); 
     }
 
 
@@ -97,18 +97,18 @@ public class ImageGalleryService : BaseService, IImageGalleryService
         if (cached != null) 
         { 
             _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", nameof(ImageGalleryService), nameof(GetRecordsByGalleryNameAsync), cacheKey);
-            return new TransferImageGalleryGridDTO(ActionStatusType.Ok, cached!); 
+            return new TransferImageGalleryGridDTO( cached!); 
         }
 
         var result = await _repo.GetRecordsByGalleryNameAsync(galleryName);
         if (result == null || result.Count <= 0)  
         { 
             _logger.LogWarning("{class}.{function}: No records found", nameof(ImageGalleryService), nameof(GetRecordsByGalleryNameAsync));
-            return new TransferImageGalleryGridDTO(ActionStatusType.NotFound); 
+            return new TransferImageGalleryGridDTO(); 
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new TransferImageGalleryGridDTO(ActionStatusType.Ok, result); 
+        return new TransferImageGalleryGridDTO( result); 
     }
 
     public async Task<TransferDTO> CreateRecordAsync(CreateImageGalleryDTO dto)

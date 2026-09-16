@@ -4,9 +4,8 @@ public class TransferImageGalleryDTO : BaseTransfer
 {
     public ImageGalleryDTO? Record { get; set; }
 
-    public TransferImageGalleryDTO(ActionStatusType statusType, ImageGalleryDTO? record = null)
+    public TransferImageGalleryDTO(ImageGalleryDTO? record = null)
     {
-        ActionStatusType = statusType;
         Record = record;
     }
 }
@@ -15,9 +14,8 @@ public class TransferImageGalleryGridDTO : BaseTransfer
 {
     public List<ImageGalleryDTO>? Records { get; set; }
 
-    public TransferImageGalleryGridDTO(ActionStatusType statusType, List<ImageGalleryDTO>? records = null)
+    public TransferImageGalleryGridDTO( List<ImageGalleryDTO>? records = null)
     {
-        ActionStatusType = statusType;
         Records = records;
     }
 }

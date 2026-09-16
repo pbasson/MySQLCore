@@ -10,69 +10,58 @@ public class ImageGalleryController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetAllRecordsAsync() 
+    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetAllRecordsAsync(CancellationToken cancellationToken) 
     {
         var result = await _service.GetAllRecordsAsync();
-        return TransferActionResult(result);
+        return result.IsNotNull() && result.Records != null && result.Records.Count > 0 ? Ok(result) : NotFound();
     }
 
     [HttpGet("by-page/{page:int}")]
-    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetRecordsByPaginationAsync(int page) 
+    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetRecordsByPaginationAsync(int page, CancellationToken cancellationToken) 
     {
-        if (page.IsNotZero())  
-        {
-            var result = await _service.GetRecordsByPaginationAsync(page);
-            return TransferActionResult(result);
-        }
-        return BadRequest(); 
+        if ( !page.IsNotZero() ) return BadRequest(); 
+
+        var result = await _service.GetRecordsByPaginationAsync(page);
+        return result.IsNotNull() && result.Records != null && result.Records.Count > 0 ? Ok(result) : NotFound();
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<TransferImageGalleryDTO>> GetRecordByIdAsync(int id) 
     {
-        if (id.IsNotZero())  
-        {
-            var result = await _service.GetRecordByIdAsync(id);
-            return TransferActionResult(result);
-        }
-        return BadRequest(); 
+        if ( !id.IsNotZero() ) return BadRequest(); 
+
+        var result = await _service.GetRecordByIdAsync(id);
+        return result.IsNotNull() && result.Record != null ? Ok(result) : NoContent();
     }
 
     [HttpGet("by-name/{galleryName}")]
-    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetRecordsByGalleryNameAsync(string galleryName) 
+    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetRecordsByGalleryNameAsync(string galleryName, CancellationToken cancellationToken) 
     {
-        if (galleryName.Length > 3)  
-        {
-            var result = await _service.GetRecordsByGalleryNameAsync(galleryName);
-            return TransferActionResult(result);
-        }
-        return BadRequest(); 
+        if (galleryName.Length > 3) return BadRequest(); 
+        var result = await _service.GetRecordsByGalleryNameAsync(galleryName);
+        return result.IsNotNull() && result.Records != null && result.Records.Count > 0 ? Ok(result) : NotFound();
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageGalleryDTO dto) 
+    public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageGalleryDTO dto, CancellationToken cancellationToken) 
     {
-        if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.CreateRecordAsync(dto);
-        return TransferActionResult(result);
+        return CreatedAtAction(nameof(GetRecordByIdAsync), new { id = result.Id }, result);
     }
 
     [HttpPut("update")]
-    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageGalleryDTO dto) 
+    public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageGalleryDTO dto, CancellationToken cancellationToken) 
     {
-        if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.UpdateRecordAsync(dto);
-        return TransferActionResult(result);
+        return result.IsNotNull() && result.Id > 0 ? Ok(result) : NotFound();
     }
 
     [HttpDelete("delete/{id:int}")]
-    public async Task<ActionResult<bool>> DeleteRecord(int id) 
+    public async Task<ActionResult<bool>> DeleteRecord(int id, CancellationToken cancellationToken) 
     {
-        if (id.IsNotZero()) 
-        {
-            var result = await _service.DeleteRecordByIdAsync(id);
-            return result.IsNotNull() ? Ok(result) : BadRequest();
-        }
-        return BadRequest();
+        if ( !id.IsNotZero() ) return BadRequest(); 
+
+        var result = await _service.DeleteRecordByIdAsync(id);
+        return result.IsNotNull() ? Ok(result) : BadRequest();
     }
 }

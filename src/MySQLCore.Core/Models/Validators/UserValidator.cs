@@ -16,14 +16,13 @@ public class CreateUserValidator : AbstractValidator<CreateUserDTO>
 {
     public CreateUserValidator(IUserRepo repo)
     {
-        RuleFor(x => x.UserName).Cascade(CascadeMode.Stop).NotEmpty()
-            .MustAsync(async (username, cancellationToken) =>
-            {
+        RuleFor(x => x.UserName).Cascade(CascadeMode.Stop).NotEmpty().MaximumLength(100).WithMessage("Username must be less than 100 characters ")
+            .MustAsync(async (username, cancellationToken) => {
                 var getUsername = await repo.GetUsernameAsync(username!, cancellationToken);
                 return getUsername == null || getUsername.Id <= 0; 
             }).WithMessage("Username is required.");
 
-        RuleFor(x => x.Email).Cascade(CascadeMode.Stop).NotEmpty().EmailAddress()
+        RuleFor(x => x.Email).Cascade(CascadeMode.Stop).NotEmpty().MaximumLength(100).WithMessage("Email must be less than 100 characters").EmailAddress()
             .MustAsync(async (email, cancellationToken) =>
                 !await repo.CheckEmailAsync(email, cancellationToken)
             ).WithMessage("Email already exists.");

@@ -14,7 +14,7 @@ public class UserRepo : BaseRepo, IUserRepo
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetAllRecordsAsync));
 
         var results = await _dBContext.User.OrderByDescending(x => x.Id).AsNoTracking()
-            .Select(x => x.ToMapped()).ToListAsync();
+            .Select(x => x.ToMapped()).ToListAsync(cancellationToken);
         return results ?? [];
     }
 
@@ -25,7 +25,7 @@ public class UserRepo : BaseRepo, IUserRepo
         
         var settings = new PageSettings();
         var results = await _dBContext.User.OrderBy(x=>x.Id).Skip(settings.SkipCount(page))
-            .Take(settings.PageSize).AsNoTracking().Select(x => x.ToMapped()).ToListAsync();
+            .Take(settings.PageSize).AsNoTracking().Select(x => x.ToMapped()).ToListAsync(cancellationToken);
         return results ?? [];
     }
 
@@ -36,7 +36,7 @@ public class UserRepo : BaseRepo, IUserRepo
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetLatestRecordsAsync));
 
         var results = await _dBContext.User.OrderByDescending(x => x.Id).Take(takeCount).AsNoTracking()
-            .Select(x => x.ToMapped()).ToListAsync();
+            .Select(x => x.ToMapped()).ToListAsync(cancellationToken);
         return results ?? [];
     }
 
@@ -45,7 +45,7 @@ public class UserRepo : BaseRepo, IUserRepo
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetRecordByIdAsync));
         activity?.SetTag("id", id);
 
-        var result = await _dBContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        var result = await _dBContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         return result?.ToMapped();
     }
 
@@ -54,7 +54,7 @@ public class UserRepo : BaseRepo, IUserRepo
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetUsernameAsync));
         activity?.SetTag("username", username);
 
-        var result = await _dBContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.UserName == username);
+        var result = await _dBContext.User.AsNoTracking().FirstOrDefaultAsync(x => x.UserName == username, cancellationToken);
         return result?.ToMapped();
     }
 
