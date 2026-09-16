@@ -85,7 +85,8 @@ public class UserController : BaseController
     {
         if (!ModelState.IsValid) { return BadRequest(); }
         var result = await _service.CreateRecordAsync(dto, cancellationToken);
-        return TransferActionResult(result);
+
+        return CreatedAtAction(nameof(GetRecordById), new { id = result.Id }, result);
     }
 
     /// <summary>

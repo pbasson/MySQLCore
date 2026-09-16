@@ -1,6 +1,3 @@
-using MySQLCore.Core.Models.Validators;
-using MySQLCore.Core.Validators;
-
 namespace MySQLCore.Core.Services.User;
 
 public class UserService : BaseService, IUserService 
@@ -153,11 +150,13 @@ public class UserService : BaseService, IUserService
 
     public async Task<TransferDTO> CreateRecordAsync(CreateUserDTO dto, CancellationToken cancellationToken)
     {
-        var validation = await _validator.ValidateAsync(dto, cancellationToken);
-        if (!validation.IsValid)
-        {
-            throw new FluentValidation.ValidationException(validation.Errors);
-        }
+        // var validation = await _validator.ValidateAsync(dto, cancellationToken);
+        // if (!validation.IsValid)
+        // {
+        //     throw new FluentValidation.ValidationException(validation.Errors);
+        // }
+
+        await _validator.ValidateAndThrowAsync(dto, cancellationToken);
 
         LoggingHolder loggingHolder = new(nameof(UserService), nameof(CreateRecordAsync));
 
