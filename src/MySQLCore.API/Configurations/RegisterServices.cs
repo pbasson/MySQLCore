@@ -33,7 +33,6 @@ public static class RegisterServices
 
     private static void RegisterCoreValidators(IServiceCollection services)
     {
-        services.AddScoped<IValidator<CreateUserDTO>, UserValidator>();
         services.AddScoped<IValidator<CreateUserDTO>, CreateUserValidator>();
     }
 }

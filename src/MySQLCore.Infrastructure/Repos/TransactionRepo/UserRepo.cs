@@ -132,7 +132,6 @@ public class UserRepo : BaseRepo, IUserRepo
         }
     }
 
-
     public async Task<bool> DeleteRecordByIdAsync(int id, CancellationToken cancellationToken) 
     {
         using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(DeleteRecordByIdAsync));

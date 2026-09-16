@@ -11,3 +11,21 @@ public class UserValidator : AbstractValidator<UserDTO>
         RuleFor(x => x.LastName).NotEmpty().WithMessage("LastName is Required").MaximumLength(100).WithMessage("LastName must be less than 100 characters ");
     }
 }
+
+public class CreateUserValidator : AbstractValidator<CreateUserDTO>
+{
+    public CreateUserValidator(IUserRepo repo)
+    {
+        RuleFor(x => x.UserName).Cascade(CascadeMode.Stop).NotEmpty()
+            .MustAsync(async (username, cancellationToken) =>
+            {
+                var getUsername = await repo.GetUsernameAsync(username!, cancellationToken);
+                return getUsername == null || getUsername.Id <= 0; 
+            }).WithMessage("Username is required.");
+
+        RuleFor(x => x.Email).Cascade(CascadeMode.Stop).NotEmpty().EmailAddress()
+            .MustAsync(async (email, cancellationToken) =>
+                !await repo.CheckEmailAsync(email, cancellationToken)
+            ).WithMessage("Email already exists.");
+    }
+}

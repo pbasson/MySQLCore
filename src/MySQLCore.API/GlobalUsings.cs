@@ -1,5 +1,3 @@
-global using System.ComponentModel.DataAnnotations;
-global using System.Net;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using FluentValidation;
@@ -21,10 +19,10 @@ global using MySQLCore.Core.Messager.Services;
 global using MySQLCore.Core.Models.DTOs.Image_Gallery;
 global using MySQLCore.Core.Models.DTOs.Transfer;
 global using MySQLCore.Core.Models.DTOs.User;
+global using MySQLCore.Core.Models.Validators;
 global using MySQLCore.Core.Services.ImageGallery;
 global using MySQLCore.Core.Services.User;
 global using MySQLCore.Core.Utilities;
-global using MySQLCore.Core.Validators;
 global using MySQLCore.Infrastructure.Context;
 global using MySQLCore.Infrastructure.Repos.MessagerRepo;
 global using MySQLCore.Infrastructure.Repos.TransactionRepo;
