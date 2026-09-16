@@ -25,7 +25,7 @@ public static class RegisterApplications
         app.MapMetrics();
         app.MapHealthChecks("/health/live");
         app.MapHealthChecks("/health/ready");
-
+        app.UseCors("Frontend");
         app.UseRateLimiter();
         app.UseMiddleware<ApiKeyMiddleware>( );
         app.UseAuthorization();
