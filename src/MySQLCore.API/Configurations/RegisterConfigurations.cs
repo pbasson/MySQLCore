@@ -1,3 +1,4 @@
+
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterConfigurations
@@ -9,7 +10,10 @@ public static class RegisterConfigurations
 
         RegisterSeq();
         RegisterOpenTelemetry(services);
+        
         RegisterAPIConfigure(services);
+        RegisterCORS(services, configuration);
+        RegisterRateLimiter(services);
 
         #region Register Services
         RegisterSwagger(services);
@@ -20,18 +24,26 @@ public static class RegisterConfigurations
         #endregion
 
         #region Register Database
-        services.RegisterDatabase(configuration);
-        services.RegisterCache();
+        services.RegisterData(configuration);
         #endregion
 
         return services;
+    }
+
+    private static void RegisterCORS(IServiceCollection services, IConfiguration configuration)
+    {
+        var corsOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("Frontend", policy => { policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod(); });
+        });
     }
 
     private static void RegisterAPIConfigure(IServiceCollection services)
     {
         services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
         services.AddEndpointsApiExplorer();
-        services.AddHealthChecks();
     }
 
     public static ConfigureHostBuilder RegisterHost(this ConfigureHostBuilder configure)
@@ -41,23 +53,30 @@ public static class RegisterConfigurations
     }
 
     private static void RegisterSwagger(IServiceCollection services)
-    {
-        services.AddSwaggerGen( x => {
-            x.SwaggerDoc("v1", new OpenApiInfo{ Title = "MySQL Core System", Version = "v1"}); 
-            x.AddSecurityDefinition(AppSettings.API_KEY, new OpenApiSecurityScheme() {
-                Description = $"{AppSettings.API_KEY} Required",
-                Name = AppSettings.API_KEY,
-                Scheme = "ApiScheme",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey
-            });   
-            x.AddSecurityRequirement(new () { { new () { 
-                Reference = new () { Type = ReferenceType.SecurityScheme, Id = AppSettings.API_KEY },
-                In = ParameterLocation.Header }, []
-                }
-            });
-            }
-        );
+    { 
+        const string title = "MySQL Core System", version = "v1";
+
+        services.AddSwaggerGen( x =>
+        {
+            x.SwaggerDoc("v1", new OpenApiInfo { Title = title, Version = version });
+            x.AddSecurityDefinition(AppSettings.API_KEY, SetScheme());
+            x.AddSecurityRequirement(SetRequirement());
+        } );
+
+        static OpenApiSecurityScheme SetScheme() => new()
+        {
+            Description = $"{AppSettings.API_KEY} Required",
+            Name = AppSettings.API_KEY,
+            Scheme = "ApiScheme",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey
+        };
+
+        static OpenApiSecurityRequirement SetRequirement() => new() { { new OpenApiSecurityScheme()
+        {
+            Reference = new () { Type = ReferenceType.SecurityScheme, Id = AppSettings.API_KEY },
+            In = ParameterLocation.Header
+        }, [] } };
     }
 
     private static void RegisterSeq( )
@@ -96,12 +115,20 @@ public static class RegisterConfigurations
                  }));
     }
 
-    private static void RegisterCache(this IServiceCollection services)
+    private static void RegisterRateLimiter(IServiceCollection services)
     {
-        services.AddStackExchangeRedisCache(options =>
+        services.AddRateLimiter(options =>
         {
-            options.Configuration = "redis:6379";
-            options.InstanceName = "MySQLCore:";
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            options.AddFixedWindowLimiter("fixed", limiterOptions =>
+            {
+                limiterOptions.PermitLimit = 50;
+                limiterOptions.Window = TimeSpan.FromMinutes(1);
+                limiterOptions.QueueLimit = 0;
+                limiterOptions.AutoReplenishment = true;
+            });
         });
     }
+
 }

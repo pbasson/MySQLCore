@@ -1,9 +1,9 @@
 namespace MySQLCore.API.Middleware;
 
-public class ApiKeyMiddleware
+public sealed class ApiKeyMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly string ApiKeyHeader = AppSettings.API_KEY;
+    private const string ApiKeyHeader = AppSettings.API_KEY;
     private readonly ILogger<ApiKeyMiddleware> _logger;
 
     public ApiKeyMiddleware(RequestDelegate next, ILogger<ApiKeyMiddleware> logger) {
@@ -21,22 +21,32 @@ public class ApiKeyMiddleware
                 return;
             }
 
-            var getApiKey = context.RequestServices.GetRequiredService<IConfiguration>() .GetValue<string>(ApiKeyHeader);
+            var getApiKey = context.RequestServices.GetRequiredService<IConfiguration>().GetValue<string>(ApiKeyHeader);
+
+            if (string.IsNullOrWhiteSpace(getApiKey))
+            {
+                _logger.LogError("APIKey: API key is not configured on the server.");
+
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                await context.Response.WriteAsync("Server API key is not configured.");
+
+                return;
+            }
 
             if (!context.Request.Headers.TryGetValue(ApiKeyHeader, out var extractedApiKey))
             {
-                await ErrorStatus(context, 401, APIConstants.APIKey_NotFound);
+                await ErrorStatus( context, StatusCodes.Status401Unauthorized, APIConstants.APIKey_NotFound);
                 _logger.LogWarning("APIKey: No API key provided in the request headers");
-
                 return;
             }
 
-            if (getApiKey != null && !getApiKey.Equals(extractedApiKey))
+            if (!getApiKey.Equals(extractedApiKey))
             {
-                await ErrorStatus(context, 403, APIConstants.APIKey_Invalid);
+                await ErrorStatus( context, StatusCodes.Status403Forbidden, APIConstants.APIKey_Invalid);
                 _logger.LogWarning("APIKey: Provided API key is invalid");
                 return;
             }
+
 
             await _next(context);
         }

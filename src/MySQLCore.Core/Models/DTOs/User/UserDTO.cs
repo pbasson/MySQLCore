@@ -48,20 +48,23 @@ public class UserTransferGridDTO : BaseTransfer
 {
     public List<UserDTO> Records { get; set; }
 
-    public UserTransferGridDTO( ActionStatusType ActionStatusType, List<UserDTO> Records) 
+    public UserTransferGridDTO(List<UserDTO> Records) 
     {
-        this.ActionStatusType = ActionStatusType;
         this.Records = Records;
     }
+
+    public int TotalRecords => Records?.Count ?? 0;
 }
 
 public class UserTransferDTO : BaseTransfer
 {
     public UserDTO Record { get; set; }
 
-    public UserTransferDTO( ActionStatusType ActionStatusType, UserDTO Record) 
+    public UserTransferDTO(UserDTO Record) 
     {
-        this.ActionStatusType = ActionStatusType;
+        // this.ActionStatusType = ActionStatusType;
         this.Record = Record;
     }
+
+    public bool CheckRecord() => Record != null && Record.Id > 0;
 }

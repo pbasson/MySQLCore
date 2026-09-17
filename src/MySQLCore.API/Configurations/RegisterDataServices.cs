@@ -1,10 +1,12 @@
 namespace MySQLCore.API.Configurations;
 
-public static class RegisterDatabases
+public static class RegisterDataServices
 {
-    public static IServiceCollection RegisterDatabase(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection RegisterData(this IServiceCollection services, IConfiguration configuration)
     {
         SetDBConnection<MySQLCoreDBContext>(services, configuration);
+        RegisterCache(services, configuration);
+        RegisterHealthChecks(services, configuration);
         return services;        
     }
 
@@ -16,7 +18,6 @@ public static class RegisterDatabases
             db.UseMySql(setDB,ServerVersion.AutoDetect(setDB),
             db => db.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null));
         });
-
     }
 
     private static string SetConnectionString(IConfiguration _configuration)
@@ -30,4 +31,21 @@ public static class RegisterDatabases
         return $"server={host}; database={dataBase}; port={port}; userid={userid}; pwd={password};";
     }
 
+    private static void RegisterCache(this IServiceCollection services, IConfiguration configuration)
+    {
+        var redisConnection = configuration.GetValue<string>("Redis:Connection")
+            ?? throw new InvalidOperationException("Redis connection is not configured.");
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnection;
+            options.InstanceName = "MySQLCore:";
+        });
+    }
+
+    private static void RegisterHealthChecks(IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = SetConnectionString(configuration);
+        services.AddHealthChecks().AddMySql(connectionString, name: "mysql", tags: ["ready"]);
+    }
 }

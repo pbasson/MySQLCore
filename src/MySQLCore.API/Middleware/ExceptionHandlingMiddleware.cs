@@ -39,22 +39,30 @@ public sealed class ExceptionHandlingMiddleware
 
     private static int GetStatusCode(Exception exception) => exception switch
     {
-        ValidationException => (int)HttpStatusCode.BadRequest,
-        // NotFoundException => (int)HttpStatusCode.NotFound,
-        UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
-        // DataPersistenceException => (int)HttpStatusCode.InternalServerError,
-        _ => (int)HttpStatusCode.InternalServerError
+        FluentValidation.ValidationException => StatusCodes.Status400BadRequest,
+        UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+        _ => StatusCodes.Status500InternalServerError
     };
-
+    
     private sealed class ErrorResponse
     {
         public int StatusCode { get; init; }
         public string Message { get; init; } = string.Empty;
+        public Dictionary<string, string[]>? Errors { get; init; }
 
         public static ErrorResponse GetErrorResponse(Exception exception, int statusCode) => new()
         {
             StatusCode = statusCode,
-            Message = statusCode == (int)HttpStatusCode.InternalServerError ? "An unexpected error occurred." : exception.Message
+            Message = statusCode == StatusCodes.Status500InternalServerError
+                ? "An unexpected error occurred."
+                : "One or more validation errors occurred.",
+            Errors = exception is FluentValidation.ValidationException validationException
+                ? validationException.Errors
+                    .GroupBy(error => error.PropertyName)
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.Select(error => error.ErrorMessage).ToArray())
+                : null
         };
     }
 }

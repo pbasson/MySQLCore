@@ -23,11 +23,14 @@ public static class RegisterApplications
         
         app.UseHttpMetrics();
         app.MapMetrics();
-        app.MapHealthChecks("/health/live");
-        app.MapHealthChecks("/health/ready");
 
+        app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
+        app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });
+
+        app.UseCors("Frontend");
+        app.UseRateLimiter();
         app.UseMiddleware<ApiKeyMiddleware>( );
         app.UseAuthorization();
-        app.MapControllers();
+        app.MapControllers().RequireRateLimiting("fixed");
     }
 }

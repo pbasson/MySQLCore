@@ -1,3 +1,5 @@
+
+
 namespace MySQLCore.API.Configurations;
 
 public static class RegisterServices 
@@ -7,6 +9,7 @@ public static class RegisterServices
         ArgumentNullException.ThrowIfNull(services);
         RegisterCoreServices(services);
         RegisterCoreRepos(services);
+        RegisterCoreValidators(services);
 
         return services;
     }
@@ -26,5 +29,11 @@ public static class RegisterServices
         services.AddScoped<IImageGalleryRepo, ImageGalleryRepo>();
         services.AddScoped<IProcessedMessageRepo, ProcessedMessageRepo>();
         services.AddScoped<IOutboxMessagerRepo, OutboxMessagerRepo>();
+    }
+
+    private static void RegisterCoreValidators(IServiceCollection services)
+    {
+        services.AddScoped<IValidator<CreateUserDTO>, CreateUserValidator>();
+        services.AddScoped<IValidator<UpdateUserDTO>, UpdateUserValidator>();
     }
 }
