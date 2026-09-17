@@ -1,6 +1,6 @@
 namespace MySQLCore.Core.Services.ImageGallery;
 
-public class ImageGalleryService : BaseService, IImageGalleryService
+public sealed class ImageGalleryService : BaseService, IImageGalleryService
 {
     private readonly IImageGalleryRepo _repo = default!;
 

@@ -2,7 +2,7 @@ namespace MySQLCore.API.Controllers;
 
 [Route("api/user")]
 [ApiController]
-public class UserController : BaseController
+public sealed class UserController : BaseController
 {
     private readonly IUserService _service;
     public UserController(IUserService service, ILogger<UserController> logger) : base(logger) 

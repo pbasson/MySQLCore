@@ -1,6 +1,6 @@
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
-public class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
+public sealed class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
 {
     public ImageGalleryRepo(MySQLCoreDBContext dBContext): base(dBContext) { }
 

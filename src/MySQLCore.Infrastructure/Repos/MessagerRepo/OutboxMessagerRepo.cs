@@ -1,6 +1,6 @@
 namespace MySQLCore.Infrastructure.Repos.MessagerRepo;
 
-public class OutboxMessagerRepo : BaseRepo, IOutboxMessagerRepo
+public sealed class OutboxMessagerRepo : BaseRepo, IOutboxMessagerRepo
 {
 
     public OutboxMessagerRepo(MySQLCoreDBContext dBContext) : base(dBContext) { }

@@ -2,7 +2,7 @@ namespace MySQLCore.API.Controllers;
 
 [ApiController]
 [Route("api/outbox-messager")]
-public class OutboxMessagerController : BaseController
+public sealed class OutboxMessagerController : BaseController
 {
     private readonly IOutboxMessagerService _service = default!; 
 

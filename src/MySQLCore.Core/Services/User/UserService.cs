@@ -1,6 +1,6 @@
 namespace MySQLCore.Core.Services.User;
 
-public class UserService : BaseService, IUserService 
+public sealed class UserService : BaseService, IUserService 
 {
     private readonly IValidator<CreateUserDTO> _createValidator = default!;
     private readonly IValidator<UpdateUserDTO> _updateValidator = default!;

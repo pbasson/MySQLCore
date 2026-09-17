@@ -1,6 +1,6 @@
 namespace MySQLCore.API.Middleware;
 
-public class ApiKeyMiddleware
+public sealed class ApiKeyMiddleware
 {
     private readonly RequestDelegate _next;
     private const string ApiKeyHeader = AppSettings.API_KEY;

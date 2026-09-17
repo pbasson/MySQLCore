@@ -1,6 +1,6 @@
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
-public class UserRepo : BaseRepo, IUserRepo 
+public sealed class UserRepo : BaseRepo, IUserRepo 
 {
     private ILogger<UserRepo> _logger = default!;
     

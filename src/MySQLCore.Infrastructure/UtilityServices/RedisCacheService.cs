@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace MySQLCore.Infrastructure.UtilityServices;
 
-public class RedisCacheService : ICacheService
+public sealed class RedisCacheService : ICacheService
 {
     private readonly IDistributedCache _cache;
 

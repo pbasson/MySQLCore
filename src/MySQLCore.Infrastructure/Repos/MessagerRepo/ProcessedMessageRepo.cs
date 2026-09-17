@@ -1,6 +1,6 @@
 namespace MySQLCore.Infrastructure.Repos.MessagerRepo;
 
-public class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
+public sealed class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
 {
     public ProcessedMessageRepo(MySQLCoreDBContext dbContext) : base(dbContext) { }
     

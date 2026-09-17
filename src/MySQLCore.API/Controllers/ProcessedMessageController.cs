@@ -2,7 +2,7 @@ namespace MySQLCore.API.Controllers;
 
 [ApiController]
 [Route("api/processed-message")]
-public class ProcessedMessageController : BaseController
+public sealed class ProcessedMessageController : BaseController
 {
     private readonly IProcessedMessageService _service = default!;
 

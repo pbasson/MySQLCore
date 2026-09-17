@@ -2,7 +2,7 @@ namespace MySQLCore.API.Controllers;
 
 [Route("api/image-gallery")]
 [ApiController]
-public class ImageGalleryController : BaseController
+public sealed class ImageGalleryController : BaseController
 {
     private readonly IImageGalleryService _service;
     public ImageGalleryController(IImageGalleryService service, ILogger<ImageGalleryController> logger) : base(logger) {
