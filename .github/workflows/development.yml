@@ -29,3 +29,9 @@ jobs:
 
       - name: Test
         run: dotnet test --no-build --configuration Release
+
+      - name: Build API Docker image
+        run: docker build . --file ./src/MySQLCore.API/Dockerfile --tag mysqlcore-api:ci
+
+      - name: Build Worker Docker image
+        run: docker build . --file ./worker/MySQLCore.Worker/Dockerfile --tag mysqlcore-worker:ci
