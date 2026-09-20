@@ -1,9 +1,11 @@
 namespace MySQLCore.Infrastructure.Repos;
 
-public abstract class BaseRepo(MySQLCoreDBContext dBContext)
+public abstract class BaseRepo<T>(MySQLCoreDBContext dBContext, ILogger<T> logger) where T : IBaseRepo
 {
     public readonly MySQLCoreDBContext _dBContext = dBContext;
     public readonly SemaphoreSlim _semaphore = new(1, 1);
+    public ILogger<T> _logger = logger;
+
 
     protected void UpdateEntity(object existDTO, object mapped)
     {

@@ -1,18 +1,18 @@
 namespace MySQLCore.Worker.BackgroundServices.ImageGallery;
 
-public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
+public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 {
     private readonly IServiceScopeFactory _scopeFactory;
     
     public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger, IServiceScopeFactory scopeFactory, IOptions<RabbitMQSettings> options, RabbitMQConnectionService connectionService)
-     : base(logger, options, connectionService)
+        : base(logger, options, connectionService)
     {
         _scopeFactory = scopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        IChannel channel = await _connectionService.CreateConnection(stoppingToken);
+        await using IChannel channel = await _connectionService.CreateChannelAsync(stoppingToken);
         var consumer = new AsyncEventingBasicConsumer(channel);
 
         consumer.ReceivedAsync += async (sender, eventArgs) =>
@@ -41,6 +41,14 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         };
 
         await channel.BasicConsumeAsync(queue: MessagerConstants.IMAGE_QUEUE, autoAck: false, consumer: consumer, cancellationToken: stoppingToken);
+        try
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, stoppingToken);
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // Leaving this scope disposes the consumer channel during shutdown.
+        }
     }
 
     private async Task ProcessMessage( ImageCreatedMessage message, BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
@@ -54,7 +62,7 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
             activity != null, activity?.TraceId, activity?.SpanId);
 
         using var scope = _scopeFactory.CreateScope();
-        var processService = scope.ServiceProvider.GetRequiredService<ProcessWorkerService>();
+        var processService = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ProcessWorkerService>();
 
         var result = await processService.ProcessAsync(message);
 
@@ -65,12 +73,14 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         }        
 
         await processService.UpdateMessageStatusAsync(message.MessageId, ProcessMessageStatus.Processed);
-        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);
+        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", 
+            nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);
         MessageMetrics.Processed.Inc();
 
         await BasicAckAsync(eventArgs, channel, stoppingToken);
         await processService.UpdateMessageStatusAsync(message.MessageId, ProcessMessageStatus.Acknowledged);
-        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Acknowledged), message.MessageId);
+        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", 
+            nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Acknowledged), message.MessageId);
         MessageMetrics.Acknowledged.Inc();
     }
 
@@ -86,7 +96,6 @@ public class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         _logger.LogError(ex, "{messager} Message Status: {status}, DeliveryTag: {DeliveryTag}", nameof(ImageCreatedMessage),
             nameof(ProcessMessageStatus.Failed), eventArgs.DeliveryTag);
         MessageMetrics.Failed.Inc();
-
 
         var retryCount = GetRetryCount(eventArgs);
         if (retryCount >= _settings.MaxRetryCount)

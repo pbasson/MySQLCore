@@ -1,6 +1,6 @@
 namespace MySQLCore.Core.Interfaces.Messager.Repo;
 
-public interface IOutboxMessagerRepo
+public interface IOutboxMessagerRepo : IBaseRepo 
 {
     Task<List<OutboxMessage>> GetPendingAsync(int take);
     Task<bool> AddAsync(OutboxMessage message);

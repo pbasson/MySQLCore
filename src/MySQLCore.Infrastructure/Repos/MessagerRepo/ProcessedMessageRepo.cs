@@ -1,8 +1,8 @@
 namespace MySQLCore.Infrastructure.Repos.MessagerRepo;
 
-public sealed class ProcessedMessageRepo : BaseRepo, IProcessedMessageRepo
+public sealed class ProcessedMessageRepo : BaseRepo<IProcessedMessageRepo>, IProcessedMessageRepo
 {
-    public ProcessedMessageRepo(MySQLCoreDBContext dbContext) : base(dbContext) { }
+    public ProcessedMessageRepo(MySQLCoreDBContext dbContext, ILogger<IProcessedMessageRepo> logger) : base(dbContext, logger) { }
     
     public async Task AddAsync(ProcessedMessage message)
     {

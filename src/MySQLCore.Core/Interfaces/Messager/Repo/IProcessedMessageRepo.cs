@@ -1,6 +1,6 @@
 namespace MySQLCore.Core.Interfaces.Messager.Repo;
 
-public interface IProcessedMessageRepo
+public interface IProcessedMessageRepo : IBaseRepo
 {
     Task AddAsync(ProcessedMessage message);
     Task<bool> ExistsAsync(Guid messageId);

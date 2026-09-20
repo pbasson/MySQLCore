@@ -10,6 +10,13 @@ public sealed class UserController : BaseController
         _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
+    [HttpGet]
+    public async Task<ActionResult<UserTransferGridDTO>> GetLatestRecordsAsync(CancellationToken cancellationToken) 
+    {
+        var result = await _service.GetLatestRecordsAsync(cancellationToken);
+        return result.IsNotNull() && result.TotalRecords > 0 ? Ok(result) : NoContent();
+    }
+
     /// <summary>
     /// Get records by pagination 
     /// </summary>
@@ -21,13 +28,6 @@ public sealed class UserController : BaseController
         if ( !page.IsNotZero() ) return BadRequest(); 
 
         var result = await _service.GetRecordsByPaginationAsync(page, cancellationToken);
-        return result.IsNotNull() && result.TotalRecords > 0 ? Ok(result) : NoContent();
-    }
-
-    [HttpGet("latest")]
-    public async Task<ActionResult<UserTransferGridDTO>> GetLatestRecordsAsync(CancellationToken cancellationToken) 
-    {
-        var result = await _service.GetLatestRecordsAsync(cancellationToken);
         return result.IsNotNull() && result.TotalRecords > 0 ? Ok(result) : NoContent();
     }
 

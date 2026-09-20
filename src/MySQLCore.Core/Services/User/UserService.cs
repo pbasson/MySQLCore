@@ -14,10 +14,10 @@ public sealed class UserService : BaseService, IUserService
         _updateValidator = updateValidator;
     }
 
-    public async Task<UserTransferGridDTO> GetAllRecordsAsync(CancellationToken cancellationToken)
+    public async Task<UserTransferGridDTO> GetLatestRecordsAsync(CancellationToken cancellationToken)
     {
-        LoggingHolder loggingHolder = new(nameof(UserService), nameof(GetAllRecordsAsync));
-
+        LoggingHolder loggingHolder = new(nameof(UserService), nameof(GetLatestRecordsAsync));
+        
         using Activity? activity = TracingConstants.StartApiActivity<UserService>(loggingHolder.Function);
 
         var cacheKey = $"{CacheKey}:{loggingHolder.Function}";
@@ -25,20 +25,19 @@ public sealed class UserService : BaseService, IUserService
         var cached = await _cache.GetAsync<List<UserDTO>>(cacheKey);
         if (cached != null) 
         { 
-            _logger.LogInformation("{class}.{function}: Cache hit for {cacheKey}", loggingHolder.Class, loggingHolder.Function, cacheKey);
+            LogWarningNoRecord(loggingHolder);
             return new UserTransferGridDTO(cached!); 
         }
 
-        var result = await _repo.GetAllRecordsAsync(cancellationToken);
-        if (result == null || result.Count <= 0)
-        {
+        var result = await _repo.GetLatestRecordsAsync(cancellationToken);
+        if (result == null || result.Count <= 0)  
+        { 
             LogWarningNoRecord(loggingHolder);
-            return new UserTransferGridDTO([]);
+            return new UserTransferGridDTO([]); 
         }
 
         await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new UserTransferGridDTO( result); 
-
+        return new UserTransferGridDTO(result); 
     }
 
     public async Task<UserTransferGridDTO> GetRecordsByPaginationAsync(int page, CancellationToken cancellationToken)
@@ -58,32 +57,6 @@ public sealed class UserService : BaseService, IUserService
         }
 
         var result = await _repo.GetRecordsByPaginationAsync(page, cancellationToken);
-        if (result == null || result.Count <= 0)  
-        { 
-            LogWarningNoRecord(loggingHolder);
-            return new UserTransferGridDTO([]); 
-        }
-
-        await _cache.SetAsync(cacheKey, result, timeSpan);
-        return new UserTransferGridDTO(result); 
-    }
-
-    public async Task<UserTransferGridDTO> GetLatestRecordsAsync(CancellationToken cancellationToken)
-    {
-        LoggingHolder loggingHolder = new(nameof(UserService), nameof(GetLatestRecordsAsync));
-        
-        using Activity? activity = TracingConstants.StartApiActivity<UserService>(loggingHolder.Function);
-
-        var cacheKey = $"{CacheKey}:{loggingHolder.Function}";
-
-        var cached = await _cache.GetAsync<List<UserDTO>>(cacheKey);
-        if (cached != null) 
-        { 
-            LogWarningNoRecord(loggingHolder);
-            return new UserTransferGridDTO(cached!); 
-        }
-
-        var result = await _repo.GetLatestRecordsAsync(cancellationToken);
         if (result == null || result.Count <= 0)  
         { 
             LogWarningNoRecord(loggingHolder);

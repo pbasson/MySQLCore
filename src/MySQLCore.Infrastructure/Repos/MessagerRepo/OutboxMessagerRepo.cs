@@ -1,18 +1,14 @@
 namespace MySQLCore.Infrastructure.Repos.MessagerRepo;
 
-public sealed class OutboxMessagerRepo : BaseRepo, IOutboxMessagerRepo
+public sealed class OutboxMessagerRepo : BaseRepo<IBaseRepo>, IOutboxMessagerRepo
 {
-
-    public OutboxMessagerRepo(MySQLCoreDBContext dBContext) : base(dBContext) { }
+    public OutboxMessagerRepo(MySQLCoreDBContext dBContext, ILogger<IOutboxMessagerRepo> logger) : base(dBContext, logger) { }
 
     public async Task<List<OutboxMessage>> GetPendingAsync(int take)
     {
         return await _dBContext.OutboxMessage
-            .Where(x => x.Status == OutboxMessageStatus.Pending ||
-                        x.Status == OutboxMessageStatus.Failed)
-            .OrderBy(x => x.CreatedAt)
-            .Take(take)
-            .ToListAsync();
+            .Where(x => x.Status == OutboxMessageStatus.Pending || x.Status == OutboxMessageStatus.Failed)
+            .OrderBy(x => x.CreatedAt).Take(take).ToListAsync();
     }
 
     public async Task<bool> AddAsync(OutboxMessage message)
@@ -24,11 +20,16 @@ public sealed class OutboxMessagerRepo : BaseRepo, IOutboxMessagerRepo
     public async Task MarkPublishedAsync(long id)
     {
         var message = await _dBContext.OutboxMessage.FindAsync(id);
-        if (message == null) return;
+        if (message == null)
+        {
+            _logger.LogWarning($"OutboxMessage with id {id} not found for marking as published.");
+            return;
+        }
 
+        DateTime dateTime = DateTime.UtcNow;
         message.Status = OutboxMessageStatus.Published;
-        message.PublishedAt = DateTime.UtcNow;
-        message.LastAttemptAt = DateTime.UtcNow;
+        message.PublishedAt = dateTime;
+        message.LastAttemptAt = dateTime;
         message.ErrorMessage = null;
 
         await _dBContext.SaveChangesAsync();
@@ -37,7 +38,11 @@ public sealed class OutboxMessagerRepo : BaseRepo, IOutboxMessagerRepo
     public async Task MarkFailedAsync(long id, string errorMessage)
     {
         var message = await _dBContext.OutboxMessage.FindAsync(id);
-        if (message == null) return;
+        if (message == null)
+        {
+            _logger.LogWarning($"OutboxMessage with id {id} not found for marking as published.");
+            return;
+        }
 
         message.Status = OutboxMessageStatus.Failed;
         message.RetryCount++;
@@ -67,9 +72,7 @@ public sealed class OutboxMessagerRepo : BaseRepo, IOutboxMessagerRepo
 
     public Task<List<OutboxMessage>> GetLatestPublishedMessages()
     {
-        var result = _dBContext.OutboxMessage
-            .Where(x => x.Status == OutboxMessageStatus.Published )
+        return _dBContext.OutboxMessage.Where(x => x.Status == OutboxMessageStatus.Published )
             .OrderByDescending(x => x.PublishedAt).Take(1000).ToListAsync();
-        return result;
     }
 }

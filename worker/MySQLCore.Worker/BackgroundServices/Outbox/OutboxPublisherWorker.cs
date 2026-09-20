@@ -1,6 +1,6 @@
 namespace MySQLCore.Worker.BackgroundServices.Outbox;
 
-public class OutboxPublisherWorker : BackgroundService
+public sealed class OutboxPublisherWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<OutboxPublisherWorker> _logger;
@@ -34,11 +34,15 @@ public class OutboxPublisherWorker : BackgroundService
                         continue;
                     }
 
-                    await publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, message);
+                    await publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, message, stoppingToken);
 
                     await outboxRepo.MarkPublishedAsync(outbox.Id);
 
                     _logger.LogInformation( "Outbox message published. MessageId: {MessageId}", outbox.MessageId);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    return;
                 }
                 catch (Exception ex)
                 {

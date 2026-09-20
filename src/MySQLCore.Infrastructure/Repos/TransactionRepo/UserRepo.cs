@@ -1,22 +1,23 @@
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
-public sealed class UserRepo : BaseRepo, IUserRepo 
+public sealed class UserRepo : BaseRepo<IUserRepo>, IUserRepo 
 {
-    private ILogger<UserRepo> _logger = default!;
-    
-    public UserRepo(MySQLCoreDBContext dBContext, ILogger<UserRepo> logger) : base(dBContext)
+    public UserRepo(MySQLCoreDBContext dBContext, ILogger<UserRepo> logger) : base(dBContext, logger)
     {
         _logger = logger;
     }
 
-    public async Task<List<UserDTO>> GetAllRecordsAsync(CancellationToken cancellationToken) 
+    public async Task<List<UserDTO>> GetLatestRecordsAsync(CancellationToken cancellationToken) 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetAllRecordsAsync));
+        int take = 50;
 
-        var results = await _dBContext.User.OrderByDescending(x => x.Id).AsNoTracking()
+        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetLatestRecordsAsync));
+
+        var results = await _dBContext.User.OrderByDescending(x => x.Id).Take(take).AsNoTracking()
             .Select(x => x.ToMapped()).ToListAsync(cancellationToken);
         return results ?? [];
     }
+
 
     public async Task<List<UserDTO>> GetRecordsByPaginationAsync(int page, CancellationToken cancellationToken) 
     {
@@ -29,16 +30,6 @@ public sealed class UserRepo : BaseRepo, IUserRepo
         return results ?? [];
     }
 
-    public async Task<List<UserDTO>> GetLatestRecordsAsync(CancellationToken cancellationToken) 
-    {
-        int takeCount = 30;
-
-        using Activity? activity = TracingConstants.StartApiActivity<UserRepo>(nameof(GetLatestRecordsAsync));
-
-        var results = await _dBContext.User.OrderByDescending(x => x.Id).Take(takeCount).AsNoTracking()
-            .Select(x => x.ToMapped()).ToListAsync(cancellationToken);
-        return results ?? [];
-    }
 
     public async Task<UserDTO?> GetRecordByIdAsync(int id, CancellationToken cancellationToken) 
     {
@@ -158,7 +149,7 @@ public sealed class UserRepo : BaseRepo, IUserRepo
     
     private async Task<User?> FindRecordByIdAsync(int id, CancellationToken cancellationToken) 
     {
-        var result = await _dBContext.User.FindAsync(id, cancellationToken);
+        var result = await _dBContext.User.FindAsync([id], cancellationToken);
         return result.IsNotNull() ? result : null;
     }
 

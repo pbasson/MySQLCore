@@ -2,7 +2,7 @@ namespace MySQLCore.Core.Interfaces.Services.ImageGallery;
 
 public interface IImageGalleryService
 {
-    Task<TransferImageGalleryGridDTO> GetAllRecordsAsync(CancellationToken cancellationToken);
+    Task<TransferImageGalleryGridDTO> GetLatestRecordsAsync(CancellationToken cancellationToken);
     Task<TransferImageGalleryGridDTO> GetRecordsByPaginationAsync(int page, CancellationToken cancellationToken);
     Task<TransferImageGalleryDTO> GetRecordByIdAsync(int id, CancellationToken cancellationToken);
     Task<TransferImageGalleryGridDTO> GetRecordsByGalleryNameAsync(string galleryName, CancellationToken cancellationToken);

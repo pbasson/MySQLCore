@@ -1,6 +1,6 @@
 namespace MySQLCore.Worker.Messager;
 
-public class ProcessWorkerService
+public sealed class ProcessWorkerService
 {
     private readonly ILogger<ProcessWorkerService> _logger;
     private readonly IProcessedMessageRepo _repo;

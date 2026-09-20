@@ -1,7 +1,9 @@
 namespace MySQLCore.Worker.Messager;
 
-public class RabbitMQConnectionService
+public class RabbitMQConnectionService : IAsyncDisposable
 {
+    private readonly SemaphoreSlim _connectionLock = new(1, 1);
+    private IConnection? _connection;
     private readonly RabbitMQSettings _settings;
     private readonly ILogger<RabbitMQConnectionService> _logger;
 
@@ -14,14 +16,48 @@ public class RabbitMQConnectionService
     /// <summary>
     /// Setup connection to RabbitMQ with Retry
     /// </summary>
-    public async Task<IChannel> CreateConnection(CancellationToken stoppingToken)
+    public async Task<IChannel> CreateChannelAsync(CancellationToken stoppingToken, bool publisherConfirmations = false)
     {
-        var factory = new ConnectionFactory { HostName = MessagerConstants.RabbitMQService(), UserName = _settings.UserName, Password = _settings.Password };
-        var connection = await CreateConnectionWithRetryAsync(factory, stoppingToken);
-        var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
+        await _connectionLock.WaitAsync(stoppingToken);
+        try
+        {
+            if (_connection == null)
+            {
+                var factory = new ConnectionFactory
+                {
+                    HostName = MessagerConstants.RabbitMQService(),
+                    UserName = _settings.UserName,
+                    Password = _settings.Password,
+                    AutomaticRecoveryEnabled = true
+                };
+                _connection = await CreateConnectionWithRetryAsync(factory, stoppingToken);
+            }
 
-        await channel.QueueDeclareAsync(queue: MessagerConstants.IMAGE_QUEUE, durable: true, exclusive: false, autoDelete: false, cancellationToken: stoppingToken);
-        return channel;
+            // Keep the same connection so automatic recovery can restore the consumer too.
+            var channel = await _connection.CreateChannelAsync(
+                new CreateChannelOptions(publisherConfirmations, publisherConfirmations), stoppingToken);
+            try
+            {
+                await channel.QueueDeclareAsync(queue: MessagerConstants.IMAGE_QUEUE, durable: true,
+                    exclusive: false, autoDelete: false, cancellationToken: stoppingToken);
+                return channel;
+            }
+            catch
+            {
+                await channel.DisposeAsync();
+                throw;
+            }
+        }
+        finally
+        {
+            _connectionLock.Release();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_connection != null) await _connection.DisposeAsync();
+        _connectionLock.Dispose();
     }
 
     /// <summary>
@@ -57,4 +93,3 @@ public class RabbitMQConnectionService
  
 }
     
-

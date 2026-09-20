@@ -6,5 +6,6 @@ public enum OutboxMessageStatus
     Processing = 2,
     Published = 3,
     Failed = 4,
-    DeadLetter = 5
+    DeadLetter = 5,
+    Exhausted = 6
 }
