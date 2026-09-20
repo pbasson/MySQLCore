@@ -34,6 +34,10 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
                 await ProcessMessage(message, eventArgs, channel, stoppingToken);
             }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return;
+            }
             catch (Exception ex)
             {
                 await ProcessMessageException(eventArgs, channel, message, ex, stoppingToken);
@@ -62,9 +66,9 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
             activity != null, activity?.TraceId, activity?.SpanId);
 
         using var scope = _scopeFactory.CreateScope();
-        var processService = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ProcessWorkerService>();
+        var processService = scope.ServiceProvider.GetRequiredService<ProcessWorkerService>();
 
-        var result = await processService.ProcessAsync(message);
+        var result = await processService.ProcessAsync(message, stoppingToken);
 
         if(result == Enums.ProcessWorkerResult.Duplicate)
         {
@@ -72,13 +76,11 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
             return;
         }        
 
-        await processService.UpdateMessageStatusAsync(message.MessageId, ProcessMessageStatus.Processed);
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", 
             nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);
         MessageMetrics.Processed.Inc();
 
         await BasicAckAsync(eventArgs, channel, stoppingToken);
-        await processService.UpdateMessageStatusAsync(message.MessageId, ProcessMessageStatus.Acknowledged);
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", 
             nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Acknowledged), message.MessageId);
         MessageMetrics.Acknowledged.Inc();
@@ -90,9 +92,6 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         activity?.SetTag("message.type", nameof(ImageCreatedMessage));
         activity?.SetTag("DeliveryTag", eventArgs.DeliveryTag);
 
-        using var scope = _scopeFactory.CreateScope();
-        var processService = scope.ServiceProvider.GetRequiredService<ProcessWorkerService>();
-
         _logger.LogError(ex, "{messager} Message Status: {status}, DeliveryTag: {DeliveryTag}", nameof(ImageCreatedMessage),
             nameof(ProcessMessageStatus.Failed), eventArgs.DeliveryTag);
         MessageMetrics.Failed.Inc();
@@ -102,7 +101,6 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         {
             _logger.LogError("{messager} Message Status: {status} - moved to DLQ after {RetryCount} retries", nameof(ImageCreatedMessage), ProcessMessageStatus.DeadLetter, retryCount);
             await channel.BasicPublishAsync(exchange: string.Empty, routingKey: _settings.DeadLetterQueueName, body: eventArgs.Body, cancellationToken: stoppingToken);
-            await processService.UpdateMessageStatusAsync(message!.MessageId, ProcessMessageStatus.DeadLetter);
             await BasicAckAsync(eventArgs, channel, stoppingToken);
             MessageMetrics.DeadLetter.Inc();
             return;

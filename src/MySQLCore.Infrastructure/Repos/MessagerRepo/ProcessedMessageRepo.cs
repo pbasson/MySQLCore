@@ -32,9 +32,10 @@ public sealed class ProcessedMessageRepo : BaseRepo<IProcessedMessageRepo>, IPro
     {
         using Activity? activity = TracingConstants.StartApiActivity<ProcessedMessageRepo>(nameof(GetLatestProcessedMessages));
 
+        int take = 100;
         var result = _dBContext.ProcessedMessage
             // .Where(x => x.Status == OutboxMessageStatus.Published )
-            .OrderByDescending(x => x.ProcessedAt).Take(1000).ToListAsync();
+            .OrderByDescending(x => x.ProcessedAt).Take(take).ToListAsync();
         return result;
     }
 
@@ -51,5 +52,59 @@ public sealed class ProcessedMessageRepo : BaseRepo<IProcessedMessageRepo>, IPro
         _dBContext.ProcessedMessage.Update(message);
         var test = CancellationToken.None;
         return await SaveChangesAsync(cancellationToken: test);
+    }
+
+    public async Task<MessageProcessResult> ProcessImageCreatedAsync(ImageCreatedMessage message, CancellationToken cancellationToken)
+    {
+        if (message.MessageId == Guid.Empty)
+            throw new ArgumentException("MessageId must not be empty.", nameof(message));
+
+        var strategy = _dBContext.Database.CreateExecutionStrategy();
+
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await _dBContext.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                // Insert or lock the existing row without overwriting its completion state.
+                await _dBContext.Database.ExecuteSqlInterpolatedAsync($"""
+                    INSERT INTO ProcessedMessage
+                        (MessageId, MessageType, EntityName, EntityId, Status, ProcessedAt)
+                    VALUES ({message.MessageId}, {nameof(ImageCreatedMessage)}, {"ImageTransaction"},
+                        {message.ImageId}, {(int)ProcessMessageStatus.Processing}, {DateTime.UtcNow})
+                    ON DUPLICATE KEY UPDATE Id = Id
+                    """, cancellationToken);
+
+                var records = await _dBContext.ProcessedMessage.FromSqlInterpolated($"""
+                    SELECT * FROM ProcessedMessage WHERE MessageId = {message.MessageId} FOR UPDATE
+                    """).AsNoTracking().ToListAsync(cancellationToken);
+                var existing = records.Single();
+
+                if (existing.EntityId != message.ImageId || existing.MessageType != nameof(ImageCreatedMessage))
+                    throw new InvalidOperationException("MessageId is already associated with a different event.");
+
+                if (existing.Status is ProcessMessageStatus.Processed or
+                    ProcessMessageStatus.Acknowledged or ProcessMessageStatus.Completed)
+                {
+                    await transaction.CommitAsync(cancellationToken);
+                    return MessageProcessResult.Duplicate;
+                }
+
+                // The current handler only records completion. Future database work belongs here.
+                await _dBContext.ProcessedMessage.Where(x => x.MessageId == message.MessageId)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(x => x.Status, ProcessMessageStatus.Processed)
+                        .SetProperty(x => x.ProcessedAt, DateTime.UtcNow), cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+                return MessageProcessResult.Completed;
+            }
+            catch
+            {
+                await transaction.RollbackAsync(CancellationToken.None);
+                throw;
+            }
+        });
     }
 }

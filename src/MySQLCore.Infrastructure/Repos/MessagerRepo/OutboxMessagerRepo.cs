@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace MySQLCore.Infrastructure.Repos.MessagerRepo;
 
 public sealed class OutboxMessagerRepo : BaseRepo<IBaseRepo>, IOutboxMessagerRepo
@@ -6,9 +8,12 @@ public sealed class OutboxMessagerRepo : BaseRepo<IBaseRepo>, IOutboxMessagerRep
 
     public async Task<List<OutboxMessage>> GetPendingAsync(int take)
     {
-        return await _dBContext.OutboxMessage
-            .Where(x => x.Status == OutboxMessageStatus.Pending || x.Status == OutboxMessageStatus.Failed)
-            .OrderBy(x => x.CreatedAt).Take(take).ToListAsync();
+        var dateNow = DateTime.UtcNow;
+        return await _dBContext.OutboxMessage.Where(Filter(dateNow)).OrderBy(x => x.CreatedAt)
+            .ThenBy(x => x.Id).Take(take).ToListAsync();
+
+        static Expression<Func<OutboxMessage, bool>> Filter(DateTime now) => x => x.Status == OutboxMessageStatus.Pending 
+            || (x.Status == OutboxMessageStatus.Failed && (x.NextAttemptAt == null || x.NextAttemptAt <= now));
     }
 
     public async Task<bool> AddAsync(OutboxMessage message)
@@ -22,7 +27,7 @@ public sealed class OutboxMessagerRepo : BaseRepo<IBaseRepo>, IOutboxMessagerRep
         var message = await _dBContext.OutboxMessage.FindAsync(id);
         if (message == null)
         {
-            _logger.LogWarning($"OutboxMessage with id {id} not found for marking as published.");
+            _logger.LogWarning("OutboxMessage with id {id} not found for marking as published.", id);
             return;
         }
 
@@ -31,6 +36,7 @@ public sealed class OutboxMessagerRepo : BaseRepo<IBaseRepo>, IOutboxMessagerRep
         message.PublishedAt = dateTime;
         message.LastAttemptAt = dateTime;
         message.ErrorMessage = null;
+        message.NextAttemptAt = null;
 
         await _dBContext.SaveChangesAsync();
     }
@@ -40,14 +46,27 @@ public sealed class OutboxMessagerRepo : BaseRepo<IBaseRepo>, IOutboxMessagerRep
         var message = await _dBContext.OutboxMessage.FindAsync(id);
         if (message == null)
         {
-            _logger.LogWarning($"OutboxMessage with id {id} not found for marking as published.");
+            _logger.LogWarning("OutboxMessage with id {id} not found for marking as published.", id);
             return;
         }
 
-        message.Status = OutboxMessageStatus.Failed;
+        var now = DateTime.UtcNow;
+
         message.RetryCount++;
-        message.LastAttemptAt = DateTime.UtcNow;
+        message.LastAttemptAt = now;
         message.ErrorMessage = errorMessage;
+
+        TimeSpan? delay = message.RetryCount switch
+        {
+            1 => TimeSpan.FromSeconds(5),
+            2 => TimeSpan.FromSeconds(30),
+            3 => TimeSpan.FromMinutes(2),
+            4 => TimeSpan.FromMinutes(10),
+            _ => null
+        };
+
+        message.Status = delay.HasValue ? OutboxMessageStatus.Failed : OutboxMessageStatus.DeadLetter;
+        message.NextAttemptAt = delay.HasValue ? now.Add(delay.Value) : null;
 
         await _dBContext.SaveChangesAsync();
     }
@@ -59,6 +78,25 @@ public sealed class OutboxMessagerRepo : BaseRepo<IBaseRepo>, IOutboxMessagerRep
 
         message.RetryCount++;
         message.LastAttemptAt = DateTime.UtcNow;
+        message.ErrorMessage = errorMessage;
+
+        await _dBContext.SaveChangesAsync();
+    }
+
+    public async Task MarkDeadLetterAsync(long id, string errorMessage)
+    {
+        var message = await _dBContext.OutboxMessage.FindAsync(id);
+
+        if (message == null)
+        {
+            _logger.LogWarning( "OutboxMessage with id {id} not found for marking as DeadLetter.", id);
+            return;
+        }
+
+        message.Status = OutboxMessageStatus.DeadLetter;
+        message.RetryCount++;
+        message.LastAttemptAt = DateTime.UtcNow;
+        message.NextAttemptAt = null;
         message.ErrorMessage = errorMessage;
 
         await _dBContext.SaveChangesAsync();

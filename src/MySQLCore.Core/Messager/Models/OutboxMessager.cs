@@ -19,6 +19,7 @@ public class OutboxMessage
     public int RetryCount { get; set; }
 
     public string? ErrorMessage { get; set; }
+    public DateTime? NextAttemptAt { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

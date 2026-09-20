@@ -8,10 +8,17 @@ public class MySQLCoreDBContext(DbContextOptions<MySQLCoreDBContext> option) : D
     public virtual DbSet<ProcessedMessage> ProcessedMessage {get; set;}
     public virtual DbSet<OutboxMessage> OutboxMessage {get; set;}
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<ProcessedMessage>().HasIndex(x => x.MessageId)
+            .IsUnique().HasDatabaseName("UX_ProcessedMessage_MessageId");
+    }
+
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         SetChanges();
-        return base.SaveChangesAsync();
+        return base.SaveChangesAsync(cancellationToken);
     }
 
     public override int SaveChanges()
