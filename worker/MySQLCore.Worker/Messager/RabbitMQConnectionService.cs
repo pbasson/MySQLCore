@@ -40,6 +40,20 @@ public class RabbitMQConnectionService : IAsyncDisposable
             {
                 await channel.QueueDeclareAsync(queue: MessagerConstants.IMAGE_QUEUE, durable: true,
                     exclusive: false, autoDelete: false, cancellationToken: stoppingToken);
+
+                await channel.QueueDeclareAsync(queue: _settings.DeadLetterQueueName, durable: true,
+                    exclusive: false, autoDelete: false, cancellationToken: stoppingToken);
+
+                var retryArguments = new Dictionary<string, object?>
+                {
+                    ["x-message-ttl"] = 30_000,
+                    ["x-dead-letter-exchange"] = "",
+                    ["x-dead-letter-routing-key"] = MessagerConstants.IMAGE_QUEUE
+                };
+
+                await channel.QueueDeclareAsync(queue: _settings.RetryQueueName, durable: true,
+                    exclusive: false, autoDelete: false, arguments: retryArguments, cancellationToken: stoppingToken); 
+               
                 return channel;
             }
             catch

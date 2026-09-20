@@ -165,7 +165,6 @@ public sealed class ImageGalleryService : BaseService, IImageGalleryService
             _logger.LogWarning("{class}.{function}: No record deleted for {Id}", loggingHolder.Class, loggingHolder.Function, id);
         }
 
-        await _cache.RemoveAsync("image:GetAllRecordsAsync");
         await _cache.RemoveAsync($"image:GetRecordByIdAsync:id={id}");
         return result;
     }
