@@ -19,6 +19,7 @@ public class OutboxMessage
     public int RetryCount { get; set; }
 
     public string? ErrorMessage { get; set; }
+    public DateTime? NextAttemptAt { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -29,15 +30,12 @@ public class OutboxMessage
 
 public static class OutboxMessageTransfer
 {
-    public static OutboxMessage GetTransfer<TMessage>( Guid messageId, string eventType, TMessage message) where TMessage : IMessage
+    public static OutboxMessage GetTransfer<TMessage>(Guid messageId, string eventType, TMessage message) where TMessage : IMessage => new OutboxMessage
     {
-        return new OutboxMessage
-        {
-            MessageId = messageId,
-            EventType = eventType,
-            Payload = JsonSerializer.Serialize(message),
-            RetryCount = 0,
-            CreatedAt = DateTime.UtcNow
-        };
-    }
+        MessageId = messageId,
+        EventType = eventType,
+        Payload = JsonSerializer.Serialize(message),
+        RetryCount = 0,
+        CreatedAt = DateTime.UtcNow
+    };
 }

@@ -9,9 +9,9 @@ public sealed class ImageGalleryService : BaseService, IImageGalleryService
         _repo = repo;
     }
 
-    public async Task<TransferImageGalleryGridDTO> GetAllRecordsAsync(CancellationToken cancellationToken)
+    public async Task<TransferImageGalleryGridDTO> GetLatestRecordsAsync(CancellationToken cancellationToken)
     {
-        LoggingHolder loggingHolder = new(nameof(ImageGalleryService), nameof(GetAllRecordsAsync));
+        LoggingHolder loggingHolder = new(nameof(ImageGalleryService), nameof(GetLatestRecordsAsync));
 
         using Activity? activity = TracingConstants.StartApiActivity<ImageGalleryService>(loggingHolder.Function);
 
@@ -24,10 +24,10 @@ public sealed class ImageGalleryService : BaseService, IImageGalleryService
             return new TransferImageGalleryGridDTO(cached!); 
         }
 
-        var result = await _repo.GetAllRecordsAsync(cancellationToken);
+        var result = await _repo.GetLatestRecordsAsync(cancellationToken);
         if (result == null || result.Count <= 0) 
         { 
-            _logger.LogWarning("{class}.{function}: No records found", loggingHolder.Class, nameof(GetAllRecordsAsync));
+            _logger.LogWarning("{class}.{function}: No records found", loggingHolder.Class, loggingHolder.Function);
             return new TransferImageGalleryGridDTO(); 
         }
 
@@ -130,7 +130,6 @@ public sealed class ImageGalleryService : BaseService, IImageGalleryService
             _logger.LogWarning("{class}.{function}: {log}", loggingHolder.Class, loggingHolder.Function, "EntityNotCreated");
             return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
         }
-        await _cache.RemoveAsync("image:GetAllRecordsAsync");
         return result;
     }
 
@@ -149,7 +148,6 @@ public sealed class ImageGalleryService : BaseService, IImageGalleryService
             return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
         }
 
-        await _cache.RemoveAsync("image:GetAllRecordsAsync");
         await _cache.RemoveAsync($"image:GetRecordByIdAsync:id={dto.ImageGalleryId}");
         return result;
     }
@@ -167,7 +165,6 @@ public sealed class ImageGalleryService : BaseService, IImageGalleryService
             _logger.LogWarning("{class}.{function}: No record deleted for {Id}", loggingHolder.Class, loggingHolder.Function, id);
         }
 
-        await _cache.RemoveAsync("image:GetAllRecordsAsync");
         await _cache.RemoveAsync($"image:GetRecordByIdAsync:id={id}");
         return result;
     }

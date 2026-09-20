@@ -10,9 +10,9 @@ public sealed class ImageGalleryController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetAllRecordsAsync(CancellationToken cancellationToken) 
+    public async Task<ActionResult<TransferImageGalleryGridDTO>> GetLatestRecordsAsync(CancellationToken cancellationToken) 
     {
-        var result = await _service.GetAllRecordsAsync(cancellationToken);
+        var result = await _service.GetLatestRecordsAsync(cancellationToken);
         return result.IsNotNull() && result.Records != null && result.Records.Count > 0 ? Ok(result) : NoContent();
     }
 
@@ -46,7 +46,7 @@ public sealed class ImageGalleryController : BaseController
     public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageGalleryDTO dto, CancellationToken cancellationToken) 
     {
         var result = await _service.CreateRecordAsync(dto, cancellationToken);
-        return CreatedAtAction(nameof(GetRecordByIdAsync), new { id = result.Id }, result);
+        return StatusCode(StatusCodes.Status201Created, result);
     }
 
     [HttpPut("update")]

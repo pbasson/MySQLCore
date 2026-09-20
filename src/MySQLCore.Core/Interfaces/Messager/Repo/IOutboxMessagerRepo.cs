@@ -1,13 +1,13 @@
 namespace MySQLCore.Core.Interfaces.Messager.Repo;
 
-public interface IOutboxMessagerRepo
+public interface IOutboxMessagerRepo : IBaseRepo 
 {
     Task<List<OutboxMessage>> GetPendingAsync(int take);
     Task<bool> AddAsync(OutboxMessage message);
     Task MarkPublishedAsync(long id);
     Task MarkFailedAsync(long id, string errorMessage);
     Task IncrementRetryAsync(long id, string errorMessage);
-
+    Task MarkDeadLetterAsync(long id, string errorMessage);
     Task<OutboxMessage> GetMessageById(long id);
     Task<List<OutboxMessage>> GetLatestPublishedMessages();
 }

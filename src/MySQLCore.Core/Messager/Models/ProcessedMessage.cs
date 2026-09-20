@@ -13,16 +13,13 @@ public class ProcessedMessage
 
 public class ProcessedMessageTransfer
 {
-    public ProcessedMessage GetTransfer(Guid messageId, string messageType, string entityName, int entityId)
+    public ProcessedMessage GetTransfer(Guid messageId, string messageType, string entityName, int entityId) => new ProcessedMessage()
     {
-        return new ProcessedMessage()
-        {
-            MessageId = messageId,
-            MessageType = messageType,
-            EntityName = entityName,
-            EntityId = entityId,
-            Status = ProcessMessageStatus.Processing,
-            ProcessedAt = DateTime.UtcNow,
-        };
-    }
+        MessageId = messageId,
+        MessageType = messageType,
+        EntityName = entityName,
+        EntityId = entityId,
+        Status = ProcessMessageStatus.Processing,
+        ProcessedAt = DateTime.UtcNow,
+    };
 }

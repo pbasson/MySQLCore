@@ -1,6 +1,6 @@
 namespace MySQLCore.Worker.Messager;
 
-public class ProcessWorkerService
+public sealed class ProcessWorkerService
 {
     private readonly ILogger<ProcessWorkerService> _logger;
     private readonly IProcessedMessageRepo _repo;
@@ -11,7 +11,7 @@ public class ProcessWorkerService
         _repo = repo;
     }
 
-    public async Task<ProcessWorkerResult> ProcessAsync(ImageCreatedMessage message)
+    public async Task<ProcessWorkerResult> ProcessAsync(ImageCreatedMessage message, CancellationToken cancellationToken = default)
     {
         using Activity? activity = TracingConstants.StartMessagingActivity<ProcessWorkerService>(nameof(ProcessAsync));
         activity?.SetTag("message.id", message.MessageId);
@@ -21,19 +21,16 @@ public class ProcessWorkerService
         _logger.LogInformation( "{messager} Message Status: {status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", 
             nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Pending), message.MessageId, message.ImageId, message.FileName);
         
-        if (await _repo.ExistsAsync(message.MessageId))
+        var result = await _repo.ProcessImageCreatedAsync(message, cancellationToken);
+        if (result == MessageProcessResult.Duplicate)
         {
-            await _repo.UpdateAsync(message.MessageId, ProcessMessageStatus.IgnoredDuplicate);
             _logger.LogInformation("{messager} Message Status: {status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.IgnoredDuplicate), message.MessageId);
             MessageMetrics.Duplicate.Inc();
             return ProcessWorkerResult.Duplicate;
         }
       
-        await _repo.AddAsync(new ProcessedMessageTransfer().GetTransfer(message.MessageId, nameof(ImageCreatedMessage), "ImageTransaction", message.ImageId));
-        
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", nameof(ImageCreatedMessage),
-            nameof(ProcessMessageStatus.Processing), message.MessageId, message.ImageId, message.FileName);
-        MessageMetrics.Processing.Inc();
+            nameof(ProcessMessageStatus.Processed), message.MessageId, message.ImageId, message.FileName);
         return ProcessWorkerResult.Completed;
     }
 

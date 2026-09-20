@@ -1,14 +1,15 @@
 namespace MySQLCore.Infrastructure.Repos.TransactionRepo;
 
-public sealed class ImageGalleryRepo : BaseRepo, IImageGalleryRepo
+public sealed class ImageGalleryRepo : BaseRepo<IImageGalleryRepo>, IImageGalleryRepo
 {
-    public ImageGalleryRepo(MySQLCoreDBContext dBContext): base(dBContext) { }
+    public ImageGalleryRepo(MySQLCoreDBContext dBContext, ILogger<IImageGalleryRepo> logger): base(dBContext, logger) { }
 
-    public async Task<List<ImageGalleryDTO>> GetAllRecordsAsync(CancellationToken cancellationToken) 
+    public async Task<List<ImageGalleryDTO>> GetLatestRecordsAsync(CancellationToken cancellationToken) 
     {
-        using Activity? activity = TracingConstants.StartApiActivity<ImageGalleryRepo>(nameof(GetAllRecordsAsync));
+        int take = 50; 
+        using Activity? activity = TracingConstants.StartApiActivity<ImageGalleryRepo>(nameof(GetLatestRecordsAsync));
 
-        var results = await _dBContext.ImageGallery.OrderByDescending(x => x.ImageGalleryId).Take(100)  
+        var results = await _dBContext.ImageGallery.OrderByDescending(x => x.ImageGalleryId).Take(take)  
             .Include(x => x.ImageFile).AsNoTracking()
             .Select(x => x.ToMapped()).ToListAsync(cancellationToken);
         return results ?? [];

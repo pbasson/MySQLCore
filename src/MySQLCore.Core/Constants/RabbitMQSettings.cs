@@ -7,7 +7,7 @@ public class RabbitMQSettings
     public string Password { get; set; } = string.Empty;
     public string QueueName { get; set; } = string.Empty;
     public string DeadLetterQueueName { get; set; } = string.Empty;
-
+    public string RetryQueueName { get; set; } = "image-processing-retry";
     public int MaxRetryCount { get; set; } = 3;
     public readonly string RetryHeader = "x-retry-count";
 }

@@ -1,6 +1,6 @@
 namespace MySQLCore.Worker.BackgroundServices.Outbox;
 
-public class OutboxPublisherWorker : BackgroundService
+public sealed class OutboxPublisherWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<OutboxPublisherWorker> _logger;
@@ -15,39 +15,69 @@ public class OutboxPublisherWorker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            using var scope = _scopeFactory.CreateScope();
-
-            var outboxRepo = scope.ServiceProvider.GetRequiredService<IOutboxMessagerRepo>();
-            var publisher = scope.ServiceProvider.GetRequiredService<IMessagePublisher>();
-
-            var messages = await outboxRepo.GetPendingAsync(10);
-
-            foreach (var outbox in messages)
+            try
             {
-                try
-                {
-                    var message = JsonSerializer.Deserialize<ImageCreatedMessage>(outbox.Payload);
+                int messageCount = 10;
+                using var scope = _scopeFactory.CreateScope();
 
-                    if (message == null)
+                var outboxRepo = scope.ServiceProvider.GetRequiredService<IOutboxMessagerRepo>();
+                var publisher = scope.ServiceProvider.GetRequiredService<IMessagePublisher>();
+
+                var messages = await outboxRepo.GetPendingAsync(messageCount);
+
+                foreach (var outbox in messages)
+                {
+                    try
                     {
-                        await outboxRepo.MarkFailedAsync(outbox.Id, "Invalid payload");
-                        continue;
+                        var message = JsonSerializer.Deserialize<ImageCreatedMessage>(outbox.Payload);
+
+                        if (message == null)
+                        {
+                            _logger.LogWarning("Invalid outbox payload. MessageId: {MessageId}", outbox.MessageId);
+                            await outboxRepo.MarkDeadLetterAsync(outbox.Id, "Invalid payload");
+                            continue;
+                        }
+
+                        await publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, message, stoppingToken);
+
+                        await outboxRepo.MarkPublishedAsync(outbox.Id);
+
+                        _logger.LogInformation( "Outbox message published. MessageId: {MessageId}", outbox.MessageId);
                     }
+                    catch (JsonException ex)
+                    {
+                        _logger.LogError(ex, "Invalid outbox payload. MessageId: {MessageId}", outbox.MessageId);
 
-                    await publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, message);
-
-                    await outboxRepo.MarkPublishedAsync(outbox.Id);
-
-                    _logger.LogInformation( "Outbox message published. MessageId: {MessageId}", outbox.MessageId);
-                }
-                catch (Exception ex)
-                {
-                    await outboxRepo.MarkFailedAsync(outbox.Id, ex.Message);
-                    _logger.LogError( ex, "Failed publishing outbox message. MessageId: {MessageId}", outbox.MessageId);
+                        await outboxRepo.MarkDeadLetterAsync(outbox.Id, ex.Message);
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError( ex, "Failed publishing outbox message. MessageId: {MessageId}", outbox.MessageId);
+                        await outboxRepo.MarkFailedAsync(outbox.Id, ex.Message);
+                    }
                 }
             }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Outbox polling cycle failed. Retrying in 5 seconds.");
+            }
 
-            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return;
+            }
         }
     }
 }
