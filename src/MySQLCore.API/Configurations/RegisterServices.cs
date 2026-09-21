@@ -18,7 +18,6 @@ public static class RegisterServices
     {
         services.AddScoped<IUserService,UserService>();
         services.AddScoped<IImageGalleryService,ImageGalleryService>();
-        services.AddScoped<ICacheService,RedisCacheService>();
         services.AddScoped<IProcessedMessageService,ProcessedMessageService>();
         services.AddScoped<IOutboxMessagerService,OutboxMessagerService>();
     }

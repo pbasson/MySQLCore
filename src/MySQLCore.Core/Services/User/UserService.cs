@@ -136,9 +136,8 @@ public sealed class UserService : BaseService, IUserService
         if (result == null || !result.Success) 
         { 
             _logger.LogWarning("{class}.{function}: {log}", loggingHolder.Class, loggingHolder.Function, "EntityNotCreated");
-            return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
+            return result ?? TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated);
         }
-        await _cache.RemoveAsync($"{CacheKey}:GetAllRecordsAsync");
         return result;
     }
 
@@ -156,10 +155,9 @@ public sealed class UserService : BaseService, IUserService
         if (result == null || !result.Success) 
         { 
             _logger.LogWarning("{class}.{function}: {log} for {Id}", loggingHolder.Class, loggingHolder.Function, "EntityNotUpdated", dto.Id);
-            return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
+            return result ?? TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated);
         }
 
-        await _cache.RemoveAsync($"{CacheKey}:GetAllRecordsAsync");
         await _cache.RemoveAsync($"{CacheKey}:GetRecordByIdAsync:id={dto.Id}");
         return result;
     }
@@ -177,7 +175,6 @@ public sealed class UserService : BaseService, IUserService
             _logger.LogWarning("{class}.{function}: No record deleted for {Id}", nameof(UserService), nameof(DeleteRecordByIdAsync), id);
         }
 
-        await _cache.RemoveAsync($"{CacheKey}:GetAllRecordsAsync");
         await _cache.RemoveAsync($"{CacheKey}:GetRecordByIdAsync:id={id}");
         return result;
     }

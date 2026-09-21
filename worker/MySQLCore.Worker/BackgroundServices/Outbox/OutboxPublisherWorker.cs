@@ -31,10 +31,10 @@ public sealed class OutboxPublisherWorker : BackgroundService
                     {
                         var message = JsonSerializer.Deserialize<ImageCreatedMessage>(outbox.Payload);
 
-                        if (message == null)
+                        if (message == null || message.MessageId == Guid.Empty || message.MessageId != outbox.MessageId)
                         {
                             _logger.LogWarning("Invalid outbox payload. MessageId: {MessageId}", outbox.MessageId);
-                            await outboxRepo.MarkDeadLetterAsync(outbox.Id, "Invalid payload");
+                            await outboxRepo.MarkDeadLetterAsync(outbox.Id, "Invalid payload: missing or mismatched MessageId.");
                             continue;
                         }
 

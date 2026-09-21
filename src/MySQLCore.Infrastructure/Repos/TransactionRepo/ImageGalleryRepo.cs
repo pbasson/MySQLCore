@@ -68,7 +68,10 @@ public sealed class ImageGalleryRepo : BaseRepo<IImageGalleryRepo>, IImageGaller
                 _dBContext.ImageGallery.Add(mapped);
                 await _dBContext.SaveChangesAsync(cancellationToken);
 
-                var message = new ImageCreatedMessage(mapped.ImageGalleryId, dto.GalleryName!);
+                var message = new ImageCreatedMessage(mapped.ImageGalleryId, dto.GalleryName!)
+                {
+                    MessageId = Guid.NewGuid()
+                };
                 var outbox = OutboxMessageTransfer.GetTransfer( message.MessageId, nameof(CreateImageGalleryDTO), message);
 
                 _dBContext.OutboxMessage.Add(outbox);
@@ -130,7 +133,10 @@ public sealed class ImageGalleryRepo : BaseRepo<IImageGalleryRepo>, IImageGaller
                 if (addList.Count > 0) { _dBContext.ImageFile.AddRange(addList); }
                 await SaveChangesAsync(cancellationToken);
 
-                var exportMessage = new ImageCreatedMessage( existDTO.ImageGalleryId, existDTO.GalleryName!);
+                var exportMessage = new ImageCreatedMessage(existDTO.ImageGalleryId, existDTO.GalleryName!)
+                {
+                    MessageId = Guid.NewGuid()
+                };
 
                 _dBContext.OutboxMessage.Add(OutboxMessageTransfer.GetTransfer(exportMessage.MessageId, nameof(UpdateImageGalleryDTO), exportMessage));
                 await SaveChangesAsync(cancellationToken);

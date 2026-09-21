@@ -37,7 +37,7 @@ public sealed class ImageGalleryController : BaseController
     [HttpGet("by-name/{galleryName}")]
     public async Task<ActionResult<TransferImageGalleryGridDTO>> GetRecordsByGalleryNameAsync(string galleryName, CancellationToken cancellationToken) 
     {
-        if (galleryName.Length > 3) return BadRequest(); 
+        if (string.IsNullOrWhiteSpace(galleryName) || galleryName.Trim().Length < 4) return BadRequest(); 
         var result = await _service.GetRecordsByGalleryNameAsync(galleryName, cancellationToken);
         return result.IsNotNull() && result.Records != null && result.Records.Count > 0 ? Ok(result) : NotFound();
     }
@@ -46,14 +46,16 @@ public sealed class ImageGalleryController : BaseController
     public async Task<ActionResult<TransferDTO>> CreateRecord(CreateImageGalleryDTO dto, CancellationToken cancellationToken) 
     {
         var result = await _service.CreateRecordAsync(dto, cancellationToken);
-        return StatusCode(StatusCodes.Status201Created, result);
+        return result.Success && result.ServiceResultType == MySQLCore.Core.Enums.ServiceResultType.Success
+            ? StatusCode(StatusCodes.Status201Created, result) : TransferFailure(result);
     }
 
     [HttpPut("update")]
     public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateImageGalleryDTO dto, CancellationToken cancellationToken) 
     {
         var result = await _service.UpdateRecordAsync(dto, cancellationToken);
-        return result.IsNotNull() && result.Id > 0 ? Ok(result) : NotFound();
+        return result.Success && result.ServiceResultType == MySQLCore.Core.Enums.ServiceResultType.Success
+            ? Ok(result) : TransferFailure(result);
     }
 
     [HttpDelete("delete/{id:int}")]

@@ -128,7 +128,7 @@ public sealed class ImageGalleryService : BaseService, IImageGalleryService
         if (result == null || !result.Success) 
         { 
             _logger.LogWarning("{class}.{function}: {log}", loggingHolder.Class, loggingHolder.Function, "EntityNotCreated");
-            return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
+            return result ?? TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated);
         }
         return result;
     }
@@ -145,7 +145,7 @@ public sealed class ImageGalleryService : BaseService, IImageGalleryService
         if (result == null || !result.Success) 
         { 
             _logger.LogWarning("{class}.{function}: {log} for {Id}", loggingHolder.Class, loggingHolder.Function, "EntityNotUpdated", dto.ImageGalleryId);
-            return TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated); 
+            return result ?? TransferFactory.GetTransferFailure(TransferEnum.EntityNotCreated);
         }
 
         await _cache.RemoveAsync($"image:GetRecordByIdAsync:id={dto.ImageGalleryId}");
