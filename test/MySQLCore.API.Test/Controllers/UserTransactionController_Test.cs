@@ -177,7 +177,7 @@ public class UserTransactionController_Test : Base_Test
         var result = await _controller.UpdateRecord(dto, CancellationToken.None);
 
         // Assert
-        Assert.IsType<NotFoundResult>(result.Result);
+        Assert.IsType<NotFoundObjectResult>(result.Result);
 
         _service.Verify(x => x.UpdateRecordAsync(dto, CancellationToken.None), Times.Once);
     }

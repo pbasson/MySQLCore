@@ -33,9 +33,16 @@ public static class RegisterDataServices
 
     private static void RegisterCache(this IServiceCollection services, IConfiguration configuration)
     {
+        if (!configuration.GetValue<bool>("Cache:Enabled"))
+        {
+            services.AddSingleton<ICacheService, NoOpCacheService>();
+            return;
+        }
+
         var redisConnection = configuration.GetValue<string>("Redis:Connection")
             ?? throw new InvalidOperationException("Redis connection is not configured.");
 
+        services.AddScoped<ICacheService, RedisCacheService>();
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = redisConnection;

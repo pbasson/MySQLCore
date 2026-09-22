@@ -57,7 +57,7 @@ public sealed class ProcessedMessageTests : IAsyncLifetime
     [MySqlFact]
     public async Task RedeliveryAfterCommitPreservesCompletion()
     {
-        var message = new ImageCreatedMessage(1, "gallery");
+        var message = new ImageCreatedMessage(1, "gallery") { MessageId = Guid.NewGuid() };
         Assert.Equal(MessageProcessResult.Completed, await Process(message));
         await using var db = CreateContext();
         var first = await db.ProcessedMessage.AsNoTracking().SingleAsync();
@@ -71,7 +71,7 @@ public sealed class ProcessedMessageTests : IAsyncLifetime
     [MySqlFact]
     public async Task ConcurrentDeliveriesCompleteOnlyOnce()
     {
-        var message = new ImageCreatedMessage(2, "gallery");
+        var message = new ImageCreatedMessage(2, "gallery") { MessageId = Guid.NewGuid() };
         var results = await Task.WhenAll(Enumerable.Range(0, 12).Select(_ => Process(message)));
         Assert.Single(results, x => x == MessageProcessResult.Completed);
         Assert.Equal(11, results.Count(x => x == MessageProcessResult.Duplicate));
@@ -82,7 +82,7 @@ public sealed class ProcessedMessageTests : IAsyncLifetime
     [MySqlFact]
     public async Task UnfinishedRecordResumesInsteadOfBeingSkipped()
     {
-        var message = new ImageCreatedMessage(3, "gallery");
+        var message = new ImageCreatedMessage(3, "gallery") { MessageId = Guid.NewGuid() };
         await using var db = CreateContext();
         db.ProcessedMessage.Add(new ProcessedMessageTransfer().GetTransfer(
             message.MessageId, nameof(ImageCreatedMessage), "ImageTransaction", message.ImageId));
@@ -95,7 +95,7 @@ public sealed class ProcessedMessageTests : IAsyncLifetime
     [MySqlFact]
     public async Task FailureBeforeCommitRollsBackClaimAndAllowsRetry()
     {
-        var message = new ImageCreatedMessage(4, "gallery");
+        var message = new ImageCreatedMessage(4, "gallery") { MessageId = Guid.NewGuid() };
         await using var db = CreateContext();
         await db.Database.ExecuteSqlRawAsync("""
             CREATE TRIGGER reject_completion BEFORE UPDATE ON ProcessedMessage
@@ -110,7 +110,7 @@ public sealed class ProcessedMessageTests : IAsyncLifetime
     [MySqlFact]
     public async Task ReusedIdForDifferentEntityIsRejected()
     {
-        var message = new ImageCreatedMessage(5, "gallery");
+        var message = new ImageCreatedMessage(5, "gallery") { MessageId = Guid.NewGuid() };
         await Process(message);
         message.ImageId = 6;
         await Assert.ThrowsAsync<InvalidOperationException>(() => Process(message));

@@ -30,6 +30,7 @@ public static class TransferFactory
     public static TransferDTO GetTransferFailure(TransferEnum transfer)
     {
         var message = "Data Error";
+        var resultType = ServiceResultType.Failed;
 
         switch (transfer)
         {
@@ -41,13 +42,17 @@ public static class TransferFactory
                 break;
             case TransferEnum.EntityNotExist:
                 message = "Entity Does Not Exist";
+                resultType = ServiceResultType.NotFound;
+                break;
+            case TransferEnum.Conflict:
+                message = "Entity Already Exists";
+                resultType = ServiceResultType.Conflict;
                 break;
             case TransferEnum.SaveChangesNotExecuted:
                 message = "Save Changes Not Executed";
                 break;
 
         }
-        return new TransferDTO(0, message, ServiceResultType.Failed);
+        return new TransferDTO(0, message, resultType);
     }
 }
-

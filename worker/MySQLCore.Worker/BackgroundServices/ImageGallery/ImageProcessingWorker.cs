@@ -93,7 +93,7 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
             return;
         }
 
-        if (message == null)
+        if (message == null || message.MessageId == Guid.Empty)
         {
             await DeadLetterInvalidAsync(eventArgs, channel, stoppingToken);
             return;

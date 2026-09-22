@@ -69,6 +69,9 @@ public sealed class UserController : BaseController
     {
         var result = await _service.CreateRecordAsync(dto, cancellationToken);
 
+        if (!result.Success || result.ServiceResultType != MySQLCore.Core.Enums.ServiceResultType.Success)
+            return TransferFailure(result);
+
         return CreatedAtAction(nameof(GetRecordById), new { id = result.Id }, result);
     }
 
@@ -81,7 +84,8 @@ public sealed class UserController : BaseController
     public async Task<ActionResult<TransferDTO>> UpdateRecord(UpdateUserDTO dto, CancellationToken cancellationToken) 
     {
         var result = await _service.UpdateRecordAsync(dto, cancellationToken);
-        return result.IsNotNull() && result.Id > 0 ? Ok(result) : NotFound();
+        return result.Success && result.ServiceResultType == MySQLCore.Core.Enums.ServiceResultType.Success
+            ? Ok(result) : TransferFailure(result);
     }
 
     /// <summary>
