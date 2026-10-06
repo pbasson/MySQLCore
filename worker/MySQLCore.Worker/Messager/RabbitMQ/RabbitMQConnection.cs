@@ -34,8 +34,7 @@ public sealed class RabbitMQConnection : IRabbitMQConnection, IAsyncDisposable
             }
 
             // Keep the same connection so automatic recovery can restore the consumer too.
-            var channel = await _connection.CreateChannelAsync(
-                new CreateChannelOptions(publisherConfirmations, publisherConfirmations), stoppingToken);
+            var channel = await _connection.CreateChannelAsync(new CreateChannelOptions(publisherConfirmations, publisherConfirmations), stoppingToken);
             try
             {
                 await channel.QueueDeclareAsync(queue: MessagerConstants.IMAGE_QUEUE, durable: true,

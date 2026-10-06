@@ -1,3 +1,5 @@
+using MySQLCore.Worker.Constants;
+
 namespace MySQLCore.Worker.BackgroundServices.Outbox;
 
 public sealed class OutboxWorker : BackgroundService

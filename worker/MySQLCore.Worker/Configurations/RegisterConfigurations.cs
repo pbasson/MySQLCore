@@ -1,3 +1,5 @@
+using MySQLCore.Worker.Constants.Settings;
+
 namespace MySQLCore.Worker.Configurations;
 
 public static class RegisterConfigurations

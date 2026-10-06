@@ -1,3 +1,6 @@
+using MySQLCore.Worker.Constants;
+using MySQLCore.Worker.Constants.Settings;
+
 namespace MySQLCore.Worker.BackgroundServices.ImageGallery;
 
 public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>

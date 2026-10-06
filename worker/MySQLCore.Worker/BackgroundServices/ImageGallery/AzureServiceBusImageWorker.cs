@@ -1,3 +1,5 @@
+using MySQLCore.Worker.Constants.Settings;
+
 namespace MySQLCore.Worker.BackgroundServices.ImageGallery;
 
 public class AzureServiceBusImageWorker : BaseWorker<ImageGalleryMessage>

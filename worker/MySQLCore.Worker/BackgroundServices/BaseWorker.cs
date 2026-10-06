@@ -1,3 +1,5 @@
+using MySQLCore.Worker.Constants.Settings;
+
 namespace MySQLCore.Worker.BackgroundServices;
 
 public abstract class BaseWorker<TMessage> : BackgroundService where TMessage: IMessage 

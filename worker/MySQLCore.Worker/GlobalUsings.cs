@@ -1,6 +1,8 @@
 global using System.Diagnostics;
 global using System.Text;
 global using System.Text.Json;
+global using Azure.Identity;
+global using Azure.Messaging.ServiceBus;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Options;
 global using MySQLCore.Core.Constants;
@@ -13,6 +15,8 @@ global using MySQLCore.Infrastructure.Repos.MessagerRepo;
 global using MySQLCore.Worker.BackgroundServices.ImageGallery;
 global using MySQLCore.Worker.BackgroundServices.Outbox;
 global using MySQLCore.Worker.Configurations;
+global using MySQLCore.Worker.Constants;
+global using MySQLCore.Worker.Constants.Settings;
 global using MySQLCore.Worker.Enums;
 global using MySQLCore.Worker.Interfaces.Worker;
 global using MySQLCore.Worker.Messager;

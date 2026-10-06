@@ -1,4 +1,4 @@
-namespace MySQLCore.Core.Constants;
+namespace MySQLCore.Worker.Constants.Settings;
 
 public sealed class MessagerSettings
 {
