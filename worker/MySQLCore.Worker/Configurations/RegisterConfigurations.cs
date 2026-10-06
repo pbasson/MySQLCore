@@ -33,6 +33,8 @@ public static class RegisterConfigurations
             case "AzureServiceBus":
                 services.AddOptions<AzureServiceBusSetting>()
                     .Bind(configuration.GetSection("Messaging:AzureServiceBus"))
+                    .Validate(settings => !string.IsNullOrWhiteSpace(settings.QueueName),
+                        "Messaging:AzureServiceBus:QueueName is required.")
                     .Validate(settings => !string.IsNullOrWhiteSpace(settings.FullyQualifiedNamespace),
                         "Messaging:AzureServiceBus:FullyQualifiedNamespace is required.")
                     .Validate(settings => Uri.CheckHostName(settings.FullyQualifiedNamespace) == UriHostNameType.Dns,

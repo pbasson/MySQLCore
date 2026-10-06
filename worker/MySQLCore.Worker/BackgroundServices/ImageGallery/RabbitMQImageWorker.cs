@@ -1,18 +1,19 @@
-using MySQLCore.Worker.Constants;
-using MySQLCore.Worker.Constants.Settings;
-
 namespace MySQLCore.Worker.BackgroundServices.ImageGallery;
 
 public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IMessageBus _messageBus;
-    
+    public readonly RabbitMQSetting _settings;
+    public readonly IRabbitMQConnection _messageConnection;
+
     public RabbitMQImageWorker(ILogger<RabbitMQImageWorker> logger, IServiceScopeFactory scopeFactory, IOptions<RabbitMQSetting> options,
-        IRabbitMQConnection connectionService, IMessageBus messageBus) : base(logger, options, connectionService)
+        IRabbitMQConnection messageConnection, IMessageBus messageBus) : base(logger)
     {
         _scopeFactory = scopeFactory;
         _messageBus = messageBus;
+        _settings = options.Value;
+        _messageConnection = messageConnection;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -49,8 +50,7 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex,
-                            "Delivery forwarding or acknowledgement failed. Restarting consumer. DeliveryTag: {DeliveryTag}",
+                        _logger.LogError(ex, "Delivery forwarding/acknowledgement failed. Restarting consumer. DeliveryTag: {DeliveryTag}",
                             eventArgs.DeliveryTag);
                         // Do not acknowledge or retry processing here: the outcome may be uncertain.
                         restart.TrySetResult(true);
@@ -87,7 +87,7 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
         ImageGalleryMessage? message;
         try
         {
-            message = DeserializeMessage(eventArgs);
+            message = DeserializeMessage(eventArgs.Body);
         }
         catch (JsonException ex)
         {
@@ -124,8 +124,7 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
     private async Task DeadLetterInvalidAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
     {
         MessageMetric.Failed.Inc();
-        await ForwardAndAckAsync(_settings.DeadLetterQueueName, eventArgs, channel,
-            eventArgs.BasicProperties.Headers, stoppingToken);
+        await ForwardAndAckAsync(_settings.DeadLetterQueueName, eventArgs, channel, eventArgs.BasicProperties.Headers, stoppingToken);
         MessageMetric.DeadLetter.Inc();
         _logger.LogWarning("Invalid payload forwarded to dead-letter queue. DeliveryTag: {DeliveryTag}", eventArgs.DeliveryTag);
     }
@@ -195,7 +194,27 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
         IDictionary<string, object?>? headers, CancellationToken stoppingToken)
     {
         await _messageBus.ForwardAsync(destinationQueue, eventArgs.Body, headers, stoppingToken);
-
         await BasicAckAsync(eventArgs, consumerChannel, stoppingToken);
+    }
+
+    private int GetRetryCount(BasicDeliverEventArgs eventArgs)
+    {
+        if (eventArgs.BasicProperties?.Headers == null)
+        {
+            return 0;
+        }
+
+        if (!eventArgs.BasicProperties.Headers.TryGetValue(_settings.RetryHeader, out var value))
+        {
+            return 0;
+        }
+
+        return value switch
+        {
+            byte[] bytes when int.TryParse(Encoding.UTF8.GetString(bytes), out var result) => result,
+            int number => number,
+            long number => (int)number,
+            _ => 0
+        };
     }
 }

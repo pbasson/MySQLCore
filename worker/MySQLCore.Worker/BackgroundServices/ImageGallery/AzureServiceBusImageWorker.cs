@@ -1,12 +1,116 @@
-using MySQLCore.Worker.Constants.Settings;
-
 namespace MySQLCore.Worker.BackgroundServices.ImageGallery;
 
-public class AzureServiceBusImageWorker : BaseWorker<ImageGalleryMessage>
+public sealed class AzureServiceBusImageWorker : BaseWorker<ImageGalleryMessage>
 {
-    public AzureServiceBusImageWorker(ILogger<BaseWorker<ImageGalleryMessage>> logger, IOptions<RabbitMQSetting> messagerSettings,
-        IRabbitMQConnection rabbitMQConnection) : base(logger, messagerSettings, rabbitMQConnection)
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ServiceBusClient _client;
+    private readonly AzureServiceBusSetting _settings;
+
+    public AzureServiceBusImageWorker(ILogger<AzureServiceBusImageWorker> logger, ServiceBusClient client, 
+        IOptions<AzureServiceBusSetting> options, IServiceScopeFactory scopeFactory): base(logger)
     {
+        _client = client;
+        _settings = options.Value;
+        _scopeFactory = scopeFactory;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await using var processor = _client.CreateProcessor(_settings.QueueName, SetOptions() );
+        processor.ProcessMessageAsync += async args =>
+        {
+            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, args.CancellationToken);
+            await HandleMessageAsync(args, cancellation.Token);
+        };
         
+        processor.ProcessErrorAsync += args =>
+        {
+            _logger.LogError(args.Exception, "Azure image consumer error. Source: {Source}, Queue: {Queue}",
+                args.ErrorSource, args.EntityPath);
+            return Task.CompletedTask;
+        };
+
+        try
+        {
+            await processor.StartProcessingAsync(stoppingToken);
+            await Task.Delay(Timeout.InfiniteTimeSpan, stoppingToken);
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // Stop receiving and drain callbacks before disposing the processor.
+        }
+        finally
+        {
+            await processor.StopProcessingAsync(CancellationToken.None);
+        }
+
+        static ServiceBusProcessorOptions SetOptions() => new()
+        {
+            AutoCompleteMessages = false,
+            ReceiveMode = ServiceBusReceiveMode.PeekLock,
+            MaxConcurrentCalls = 1,
+            PrefetchCount = 0
+        };
+    }
+
+    private async Task HandleMessageAsync(ProcessMessageEventArgs args, CancellationToken cancellationToken)
+    {
+        MessageMetric.Received.Inc();
+        ImageGalleryMessage? message;
+        try
+        {
+            message = DeserializeMessage(args.Message.Body.ToMemory());
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Malformed Azure image message. MessageId: {MessageId}", args.Message.MessageId);
+            await DeadLetterInvalidAsync(args, cancellationToken);
+            return;
+        }
+
+        if (message == null || message.MessageId == Guid.Empty)
+        {
+            await DeadLetterInvalidAsync(args, cancellationToken);
+            return;
+        }
+
+        using var activity = TracingConstants.StartMessagingActivity<AzureServiceBusImageWorker>(nameof(HandleMessageAsync));
+        activity?.SetTag("message.id", message.MessageId);
+        activity?.SetTag("image.id", message.ImageId);
+        try
+        {
+            await using var scope = _scopeFactory.CreateAsyncScope();
+            var service = scope.ServiceProvider.GetRequiredService<ProcessWorkerService>();
+            var result = await service.ProcessAsync(message, cancellationToken);
+            if (result == ProcessWorkerResult.Completed)
+                MessageMetric.Processed.Inc();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            MessageMetric.Failed.Inc();
+            _logger.LogError(ex, "Azure image processing failed. MessageId: {MessageId}, DeliveryCount: {DeliveryCount}",
+                message.MessageId, args.Message.DeliveryCount);
+            // The Azure queue's MaxDeliveryCount limits retries; abandonment does not delay redelivery.
+            await args.AbandonMessageAsync(args.Message, cancellationToken: cancellationToken);
+            return;
+        }
+
+        // Keep settlement failures separate from processing failures. Redelivery uses existing deduplication.
+        await args.CompleteMessageAsync(args.Message, cancellationToken);
+        MessageMetric.Acknowledged.Inc();
+        _logger.LogInformation("Azure message completed. MessageId: {MessageId}", message.MessageId);
+    }
+
+    private async Task DeadLetterInvalidAsync(ProcessMessageEventArgs args, CancellationToken cancellationToken)
+    {
+        MessageMetric.Failed.Inc();
+        await args.DeadLetterMessageAsync(args.Message, "InvalidPayload",
+            "Expected an image message with a non-empty MessageId.", cancellationToken);
+        MessageMetric.DeadLetter.Inc();
+        _logger.LogWarning("Invalid Azure image message dead-lettered. MessageId: {MessageId}", args.Message.MessageId);
     }
 }
