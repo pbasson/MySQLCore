@@ -1,9 +1,11 @@
 using System.Reflection;
+using System.Diagnostics;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using MySQLCore.Core.Enums;
+using MySQLCore.Core.Constants;
 using MySQLCore.Core.Interfaces.Messager.Repo;
 using MySQLCore.Worker.BackgroundServices.ImageGallery;
 using MySQLCore.Worker.Constants.Settings;
@@ -14,6 +16,56 @@ namespace MySQLCore.Messaging.IntegrationTest;
 
 public class AzureImageWorkerTests
 {
+    [Theory]
+    [InlineData("success")]
+    [InlineData("duplicate")]
+    [InlineData("invalid")]
+    [InlineData("processing-failure")]
+    [InlineData("completion-failure")]
+    public async Task DeliveryActivityIncludesProcessingAndSettlement(string scenario)
+    {
+        using var root = new Activity("azure-trace-test").SetIdFormat(ActivityIdFormat.W3C).Start();
+        var stopped = new List<Activity>();
+        using var listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name == TracingConstants.ACTIVITY_SOURCE,
+            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStopped = activity =>
+            {
+                if (activity.TraceId == root.TraceId) stopped.Add(activity);
+            }
+        };
+        ActivitySource.AddActivityListener(listener);
+        await using var fixture = new Fixture();
+        fixture.Repo.Fail = scenario == "processing-failure";
+        fixture.Repo.Duplicate = scenario == "duplicate";
+        await fixture.StartAsync();
+        var delivery = new Delivery(scenario == "invalid" ? "not-json" : ValidBody)
+        {
+            FailCompletion = scenario == "completion-failure"
+        };
+        if (delivery.FailCompletion)
+            await Assert.ThrowsAsync<InvalidOperationException>(() => fixture.Client.Processor.DeliverAsync(delivery));
+        else
+            await fixture.Client.Processor.DeliverAsync(delivery);
+
+        var outer = Assert.Single(stopped, activity => activity.Kind == ActivityKind.Consumer);
+        Assert.Equal("AzureServiceBusImageWorker.HandleMessageAsync", outer.OperationName);
+        Assert.Equal("images", outer.GetTagItem("messaging.destination.name"));
+        Assert.Same(outer, delivery.SettlementActivity);
+        Assert.Equal(scenario is "success" or "duplicate" ? ActivityStatusCode.Unset : ActivityStatusCode.Error,
+            outer.Status);
+        if (scenario != "invalid")
+        {
+            var inner = Assert.Single(stopped, activity => activity.OperationName == "ProcessWorkerService.ProcessAsync");
+            Assert.Equal(outer.SpanId, inner.ParentSpanId);
+            Assert.True(stopped.IndexOf(inner) < stopped.IndexOf(outer));
+            Assert.Equal(scenario == "processing-failure" ? ActivityStatusCode.Error : ActivityStatusCode.Unset,
+                inner.Status);
+        }
+        Assert.Equal(scenario == "invalid" ? 1 : 2, stopped.Count);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -168,23 +220,27 @@ public class AzureImageWorkerTests
     {
         public List<string> Actions { get; } = new();
         public bool FailCompletion;
+        public Activity? SettlementActivity;
         public Delivery(string body) : base(ServiceBusModelFactory.ServiceBusReceivedMessage(
             body: new BinaryData(body)), null!, CancellationToken.None) { }
         public override Task CompleteMessageAsync(ServiceBusReceivedMessage message, CancellationToken cancellationToken = default)
         {
             Actions.Add("complete");
+            SettlementActivity = Activity.Current;
             return FailCompletion ? Task.FromException(new InvalidOperationException("Connection lost")) : Task.CompletedTask;
         }
         public override Task AbandonMessageAsync(ServiceBusReceivedMessage message,
             IDictionary<string, object>? propertiesToModify = null, CancellationToken cancellationToken = default)
         {
             Actions.Add("abandon");
+            SettlementActivity = Activity.Current;
             return Task.CompletedTask;
         }
         public override Task DeadLetterMessageAsync(ServiceBusReceivedMessage message, string deadLetterReason,
             string? deadLetterErrorDescription = null, CancellationToken cancellationToken = default)
         {
             Actions.Add("dead-letter");
+            SettlementActivity = Activity.Current;
             return Task.CompletedTask;
         }
     }

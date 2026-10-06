@@ -16,13 +16,15 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
         _messageConnection = messageConnection;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
+            int retrying = 5;
+
             try
             {
-                await using IChannel channel = await _messageConnection.CreateChannelAsync(stoppingToken);
+                await using IChannel channel = await _messageConnection.CreateChannelAsync(cancellationToken);
                 var restart = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                 channel.ChannelShutdownAsync += (_, _) =>
                 {
@@ -31,118 +33,139 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
                 };
 
                 // Limit deliveries held by this consumer while processing or recovering.
-                await channel.BasicQosAsync(0, 1, false, stoppingToken);
+                await channel.BasicQosAsync(0, 1, false, cancellationToken);
                 var consumer = new AsyncEventingBasicConsumer(channel);
                 consumer.UnregisteredAsync += (_, _) =>
                 {
                     restart.TrySetResult(true);
                     return Task.CompletedTask;
                 };
-                consumer.ReceivedAsync += async (_, eventArgs) =>
+                consumer.ReceivedAsync += async (_, args) =>
                 {
                     try
                     {
-                        await HandleDeliveryAsync(eventArgs, channel, stoppingToken);
+                        await HandleMessageAsync(args, channel, cancellationToken);
                     }
-                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                     {
                         // Channel disposal during shutdown returns unacknowledged deliveries.
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Delivery forwarding/acknowledgement failed. Restarting consumer. DeliveryTag: {DeliveryTag}",
-                            eventArgs.DeliveryTag);
+                            args.DeliveryTag);
                         // Do not acknowledge or retry processing here: the outcome may be uncertain.
                         restart.TrySetResult(true);
                     }
                 };
 
                 await channel.BasicConsumeAsync(queue: MessagerConstants.IMAGE_QUEUE, autoAck: false,
-                    consumer: consumer, cancellationToken: stoppingToken);
-                await restart.Task.WaitAsync(stoppingToken);
+                    consumer, cancellationToken);
+                await restart.Task.WaitAsync(cancellationToken);
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Image consumer unavailable. Retrying in 5 seconds.");
+                _logger.LogError(ex, "Image consumer unavailable. Retrying in {retry} seconds.", retrying);
             }
 
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(retrying), cancellationToken);
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
         }
     }
 
-    private async Task HandleDeliveryAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
+    private async Task HandleMessageAsync(BasicDeliverEventArgs args, IChannel channel, CancellationToken cancellationToken)
     {
-        MessageMetric.Received.Inc();
-        ImageGalleryMessage? message;
-        try
-        {
-            message = DeserializeMessage(eventArgs.Body);
-        }
-        catch (JsonException ex)
-        {
-            _logger.LogWarning(ex, "Malformed image message. DeliveryTag: {DeliveryTag}", eventArgs.DeliveryTag);
-            await DeadLetterInvalidAsync(eventArgs, channel, stoppingToken);
-            return;
-        }
-
-        if (message == null || message.MessageId == Guid.Empty)
-        {
-            await DeadLetterInvalidAsync(eventArgs, channel, stoppingToken);
-            return;
-        }
+        // One activity covers validation, processing, retry/dead-letter forwarding and acknowledgement.
+        using Activity? activity = TracingConstants.MessagingActivitySource.StartActivity(
+            $"{nameof(RabbitMQImageWorker)}.{nameof(HandleMessageAsync)}", ActivityKind.Consumer);
+        activity?.SetTag("messaging.system", "rabbitmq");
+        activity?.SetTag("messaging.destination.name", MessagerConstants.IMAGE_QUEUE);
+        activity?.SetTag("message.type", nameof(ImageGalleryMessage));
+        activity?.SetTag("DeliveryTag", args.DeliveryTag);
 
         try
         {
-            await ProcessMessage(message, stoppingToken);
+            MessageMetric.Received.Inc();
+            ImageGalleryMessage? message;
+            try
+            {
+                message = DeserializeMessage(args.Body);
+            }
+            catch (JsonException ex)
+            {
+                activity?.SetStatus(ActivityStatusCode.Error, "Malformed image payload");
+                _logger.LogWarning(ex, "Malformed image message. DeliveryTag: {DeliveryTag}", args.DeliveryTag);
+                await DeadLetterInvalidAsync(args, channel, cancellationToken);
+                return;
+            }
+
+            if (message == null || message.MessageId == Guid.Empty)
+            {
+                activity?.SetStatus(ActivityStatusCode.Error, "Missing message or MessageId");
+                await DeadLetterInvalidAsync(args, channel, cancellationToken);
+                return;
+            }
+
+            activity?.SetTag("message.id", message.MessageId);
+            activity?.SetTag("image.id", message.ImageId);
+
+            try
+            {
+                await ProcessMessage(message, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                activity?.SetStatus(ActivityStatusCode.Error, "Image processing failed");
+                await ProcessMessageException(args, channel, message, ex, cancellationToken);
+                return;
+            }
+
+            // Database processing has completed; acknowledgement failure is a delivery problem.
+            await BasicAckAsync(args, channel, cancellationToken);
+            _logger.LogInformation("Acknowledgement sent. MessageId: {MessageId}", message.MessageId);
         }
-        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            // Expected shutdown is not a processing failure.
             throw;
         }
         catch (Exception ex)
         {
-            await ProcessMessageException(eventArgs, channel, message, ex, stoppingToken);
-            return;
+            // Includes forwarding/acknowledgement failures; preserve the existing restart behaviour.
+            activity?.SetStatus(ActivityStatusCode.Error, "Message delivery failed");
+            activity?.SetTag("error.type", ex.GetType().FullName);
+            throw;
         }
-
-        // Database processing has completed; acknowledgement failure is a delivery problem.
-        await BasicAckAsync(eventArgs, channel, stoppingToken);
-        _logger.LogInformation("Acknowledgement sent. MessageId: {MessageId}", message.MessageId);
     }
 
-    private async Task DeadLetterInvalidAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
+    private async Task DeadLetterInvalidAsync(BasicDeliverEventArgs args, IChannel channel, CancellationToken cancellationToken)
     {
         MessageMetric.Failed.Inc();
-        await ForwardAndAckAsync(_settings.DeadLetterQueueName, eventArgs, channel, eventArgs.BasicProperties.Headers, stoppingToken);
+        await ForwardAndAckAsync(_settings.DeadLetterQueueName, args, channel, args.BasicProperties.Headers, cancellationToken);
         MessageMetric.DeadLetter.Inc();
-        _logger.LogWarning("Invalid payload forwarded to dead-letter queue. DeliveryTag: {DeliveryTag}", eventArgs.DeliveryTag);
+        _logger.LogWarning("Invalid payload forwarded to dead-letter queue. DeliveryTag: {DeliveryTag}", args.DeliveryTag);
     }
 
-    private async Task ProcessMessage(ImageGalleryMessage message, CancellationToken stoppingToken)
+    private async Task ProcessMessage(ImageGalleryMessage message, CancellationToken cancellationToken)
     {
-        using Activity? activity = TracingConstants.StartMessagingActivity<RabbitMQImageWorker>(nameof(ProcessMessage));
-        activity?.SetTag("message.id", message.MessageId);
-        activity?.SetTag("image.id", message.ImageId);
-        activity?.SetTag("message.type", nameof(ImageGalleryMessage));
-
-        _logger.LogInformation( "Activity created: {ActivityCreated}, TraceId: {TraceId}, SpanId: {SpanId}",
-            activity != null, activity?.TraceId, activity?.SpanId);
-
         using var scope = _scopeFactory.CreateScope();
         var processService = scope.ServiceProvider.GetRequiredService<ProcessWorkerService>();
 
-        var result = await processService.ProcessAsync(message, stoppingToken);
+        var result = await processService.ProcessAsync(message, cancellationToken);
 
         if(result == ProcessWorkerResult.Duplicate)
         {
@@ -155,56 +178,52 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
 
     }
 
-    private async Task ProcessMessageException(BasicDeliverEventArgs eventArgs, IChannel channel, ImageGalleryMessage? message, Exception ex, CancellationToken stoppingToken)
+    private async Task ProcessMessageException(BasicDeliverEventArgs args, IChannel channel, ImageGalleryMessage? message, Exception ex, CancellationToken cancellationToken)
     {
-        using Activity? activity = TracingConstants.StartMessagingActivity<RabbitMQImageWorker>(nameof(ProcessMessageException));
-        activity?.SetTag("message.type", nameof(ImageGalleryMessage));
-        activity?.SetTag("DeliveryTag", eventArgs.DeliveryTag);
-
         _logger.LogError(ex, "{messager} Message Status: {status}, DeliveryTag: {DeliveryTag}", nameof(ImageGalleryMessage),
-            nameof(ProcessMessageStatus.Failed), eventArgs.DeliveryTag);
+            nameof(ProcessMessageStatus.Failed), args.DeliveryTag);
         MessageMetric.Failed.Inc();
 
-        var retryCount = GetRetryCount(eventArgs);
+        var retryCount = GetRetryCount(args);
 
-        var headers = eventArgs.BasicProperties.Headers == null
-            ? new Dictionary<string, object?>() : new Dictionary<string, object?>(eventArgs.BasicProperties.Headers);
+        var headers = args.BasicProperties.Headers == null
+            ? new Dictionary<string, object?>() : new Dictionary<string, object?>(args.BasicProperties.Headers);
 
         if (retryCount >= _settings.MaxRetryCount)
         {
-            await ForwardAndAckAsync(_settings.DeadLetterQueueName, eventArgs, channel, headers, stoppingToken);
+            await ForwardAndAckAsync(_settings.DeadLetterQueueName, args, channel, headers, cancellationToken);
             _logger.LogWarning("Delivery forwarded to dead-letter queue. MessageId: {MessageId}", message?.MessageId);
             MessageMetric.DeadLetter.Inc();
             return;
         }
 
         headers[_settings.RetryHeader] = retryCount + 1;
-        await ForwardAndAckAsync(_settings.RetryQueueName, eventArgs, channel, headers, stoppingToken);
+        await ForwardAndAckAsync(_settings.RetryQueueName, args, channel, headers, cancellationToken);
 
         return; 
     }
 
-    private async Task BasicAckAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
+    private async Task BasicAckAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken cancellationToken)
     {
-        await channel.BasicAckAsync(deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+        await channel.BasicAckAsync(deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken);
         MessageMetric.Acknowledged.Inc();
     }
 
-    private async Task ForwardAndAckAsync(string destinationQueue, BasicDeliverEventArgs eventArgs, IChannel consumerChannel,
-        IDictionary<string, object?>? headers, CancellationToken stoppingToken)
+    private async Task ForwardAndAckAsync(string destinationQueue, BasicDeliverEventArgs args, IChannel channel,
+        IDictionary<string, object?>? headers, CancellationToken cancellationToken)
     {
-        await _messageBus.ForwardAsync(destinationQueue, eventArgs.Body, headers, stoppingToken);
-        await BasicAckAsync(eventArgs, consumerChannel, stoppingToken);
+        await _messageBus.ForwardAsync(destinationQueue, args.Body, headers, cancellationToken);
+        await BasicAckAsync(args, channel, cancellationToken);
     }
 
-    private int GetRetryCount(BasicDeliverEventArgs eventArgs)
+    private int GetRetryCount(BasicDeliverEventArgs args)
     {
-        if (eventArgs.BasicProperties?.Headers == null)
+        if (args.BasicProperties?.Headers == null)
         {
             return 0;
         }
 
-        if (!eventArgs.BasicProperties.Headers.TryGetValue(_settings.RetryHeader, out var value))
+        if (!args.BasicProperties.Headers.TryGetValue(_settings.RetryHeader, out var value))
         {
             return 0;
         }
