@@ -4,13 +4,13 @@ public abstract class BaseWorker<TMessage> : BackgroundService where TMessage: I
 {
     public readonly ILogger<BaseWorker<TMessage>> _logger;
     public readonly MessagerSettings _settings;
-    public readonly RabbitMQService _connectionService;
+    public readonly IRabbitMQConnection _messageConnection;
 
-    public BaseWorker(ILogger<BaseWorker<TMessage>> logger, IOptions<MessagerSettings> options, RabbitMQService connectionService)
+    public BaseWorker(ILogger<BaseWorker<TMessage>> logger, IOptions<MessagerSettings> options, IRabbitMQConnection messageConnection)
     {
         _logger = logger;
         _settings = options.Value;
-        _connectionService = connectionService;
+        _messageConnection = messageConnection;
     }
     
     protected override Task ExecuteAsync(CancellationToken stoppingToken)

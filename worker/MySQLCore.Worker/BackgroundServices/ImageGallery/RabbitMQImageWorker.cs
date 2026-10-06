@@ -1,12 +1,12 @@
 namespace MySQLCore.Worker.BackgroundServices.ImageGallery;
 
-public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
+public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IMessageBus _messageBus;
     
-    public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger, IServiceScopeFactory scopeFactory, IOptions<MessagerSettings> options, RabbitMQService connectionService, IMessageBus messageBus)
-        : base(logger, options, connectionService)
+    public RabbitMQImageWorker(ILogger<RabbitMQImageWorker> logger, IServiceScopeFactory scopeFactory, IOptions<MessagerSettings> options,
+        IRabbitMQConnection connectionService, IMessageBus messageBus) : base(logger, options, connectionService)
     {
         _scopeFactory = scopeFactory;
         _messageBus = messageBus;
@@ -18,7 +18,7 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         {
             try
             {
-                await using IChannel channel = await _connectionService.CreateChannelAsync(stoppingToken);
+                await using IChannel channel = await _messageConnection.CreateChannelAsync(stoppingToken);
                 var restart = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                 channel.ChannelShutdownAsync += (_, _) =>
                 {
@@ -81,7 +81,7 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
     private async Task HandleDeliveryAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
     {
         MessageMetric.Received.Inc();
-        ImageCreatedMessage? message;
+        ImageGalleryMessage? message;
         try
         {
             message = DeserializeMessage(eventArgs);
@@ -127,12 +127,12 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         _logger.LogWarning("Invalid payload forwarded to dead-letter queue. DeliveryTag: {DeliveryTag}", eventArgs.DeliveryTag);
     }
 
-    private async Task ProcessMessage(ImageCreatedMessage message, CancellationToken stoppingToken)
+    private async Task ProcessMessage(ImageGalleryMessage message, CancellationToken stoppingToken)
     {
-        using Activity? activity = TracingConstants.StartMessagingActivity<ImageProcessingWorker>(nameof(ProcessMessage));
+        using Activity? activity = TracingConstants.StartMessagingActivity<RabbitMQImageWorker>(nameof(ProcessMessage));
         activity?.SetTag("message.id", message.MessageId);
         activity?.SetTag("image.id", message.ImageId);
-        activity?.SetTag("message.type", nameof(ImageCreatedMessage));
+        activity?.SetTag("message.type", nameof(ImageGalleryMessage));
 
         _logger.LogInformation( "Activity created: {ActivityCreated}, TraceId: {TraceId}, SpanId: {SpanId}",
             activity != null, activity?.TraceId, activity?.SpanId);
@@ -148,18 +148,18 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         }        
 
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", 
-            nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);
+            nameof(ImageGalleryMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);
         MessageMetric.Processed.Inc();
 
     }
 
-    private async Task ProcessMessageException(BasicDeliverEventArgs eventArgs, IChannel channel, ImageCreatedMessage? message, Exception ex, CancellationToken stoppingToken)
+    private async Task ProcessMessageException(BasicDeliverEventArgs eventArgs, IChannel channel, ImageGalleryMessage? message, Exception ex, CancellationToken stoppingToken)
     {
-        using Activity? activity = TracingConstants.StartMessagingActivity<ImageProcessingWorker>(nameof(ProcessMessageException));
-        activity?.SetTag("message.type", nameof(ImageCreatedMessage));
+        using Activity? activity = TracingConstants.StartMessagingActivity<RabbitMQImageWorker>(nameof(ProcessMessageException));
+        activity?.SetTag("message.type", nameof(ImageGalleryMessage));
         activity?.SetTag("DeliveryTag", eventArgs.DeliveryTag);
 
-        _logger.LogError(ex, "{messager} Message Status: {status}, DeliveryTag: {DeliveryTag}", nameof(ImageCreatedMessage),
+        _logger.LogError(ex, "{messager} Message Status: {status}, DeliveryTag: {DeliveryTag}", nameof(ImageGalleryMessage),
             nameof(ProcessMessageStatus.Failed), eventArgs.DeliveryTag);
         MessageMetric.Failed.Inc();
 

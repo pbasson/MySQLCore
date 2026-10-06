@@ -11,25 +11,25 @@ public sealed class ProcessWorkerService
         _repo = repo;
     }
 
-    public async Task<ProcessWorkerResult> ProcessAsync(ImageCreatedMessage message, CancellationToken cancellationToken = default)
+    public async Task<ProcessWorkerResult> ProcessAsync(ImageGalleryMessage message, CancellationToken cancellationToken = default)
     {
         using Activity? activity = TracingConstants.StartMessagingActivity<ProcessWorkerService>(nameof(ProcessAsync));
         activity?.SetTag("message.id", message.MessageId);
         activity?.SetTag("image.id", message.ImageId);
-        activity?.SetTag("message.type", nameof(ImageCreatedMessage));
+        activity?.SetTag("message.type", nameof(ImageGalleryMessage));
 
         _logger.LogInformation( "{messager} Message Status: {status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", 
-            nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Pending), message.MessageId, message.ImageId, message.FileName);
+            nameof(ImageGalleryMessage), nameof(ProcessMessageStatus.Pending), message.MessageId, message.ImageId, message.FileName);
         
         var result = await _repo.ProcessImageCreatedAsync(message, cancellationToken);
         if (result == MessageProcessResult.Duplicate)
         {
-            _logger.LogInformation("{messager} Message Status: {status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.IgnoredDuplicate), message.MessageId);
+            _logger.LogInformation("{messager} Message Status: {status}, MessageId: {MessageId}", nameof(ImageGalleryMessage), nameof(ProcessMessageStatus.IgnoredDuplicate), message.MessageId);
             MessageMetric.Duplicate.Inc();
             return ProcessWorkerResult.Duplicate;
         }
       
-        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", nameof(ImageCreatedMessage),
+        _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}, ImageId: {ImageId}, FileName: {FileName}", nameof(ImageGalleryMessage),
             nameof(ProcessMessageStatus.Processed), message.MessageId, message.ImageId, message.FileName);
         return ProcessWorkerResult.Completed;
     }

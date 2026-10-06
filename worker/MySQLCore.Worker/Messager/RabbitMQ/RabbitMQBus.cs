@@ -1,13 +1,13 @@
-namespace MySQLCore.Worker.Messager;
+namespace MySQLCore.Worker.Messager.RabbitMQ;
 
 public sealed class RabbitMQBus : IMessageBus, IAsyncDisposable
 {
     private readonly ILogger<RabbitMQBus> _logger;
-    private readonly RabbitMQService _service;
+    private readonly IRabbitMQConnection _service;
     private IChannel? _channel;
     private readonly SemaphoreSlim _publishLock = new(1, 1);
 
-    public RabbitMQBus(ILogger<RabbitMQBus> logger, RabbitMQService service)
+    public RabbitMQBus(ILogger<RabbitMQBus> logger, IRabbitMQConnection service)
     {
         _logger = logger;
         _service = service;
@@ -19,7 +19,7 @@ public sealed class RabbitMQBus : IMessageBus, IAsyncDisposable
         activity?.SetTag("queue.name", queueName);
         activity?.SetTag("message.type", typeof(TMessage).Name);
 
-        byte[] body = _service.SerializeMessage(message);
+        byte[] body = JsonSerializer.SerializeToUtf8Bytes(message);
 
         await ForwardAsync(queueName, body, headers: null, cancellationToken: cancellationToken);
         

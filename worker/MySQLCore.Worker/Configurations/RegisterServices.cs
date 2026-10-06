@@ -1,3 +1,5 @@
+using MySQLCore.Worker.Messager.RabbitMQ;
+
 namespace MySQLCore.Worker.Configurations;
 
 public static class RegisterServices 
@@ -13,7 +15,7 @@ public static class RegisterServices
     private static void RegisterCoreServices(IServiceCollection services)
     {
         services.AddSingleton<IMessageBus,RabbitMQBus>();
-        services.AddSingleton<RabbitMQService>();
+        services.AddSingleton<IRabbitMQConnection, RabbitMQConnection>();
         services.AddScoped<ProcessWorkerService>();
     }
 

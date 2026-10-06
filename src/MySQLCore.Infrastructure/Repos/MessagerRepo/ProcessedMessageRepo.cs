@@ -54,7 +54,7 @@ public sealed class ProcessedMessageRepo : BaseRepo<IProcessedMessageRepo>, IPro
         return await SaveChangesAsync(cancellationToken: test);
     }
 
-    public async Task<MessageProcessResult> ProcessImageCreatedAsync(ImageCreatedMessage message, CancellationToken cancellationToken)
+    public async Task<MessageProcessResult> ProcessImageCreatedAsync(ImageGalleryMessage message, CancellationToken cancellationToken)
     {
         if (message.MessageId == Guid.Empty)
             throw new ArgumentException("MessageId must not be empty.", nameof(message));
@@ -71,7 +71,7 @@ public sealed class ProcessedMessageRepo : BaseRepo<IProcessedMessageRepo>, IPro
                 await _dBContext.Database.ExecuteSqlInterpolatedAsync($"""
                     INSERT INTO ProcessedMessage
                         (MessageId, MessageType, EntityName, EntityId, Status, ProcessedAt)
-                    VALUES ({message.MessageId}, {nameof(ImageCreatedMessage)}, {"ImageTransaction"},
+                    VALUES ({message.MessageId}, {nameof(ImageGalleryMessage)}, {"ImageTransaction"},
                         {message.ImageId}, {(int)ProcessMessageStatus.Processing}, {DateTime.UtcNow})
                     ON DUPLICATE KEY UPDATE Id = Id
                     """, cancellationToken);
@@ -81,7 +81,7 @@ public sealed class ProcessedMessageRepo : BaseRepo<IProcessedMessageRepo>, IPro
                     """).AsNoTracking().ToListAsync(cancellationToken);
                 var existing = records.Single();
 
-                if (existing.EntityId != message.ImageId || existing.MessageType != nameof(ImageCreatedMessage))
+                if (existing.EntityId != message.ImageId || existing.MessageType != nameof(ImageGalleryMessage))
                     throw new InvalidOperationException("MessageId is already associated with a different event.");
 
                 if (existing.Status is ProcessMessageStatus.Processed or

@@ -16,6 +16,8 @@ global using MySQLCore.Worker.Configurations;
 global using MySQLCore.Worker.Enums;
 global using MySQLCore.Worker.Interfaces.Worker;
 global using MySQLCore.Worker.Messager;
+global using MySQLCore.Worker.Messager.Azure;
+global using MySQLCore.Worker.Messager.RabbitMQ;
 global using MySQLCore.Worker.MetricManager;
 global using OpenTelemetry.Resources;
 global using OpenTelemetry.Trace;

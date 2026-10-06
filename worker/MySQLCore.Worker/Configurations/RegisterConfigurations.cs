@@ -20,12 +20,33 @@ public static class RegisterConfigurations
     private static void RegisterMessager(IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<MessagerSettings>(configuration.GetSection("RabbitMQ"));
+
+        switch (configuration["Messaging:Provider"])
+        {
+            case "RabbitMQ":
+                services.AddSingleton<IRabbitMQConnection, RabbitMQConnection>();
+                services.AddSingleton<IMessageBus, RabbitMQBus>();
+                services.AddHostedService<RabbitMQImageWorker>();
+                break;
+
+            case "AzureServiceBus":
+                // Register the configured ServiceBusClient here.
+                services.AddSingleton<IMessageBus, AzureServiceBus>();
+                services.AddHostedService<AzureServiceBusImageWorker>();
+                break;
+
+            default:
+                throw new InvalidOperationException(
+                    "Messaging:Provider must be RabbitMQ or AzureServiceBus.");
+        }
     }
 
     private static void RegisterBackgroundServices(IServiceCollection services)
     {
         services.AddHostedService<OutboxWorker>();
-        services.AddHostedService<ImageProcessingWorker>();
+        services.AddHostedService<RabbitMQImageWorker>();
+
+        
     }
 
     private static void RegisterSeq()

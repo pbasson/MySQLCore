@@ -29,7 +29,7 @@ public sealed class OutboxWorker : BackgroundService
                 {
                     try
                     {
-                        var message = JsonSerializer.Deserialize<ImageCreatedMessage>(outbox.Payload);
+                        var message = JsonSerializer.Deserialize<ImageGalleryMessage>(outbox.Payload);
 
                         if (message == null || message.MessageId == Guid.Empty || message.MessageId != outbox.MessageId)
                         {
