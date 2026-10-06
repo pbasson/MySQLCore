@@ -21,34 +21,43 @@ public static class RegisterConfigurations
 
     private static void RegisterMessager(IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<MessagerSettings>(configuration.GetSection("RabbitMQ"));
-
         switch (configuration["Messaging:Provider"])
         {
             case "RabbitMQ":
+                services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
                 services.AddSingleton<IRabbitMQConnection, RabbitMQConnection>();
                 services.AddSingleton<IMessageBus, RabbitMQBus>();
                 services.AddHostedService<RabbitMQImageWorker>();
                 break;
 
             case "AzureServiceBus":
-                // Register the configured ServiceBusClient here.
+                services.AddOptions<AzureServiceBusSetting>()
+                    .Bind(configuration.GetSection("Messaging:AzureServiceBus"))
+                    .Validate(settings => !string.IsNullOrWhiteSpace(settings.FullyQualifiedNamespace),
+                        "Messaging:AzureServiceBus:FullyQualifiedNamespace is required.")
+                    .Validate(settings => Uri.CheckHostName(settings.FullyQualifiedNamespace) == UriHostNameType.Dns,
+                        "Azure Service Bus namespace must be a hostname without a scheme or path.")
+                    .ValidateOnStart();
+
                 services.AddSingleton<IMessageBus, AzureServiceBus>();
                 services.AddHostedService<AzureServiceBusImageWorker>();
+
+                services.AddSingleton<ServiceBusClient>(provider =>
+                {
+                    var settings = provider.GetRequiredService<IOptions<AzureServiceBusSetting>>().Value;
+                    return new ServiceBusClient(settings.FullyQualifiedNamespace, new DefaultAzureCredential());
+                });
+
                 break;
 
             default:
-                throw new InvalidOperationException(
-                    "Messaging:Provider must be RabbitMQ or AzureServiceBus.");
+                throw new InvalidOperationException("Messaging:Provider is Required.");
         }
     }
 
     private static void RegisterBackgroundServices(IServiceCollection services)
     {
         services.AddHostedService<OutboxWorker>();
-        services.AddHostedService<RabbitMQImageWorker>();
-
-        
     }
 
     private static void RegisterSeq()

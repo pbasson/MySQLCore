@@ -8,7 +8,7 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IMessageBus _messageBus;
     
-    public RabbitMQImageWorker(ILogger<RabbitMQImageWorker> logger, IServiceScopeFactory scopeFactory, IOptions<MessagerSettings> options,
+    public RabbitMQImageWorker(ILogger<RabbitMQImageWorker> logger, IServiceScopeFactory scopeFactory, IOptions<RabbitMQSetting> options,
         IRabbitMQConnection connectionService, IMessageBus messageBus) : base(logger, options, connectionService)
     {
         _scopeFactory = scopeFactory;

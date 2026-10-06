@@ -5,10 +5,10 @@ namespace MySQLCore.Worker.BackgroundServices;
 public abstract class BaseWorker<TMessage> : BackgroundService where TMessage: IMessage 
 {
     public readonly ILogger<BaseWorker<TMessage>> _logger;
-    public readonly MessagerSettings _settings;
+    public readonly RabbitMQSetting _settings;
     public readonly IRabbitMQConnection _messageConnection;
 
-    public BaseWorker(ILogger<BaseWorker<TMessage>> logger, IOptions<MessagerSettings> options, IRabbitMQConnection messageConnection)
+    public BaseWorker(ILogger<BaseWorker<TMessage>> logger, IOptions<RabbitMQSetting> options, IRabbitMQConnection messageConnection)
     {
         _logger = logger;
         _settings = options.Value;

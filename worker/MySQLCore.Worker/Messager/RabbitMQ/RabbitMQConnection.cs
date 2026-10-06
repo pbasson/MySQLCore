@@ -3,11 +3,11 @@ namespace MySQLCore.Worker.Messager.RabbitMQ;
 public sealed class RabbitMQConnection : IRabbitMQConnection, IAsyncDisposable
 {
     private readonly ILogger<RabbitMQConnection> _logger;
-    private readonly MessagerSettings _settings;
+    private readonly RabbitMQSetting _settings;
     private IConnection? _connection;
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
 
-    public RabbitMQConnection(IOptions<MessagerSettings> options, ILogger<RabbitMQConnection> logger)
+    public RabbitMQConnection(IOptions<RabbitMQSetting> options, ILogger<RabbitMQConnection> logger)
     {
         _settings = options.Value;
         _logger = logger;
