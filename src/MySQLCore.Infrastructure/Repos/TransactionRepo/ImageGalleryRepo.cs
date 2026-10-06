@@ -10,7 +10,8 @@ public sealed class ImageGalleryRepo : BaseRepo<IImageGalleryRepo>, IImageGaller
         using Activity? activity = TracingConstants.StartApiActivity<ImageGalleryRepo>(nameof(GetLatestRecordsAsync));
 
         var results = await _dBContext.ImageGallery.OrderByDescending(x => x.ImageGalleryId).Take(take)  
-            .Include(x => x.ImageFile).AsNoTracking()
+            // .Include(x => x.ImageFile)
+            .AsNoTracking()
             .Select(x => x.ToMapped()).ToListAsync(cancellationToken);
         return results ?? [];
     }

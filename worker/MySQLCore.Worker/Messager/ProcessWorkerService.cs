@@ -25,7 +25,7 @@ public sealed class ProcessWorkerService
         if (result == MessageProcessResult.Duplicate)
         {
             _logger.LogInformation("{messager} Message Status: {status}, MessageId: {MessageId}", nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.IgnoredDuplicate), message.MessageId);
-            MessageMetrics.Duplicate.Inc();
+            MessageMetric.Duplicate.Inc();
             return ProcessWorkerResult.Duplicate;
         }
       

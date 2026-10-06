@@ -1,11 +1,11 @@
 namespace MySQLCore.Worker.BackgroundServices.Outbox;
 
-public sealed class OutboxPublisherWorker : BackgroundService
+public sealed class OutboxWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger<OutboxPublisherWorker> _logger;
+    private readonly ILogger<OutboxWorker> _logger;
 
-    public OutboxPublisherWorker( IServiceScopeFactory scopeFactory,ILogger<OutboxPublisherWorker> logger)
+    public OutboxWorker( IServiceScopeFactory scopeFactory,ILogger<OutboxWorker> logger)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
@@ -21,7 +21,7 @@ public sealed class OutboxPublisherWorker : BackgroundService
                 using var scope = _scopeFactory.CreateScope();
 
                 var outboxRepo = scope.ServiceProvider.GetRequiredService<IOutboxMessagerRepo>();
-                var publisher = scope.ServiceProvider.GetRequiredService<IMessagePublisher>();
+                var messageBus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
 
                 var messages = await outboxRepo.GetPendingAsync(messageCount);
 
@@ -38,7 +38,7 @@ public sealed class OutboxPublisherWorker : BackgroundService
                             continue;
                         }
 
-                        await publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, message, stoppingToken);
+                        await messageBus.PublishAsync(MessagerConstants.IMAGE_QUEUE, message, stoppingToken);
 
                         await outboxRepo.MarkPublishedAsync(outbox.Id);
 

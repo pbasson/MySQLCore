@@ -1,6 +1,6 @@
 namespace MySQLCore.Core.Constants;
 
-public class RabbitMQSettings
+public sealed class MessagerSettings
 {
     public string HostName { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;

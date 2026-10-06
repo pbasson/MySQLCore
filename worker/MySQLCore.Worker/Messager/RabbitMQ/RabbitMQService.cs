@@ -1,13 +1,13 @@
 namespace MySQLCore.Worker.Messager;
 
-public class RabbitMQConnectionService : IAsyncDisposable
+public sealed class RabbitMQService : IAsyncDisposable
 {
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
     private IConnection? _connection;
-    private readonly RabbitMQSettings _settings;
-    private readonly ILogger<RabbitMQConnectionService> _logger;
+    private readonly MessagerSettings _settings;
+    private readonly ILogger<RabbitMQService> _logger;
 
-    public RabbitMQConnectionService(IOptions<RabbitMQSettings> options, ILogger<RabbitMQConnectionService> logger)
+    public RabbitMQService(IOptions<MessagerSettings> options, ILogger<RabbitMQService> logger)
     {
         _settings = options.Value;
         _logger = logger;
@@ -104,6 +104,5 @@ public class RabbitMQConnectionService : IAsyncDisposable
         var body = Encoding.UTF8.GetBytes(json);
         return body;
     }
- 
 }
     

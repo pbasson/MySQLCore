@@ -1,6 +1,6 @@
 namespace MySQLCore.Worker.MetricManager;
 
-public static class MessageMetrics
+public static class MessageMetric
 {
     public static readonly Counter Published =
         Metrics.CreateCounter("messages_published_total", "Total messages published");

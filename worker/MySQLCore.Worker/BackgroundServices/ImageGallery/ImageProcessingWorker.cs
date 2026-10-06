@@ -3,13 +3,13 @@ namespace MySQLCore.Worker.BackgroundServices.ImageGallery;
 public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IMessagePublisher _publisher;
+    private readonly IMessageBus _messageBus;
     
-    public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger, IServiceScopeFactory scopeFactory, IOptions<RabbitMQSettings> options, RabbitMQConnectionService connectionService, IMessagePublisher publisher)
+    public ImageProcessingWorker(ILogger<ImageProcessingWorker> logger, IServiceScopeFactory scopeFactory, IOptions<MessagerSettings> options, RabbitMQService connectionService, IMessageBus messageBus)
         : base(logger, options, connectionService)
     {
         _scopeFactory = scopeFactory;
-        _publisher = publisher;
+        _messageBus = messageBus;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -80,7 +80,7 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
     private async Task HandleDeliveryAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
     {
-        MessageMetrics.Received.Inc();
+        MessageMetric.Received.Inc();
         ImageCreatedMessage? message;
         try
         {
@@ -120,10 +120,10 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
     private async Task DeadLetterInvalidAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
     {
-        MessageMetrics.Failed.Inc();
+        MessageMetric.Failed.Inc();
         await ForwardAndAckAsync(_settings.DeadLetterQueueName, eventArgs, channel,
             eventArgs.BasicProperties.Headers, stoppingToken);
-        MessageMetrics.DeadLetter.Inc();
+        MessageMetric.DeadLetter.Inc();
         _logger.LogWarning("Invalid payload forwarded to dead-letter queue. DeliveryTag: {DeliveryTag}", eventArgs.DeliveryTag);
     }
 
@@ -149,7 +149,7 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", 
             nameof(ImageCreatedMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);
-        MessageMetrics.Processed.Inc();
+        MessageMetric.Processed.Inc();
 
     }
 
@@ -161,7 +161,7 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
 
         _logger.LogError(ex, "{messager} Message Status: {status}, DeliveryTag: {DeliveryTag}", nameof(ImageCreatedMessage),
             nameof(ProcessMessageStatus.Failed), eventArgs.DeliveryTag);
-        MessageMetrics.Failed.Inc();
+        MessageMetric.Failed.Inc();
 
         var retryCount = GetRetryCount(eventArgs);
 
@@ -172,7 +172,7 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
         {
             await ForwardAndAckAsync(_settings.DeadLetterQueueName, eventArgs, channel, headers, stoppingToken);
             _logger.LogWarning("Delivery forwarded to dead-letter queue. MessageId: {MessageId}", message?.MessageId);
-            MessageMetrics.DeadLetter.Inc();
+            MessageMetric.DeadLetter.Inc();
             return;
         }
 
@@ -185,13 +185,13 @@ public sealed class ImageProcessingWorker : BaseWorker<ImageCreatedMessage>
     private async Task BasicAckAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken stoppingToken)
     {
         await channel.BasicAckAsync(deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
-        MessageMetrics.Acknowledged.Inc();
+        MessageMetric.Acknowledged.Inc();
     }
 
     private async Task ForwardAndAckAsync(string destinationQueue, BasicDeliverEventArgs eventArgs, IChannel consumerChannel,
         IDictionary<string, object?>? headers, CancellationToken stoppingToken)
     {
-        await _publisher.ForwardAsync(destinationQueue, eventArgs.Body, headers, stoppingToken);
+        await _messageBus.ForwardAsync(destinationQueue, eventArgs.Body, headers, stoppingToken);
 
         await BasicAckAsync(eventArgs, consumerChannel, stoppingToken);
     }

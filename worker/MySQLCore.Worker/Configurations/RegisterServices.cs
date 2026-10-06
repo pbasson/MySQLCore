@@ -12,9 +12,9 @@ public static class RegisterServices
 
     private static void RegisterCoreServices(IServiceCollection services)
     {
-        services.AddSingleton<IMessagePublisher,RabbitMQPublisher>();
+        services.AddSingleton<IMessageBus,RabbitMQBus>();
+        services.AddSingleton<RabbitMQService>();
         services.AddScoped<ProcessWorkerService>();
-        services.AddSingleton<RabbitMQConnectionService>();
     }
 
     private static void RegisterCoreRepos(IServiceCollection services)

@@ -1,16 +1,4 @@
 services:
-  mysqlcore.db:
-    image: mysql:8.3
-    ports:
-      - 33066:3306
-    env_file:
-      - ${MYSQL_DB}
-      - ${MYSQL_USER}
-    volumes:
-      - ${MYSQL_DATA_PATH}:/var/lib/mysql
-    networks:
-      - mysqlcore_network
-    
   rabbitmq:
     image: rabbitmq:4-management
     ports:
@@ -36,21 +24,20 @@ services:
       - mysqlcore_network
 
   mysqlcore.api:
-    image: mysqlcore-api:v1
+    image: mysqlcore-api:latest
     build:
       context: .
       dockerfile: src/MySQLCore.API/Dockerfile
     ports:
       - 5820:5820
     env_file:
-      - ${MYSQL_USER}
-      - ${APP_SETTINGS}
+      - ${MYSQL_USER_PROD}
+      - ${APP_SETTINGS_PROD}
       - ${APP_APIKEY}
       - ${APP_CERT}
       - ${RABBITMQ}
     restart: always
     depends_on:
-      - mysqlcore.db
       - rabbitmq
       - seq
       - otel-collector
@@ -58,24 +45,24 @@ services:
       - mysqlcore_network
     volumes:
       - ${APP_PATH}:/Logs
-      # - ${CERTICATE_PATH}:/https/aspnetcore.pfx:ro  # Mount the cert
-
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   mysqlcore.worker:
-    image: mysqlcore-worker:v1
+    image: mysqlcore-worker:latest
     build:
       context: .
       dockerfile: worker/MySQLCore.Worker/Dockerfile
     env_file:
-      - ${MYSQL_USER}
-      - ${APP_SETTINGS}
+      - ${MYSQL_USER_PROD}
+      - ${APP_SETTINGS_PROD}
       - ${RABBITMQ}
     depends_on:
-      - mysqlcore.db
       - rabbitmq
       - otel-collector
     networks:
       - mysqlcore_network
-
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   redis:
     image: redis:latest
     ports:
@@ -93,7 +80,6 @@ services:
     volumes:
       - ${PROMETHEUS}:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
-      # - ${PROMETHEUS_DATA_PATH}:/prometheus
     networks:
       - mysqlcore_network
 
@@ -116,8 +102,6 @@ services:
       - "4318:4318"
     volumes:
       - ${TEMPO}:/etc/tempo.yml:ro
-      # - tempo_data:/tmp/tempo
-      # - ${TEMPO_DATA_PATH}:/tmp/tempo
     networks:
       - mysqlcore_network
 
@@ -135,7 +119,6 @@ services:
       - mysqlcore_network
 
 volumes:
-  mysqlcore_vol:
   prometheus_data:
   tempo_data:
 networks:

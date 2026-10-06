@@ -19,12 +19,12 @@ public static class RegisterConfigurations
 
     private static void RegisterMessager(IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<RabbitMQSettings>(configuration.GetSection("RabbitMQ"));
+        services.Configure<MessagerSettings>(configuration.GetSection("RabbitMQ"));
     }
 
     private static void RegisterBackgroundServices(IServiceCollection services)
     {
-        services.AddHostedService<OutboxPublisherWorker>();
+        services.AddHostedService<OutboxWorker>();
         services.AddHostedService<ImageProcessingWorker>();
     }
 
