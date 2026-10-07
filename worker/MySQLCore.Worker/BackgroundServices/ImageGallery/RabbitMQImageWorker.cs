@@ -3,12 +3,12 @@ namespace MySQLCore.Worker.BackgroundServices.ImageGallery;
 public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IMessageBus _messageBus;
+    private readonly IRabbitMQBus _messageBus;
     public readonly RabbitMQSetting _settings;
     public readonly IRabbitMQConnection _messageConnection;
 
     public RabbitMQImageWorker(ILogger<RabbitMQImageWorker> logger, IServiceScopeFactory scopeFactory, IOptions<RabbitMQSetting> options,
-        IRabbitMQConnection messageConnection, IMessageBus messageBus) : base(logger)
+        IRabbitMQConnection messageConnection, IRabbitMQBus messageBus) : base(logger)
     {
         _scopeFactory = scopeFactory;
         _messageBus = messageBus;
@@ -100,18 +100,18 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
             try
             {
                 message = DeserializeMessage(args.Body);
+                
+                if (message == null || message.MessageId == Guid.Empty)
+                {
+                    activity?.SetStatus(ActivityStatusCode.Error, "Missing message or MessageId");
+                    await DeadLetterInvalidAsync(args, channel, cancellationToken);
+                    return;
+                }
             }
             catch (JsonException ex)
             {
                 activity?.SetStatus(ActivityStatusCode.Error, "Malformed image payload");
                 _logger.LogWarning(ex, "Malformed image message. DeliveryTag: {DeliveryTag}", args.DeliveryTag);
-                await DeadLetterInvalidAsync(args, channel, cancellationToken);
-                return;
-            }
-
-            if (message == null || message.MessageId == Guid.Empty)
-            {
-                activity?.SetStatus(ActivityStatusCode.Error, "Missing message or MessageId");
                 await DeadLetterInvalidAsync(args, channel, cancellationToken);
                 return;
             }
@@ -167,10 +167,7 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
 
         var result = await processService.ProcessAsync(message, cancellationToken);
 
-        if(result == ProcessWorkerResult.Duplicate)
-        {
-            return;
-        }        
+        if(result == ProcessWorkerResult.Duplicate) return;
 
         _logger.LogInformation( "{messager} Message Status: {Status}, MessageId: {MessageId}", 
             nameof(ImageGalleryMessage), nameof(ProcessMessageStatus.Processed), message.MessageId);
@@ -203,9 +200,9 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
         return; 
     }
 
-    private async Task BasicAckAsync(BasicDeliverEventArgs eventArgs, IChannel channel, CancellationToken cancellationToken)
+    private async Task BasicAckAsync(BasicDeliverEventArgs args, IChannel channel, CancellationToken cancellationToken)
     {
-        await channel.BasicAckAsync(deliveryTag: eventArgs.DeliveryTag, multiple: false, cancellationToken);
+        await channel.BasicAckAsync(deliveryTag: args.DeliveryTag, multiple: false, cancellationToken);
         MessageMetric.Acknowledged.Inc();
     }
 
@@ -218,15 +215,9 @@ public sealed class RabbitMQImageWorker : BaseWorker<ImageGalleryMessage>
 
     private int GetRetryCount(BasicDeliverEventArgs args)
     {
-        if (args.BasicProperties?.Headers == null)
-        {
+        if (args.BasicProperties?.Headers == null 
+            || !args.BasicProperties.Headers.TryGetValue(_settings.RetryHeader, out var value))
             return 0;
-        }
-
-        if (!args.BasicProperties.Headers.TryGetValue(_settings.RetryHeader, out var value))
-        {
-            return 0;
-        }
 
         return value switch
         {

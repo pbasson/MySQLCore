@@ -1,5 +1,3 @@
-using MySQLCore.Worker.Constants;
-
 namespace MySQLCore.Worker.BackgroundServices.Outbox;
 
 public sealed class OutboxWorker : BackgroundService
@@ -13,9 +11,9 @@ public sealed class OutboxWorker : BackgroundService
         _logger = logger;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -40,7 +38,7 @@ public sealed class OutboxWorker : BackgroundService
                             continue;
                         }
 
-                        await messageBus.PublishAsync(MessagerConstants.IMAGE_QUEUE, message, stoppingToken);
+                        await messageBus.PublishAsync(MessagerConstants.IMAGE_QUEUE, message, cancellationToken);
 
                         await outboxRepo.MarkPublishedAsync(outbox.Id);
 
@@ -52,7 +50,7 @@ public sealed class OutboxWorker : BackgroundService
 
                         await outboxRepo.MarkDeadLetterAsync(outbox.Id, ex.Message);
                     }
-                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                     {
                         return;
                     }
@@ -63,7 +61,7 @@ public sealed class OutboxWorker : BackgroundService
                     }
                 }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
@@ -74,9 +72,9 @@ public sealed class OutboxWorker : BackgroundService
 
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 return;
             }

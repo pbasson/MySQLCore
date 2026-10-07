@@ -1,6 +1,6 @@
 namespace MySQLCore.Worker.Messager.RabbitMQ;
 
-public sealed class RabbitMQBus : IMessageBus, IAsyncDisposable
+public sealed class RabbitMQBus : IRabbitMQBus, IAsyncDisposable
 {
     private readonly ILogger<RabbitMQBus> _logger;
     private readonly IRabbitMQConnection _service;
