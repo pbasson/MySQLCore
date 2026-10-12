@@ -9,11 +9,11 @@ public sealed class MessageSerializationTests
     [Fact]
     public void RedeliveryPreservesOriginalMessageId()
     {
-        var original = new ImageCreatedMessage(1, "gallery") { MessageId = Guid.NewGuid() };
+        var original = new ImageGalleryMessage(1, "gallery") { MessageId = Guid.NewGuid() };
         var payload = JsonSerializer.Serialize(original);
 
-        var first = JsonSerializer.Deserialize<ImageCreatedMessage>(payload);
-        var redelivery = JsonSerializer.Deserialize<ImageCreatedMessage>(payload);
+        var first = JsonSerializer.Deserialize<ImageGalleryMessage>(payload);
+        var redelivery = JsonSerializer.Deserialize<ImageGalleryMessage>(payload);
 
         Assert.Equal(original.MessageId, first!.MessageId);
         Assert.Equal(original.MessageId, redelivery!.MessageId);
@@ -24,7 +24,7 @@ public sealed class MessageSerializationTests
     [InlineData("{\"MessageId\":\"00000000-0000-0000-0000-000000000000\",\"ImageId\":1,\"FileName\":\"gallery\"}")]
     public void MissingOrEmptyIdIsNotReplaced(string payload)
     {
-        var message = JsonSerializer.Deserialize<ImageCreatedMessage>(payload);
+        var message = JsonSerializer.Deserialize<ImageGalleryMessage>(payload);
 
         Assert.NotNull(message);
         Assert.Equal(Guid.Empty, message.MessageId);

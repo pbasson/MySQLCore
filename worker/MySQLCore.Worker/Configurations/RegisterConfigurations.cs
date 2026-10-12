@@ -10,22 +10,10 @@ public static class RegisterConfigurations
         RegisterSeq();
         RegisterOpenTelemetry(services);
         RegisterMetrics(services);
-        RegisterMessager(services, configuration);
         services.RegisterDatabase(configuration);
         services.RegisterService();
-        RegisterBackgroundServices(services);
+        services.RegisterMessager(configuration);
         return services;
-    }
-
-    private static void RegisterMessager(IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<RabbitMQSettings>(configuration.GetSection("RabbitMQ"));
-    }
-
-    private static void RegisterBackgroundServices(IServiceCollection services)
-    {
-        services.AddHostedService<OutboxPublisherWorker>();
-        services.AddHostedService<ImageProcessingWorker>();
     }
 
     private static void RegisterSeq()

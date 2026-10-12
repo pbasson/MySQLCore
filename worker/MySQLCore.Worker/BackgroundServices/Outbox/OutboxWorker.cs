@@ -1,19 +1,29 @@
 namespace MySQLCore.Worker.BackgroundServices.Outbox;
 
-public sealed class OutboxPublisherWorker : BackgroundService
+public sealed class OutboxWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger<OutboxPublisherWorker> _logger;
+    private readonly ILogger<OutboxWorker> _logger;
+    private readonly string _queueName;
 
-    public OutboxPublisherWorker( IServiceScopeFactory scopeFactory,ILogger<OutboxPublisherWorker> logger)
+    public OutboxWorker(IServiceScopeFactory scopeFactory, ILogger<OutboxWorker> logger,
+        IConfiguration configuration, IOptions<AzureServiceBusSetting> azureOptions)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
+        // Use the same Azure queue as the consumer; RabbitMQ retains its existing queue.
+        _queueName = configuration["Messaging:Provider"] switch
+        {
+            "AzureServiceBus" => azureOptions.Value.QueueName,
+            "RabbitMQ" => MessagerConstants.IMAGE_QUEUE,
+            _ => throw new InvalidOperationException("Messaging:Provider is Required.")
+        };
+        ArgumentException.ThrowIfNullOrWhiteSpace(_queueName);
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -21,7 +31,7 @@ public sealed class OutboxPublisherWorker : BackgroundService
                 using var scope = _scopeFactory.CreateScope();
 
                 var outboxRepo = scope.ServiceProvider.GetRequiredService<IOutboxMessagerRepo>();
-                var publisher = scope.ServiceProvider.GetRequiredService<IMessagePublisher>();
+                var messageBus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
 
                 var messages = await outboxRepo.GetPendingAsync(messageCount);
 
@@ -29,7 +39,7 @@ public sealed class OutboxPublisherWorker : BackgroundService
                 {
                     try
                     {
-                        var message = JsonSerializer.Deserialize<ImageCreatedMessage>(outbox.Payload);
+                        var message = JsonSerializer.Deserialize<ImageGalleryMessage>(outbox.Payload);
 
                         if (message == null || message.MessageId == Guid.Empty || message.MessageId != outbox.MessageId)
                         {
@@ -38,7 +48,7 @@ public sealed class OutboxPublisherWorker : BackgroundService
                             continue;
                         }
 
-                        await publisher.PublishAsync(MessagerConstants.IMAGE_QUEUE, message, stoppingToken);
+                        await messageBus.PublishAsync(_queueName, message, cancellationToken);
 
                         await outboxRepo.MarkPublishedAsync(outbox.Id);
 
@@ -50,7 +60,7 @@ public sealed class OutboxPublisherWorker : BackgroundService
 
                         await outboxRepo.MarkDeadLetterAsync(outbox.Id, ex.Message);
                     }
-                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                     {
                         return;
                     }
@@ -61,7 +71,7 @@ public sealed class OutboxPublisherWorker : BackgroundService
                     }
                 }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
@@ -72,9 +82,9 @@ public sealed class OutboxPublisherWorker : BackgroundService
 
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 return;
             }

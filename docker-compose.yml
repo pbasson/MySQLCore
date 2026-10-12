@@ -36,7 +36,7 @@ services:
       - mysqlcore_network
 
   mysqlcore.api:
-    image: mysqlcore-api:latest
+    image: mysqlcore-api:v1
     build:
       context: .
       dockerfile: src/MySQLCore.API/Dockerfile
@@ -61,7 +61,7 @@ services:
       # - ${CERTICATE_PATH}:/https/aspnetcore.pfx:ro  # Mount the cert
 
   mysqlcore.worker:
-    image: mysqlcore-worker:latest
+    image: mysqlcore-worker:v1
     build:
       context: .
       dockerfile: worker/MySQLCore.Worker/Dockerfile

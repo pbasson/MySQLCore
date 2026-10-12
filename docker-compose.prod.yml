@@ -1,0 +1,128 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file:
+      - env/docker-env/rabbitmq-middleware.dev.env
+    volumes:
+      - ${RABBITMQ_DATA_PATH}:/var/lib/rabbitmq
+    networks:
+      - mysqlcore_network
+
+  seq:
+    image: datalust/seq:latest
+    ports:
+      - "5341:80"
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    volumes:
+      - ${SEQ_PATH}:/data
+    networks:
+      - mysqlcore_network
+
+  mysqlcore.api:
+    image: mysqlcore-api:latest
+    build:
+      context: .
+      dockerfile: src/MySQLCore.API/Dockerfile
+    ports:
+      - 5820:5820
+    env_file:
+      - ${MYSQL_USER_PROD}
+      - ${APP_SETTINGS_PROD}
+      - ${APP_APIKEY}
+      - ${APP_CERT}
+      - ${RABBITMQ}
+    restart: always
+    depends_on:
+      - rabbitmq
+      - seq
+      - otel-collector
+    networks:
+      - mysqlcore_network
+    volumes:
+      - ${APP_PATH}:/Logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  mysqlcore.worker:
+    image: mysqlcore-worker:latest
+    build:
+      context: .
+      dockerfile: worker/MySQLCore.Worker/Dockerfile
+    env_file:
+      - ${MYSQL_USER_PROD}
+      - ${APP_SETTINGS_PROD}
+      - ${RABBITMQ}
+    depends_on:
+      - rabbitmq
+      - otel-collector
+    networks:
+      - mysqlcore_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - ${REDIS_DATA_PATH}:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - mysqlcore_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ${PROMETHEUS}:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - mysqlcore_network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${GRAFANA_PATH}:/var/lib/grafana
+    networks:
+      - mysqlcore_network
+
+  tempo:
+    image: grafana/tempo:latest
+    # user: "0:0"
+    command: [ "-config.file=/etc/tempo.yml" ]
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ${TEMPO}:/etc/tempo.yml:ro
+    networks:
+      - mysqlcore_network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector.yml"]
+    ports:
+      - "4319:4317"
+      - "4320:4318"
+    volumes:
+      - ${OTEL_COLLECTOR}:/etc/otel-collector.yml:ro
+    depends_on:
+      - tempo
+    networks:
+      - mysqlcore_network
+
+volumes:
+  prometheus_data:
+  tempo_data:
+networks:
+  mysqlcore_network:
+    name: mysqlcore_network
+    external: true
+      

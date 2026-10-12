@@ -11,5 +11,6 @@
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.0.1" PrivateAssets="all" />
     <ProjectReference Include="../../src/MySQLCore.Infrastructure/MySQLCore.Infrastructure.csproj" />
+    <ProjectReference Include="../../worker/MySQLCore.Worker/MySQLCore.Worker.csproj" />
   </ItemGroup>
 </Project>

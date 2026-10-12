@@ -1,13 +1,13 @@
-namespace MySQLCore.Worker.Messager;
+namespace MySQLCore.Worker.Messager.RabbitMQ;
 
-public class RabbitMQConnectionService : IAsyncDisposable
+public sealed class RabbitMQConnection : IRabbitMQConnection, IAsyncDisposable
 {
-    private readonly SemaphoreSlim _connectionLock = new(1, 1);
+    private readonly ILogger<RabbitMQConnection> _logger;
+    private readonly RabbitMQSetting _settings;
     private IConnection? _connection;
-    private readonly RabbitMQSettings _settings;
-    private readonly ILogger<RabbitMQConnectionService> _logger;
+    private readonly SemaphoreSlim _connectionLock = new(1, 1);
 
-    public RabbitMQConnectionService(IOptions<RabbitMQSettings> options, ILogger<RabbitMQConnectionService> logger)
+    public RabbitMQConnection(IOptions<RabbitMQSetting> options, ILogger<RabbitMQConnection> logger)
     {
         _settings = options.Value;
         _logger = logger;
@@ -34,8 +34,7 @@ public class RabbitMQConnectionService : IAsyncDisposable
             }
 
             // Keep the same connection so automatic recovery can restore the consumer too.
-            var channel = await _connection.CreateChannelAsync(
-                new CreateChannelOptions(publisherConfirmations, publisherConfirmations), stoppingToken);
+            var channel = await _connection.CreateChannelAsync(new CreateChannelOptions(publisherConfirmations, publisherConfirmations), stoppingToken);
             try
             {
                 await channel.QueueDeclareAsync(queue: MessagerConstants.IMAGE_QUEUE, durable: true,
@@ -98,12 +97,5 @@ public class RabbitMQConnectionService : IAsyncDisposable
         throw new OperationCanceledException();
     }
 
-    public byte[] SerializeMessage<TMessage>(TMessage message) where TMessage : IMessage
-    {
-        var json = JsonSerializer.Serialize(message);
-        var body = Encoding.UTF8.GetBytes(json);
-        return body;
-    }
- 
 }
     
