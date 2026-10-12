@@ -4,11 +4,21 @@ public sealed class OutboxWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<OutboxWorker> _logger;
+    private readonly string _queueName;
 
-    public OutboxWorker( IServiceScopeFactory scopeFactory,ILogger<OutboxWorker> logger)
+    public OutboxWorker(IServiceScopeFactory scopeFactory, ILogger<OutboxWorker> logger,
+        IConfiguration configuration, IOptions<AzureServiceBusSetting> azureOptions)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
+        // Use the same Azure queue as the consumer; RabbitMQ retains its existing queue.
+        _queueName = configuration["Messaging:Provider"] switch
+        {
+            "AzureServiceBus" => azureOptions.Value.QueueName,
+            "RabbitMQ" => MessagerConstants.IMAGE_QUEUE,
+            _ => throw new InvalidOperationException("Messaging:Provider is Required.")
+        };
+        ArgumentException.ThrowIfNullOrWhiteSpace(_queueName);
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -38,7 +48,7 @@ public sealed class OutboxWorker : BackgroundService
                             continue;
                         }
 
-                        await messageBus.PublishAsync(MessagerConstants.IMAGE_QUEUE, message, cancellationToken);
+                        await messageBus.PublishAsync(_queueName, message, cancellationToken);
 
                         await outboxRepo.MarkPublishedAsync(outbox.Id);
 

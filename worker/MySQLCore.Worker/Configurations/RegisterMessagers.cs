@@ -18,6 +18,7 @@ public static class RegisterMessagers
                 services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
                 services.AddSingleton<IRabbitMQConnection, RabbitMQConnection>();
                 services.AddSingleton<IRabbitMQBus, RabbitMQBus>();
+                services.AddSingleton<IMessageBus>(provider => provider.GetRequiredService<IRabbitMQBus>());
                 services.AddHostedService<RabbitMQImageWorker>();
                 break;
 

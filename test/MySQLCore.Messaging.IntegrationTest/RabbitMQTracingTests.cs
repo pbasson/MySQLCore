@@ -67,9 +67,9 @@ public class RabbitMQTracingTests
             return scenario == "ack-failure"
                 ? ValueTask.FromException(new InvalidOperationException("Ack failed")) : ValueTask.CompletedTask;
         });
-        var bus = Proxy<IMessageBus>((method, _) =>
+        var bus = Proxy<IRabbitMQBus>((method, _) =>
         {
-            Assert.Equal(nameof(IMessageBus.ForwardAsync), method.Name);
+            Assert.Equal(nameof(IRabbitMQBus.ForwardAsync), method.Name);
             duringForward = Activity.Current;
             return scenario == "forward-failure"
                 ? Task.FromException(new InvalidOperationException("Forward failed")) : Task.CompletedTask;
