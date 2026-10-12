@@ -1,19 +1,19 @@
 # MySQLCore
 
-MySQLCore is a backend demo project showing how to build a layered ASP.NET Core REST API backed by MySQL, with RabbitMQ messaging, outbox-based background processing, Redis caching, structured logging, distributed tracing, metrics, containerized infrastructure, and test coverage across the main application layers.
+MySQLCore is a backend demo project showing how to build a layered ASP.NET Core REST API backed by MySQL, with RabbitMQ or Azure Service Bus messaging, outbox-based background processing, Redis caching, structured logging, distributed tracing, metrics, containerized infrastructure, and test coverage across the main application layers.
 
 ## What This Demo Shows
 
-- A REST API for CRUD-style transaction data.
-- A one-to-many image transaction workflow using image records and gallery records.
+- A REST API for user and image gallery data.
+- A one-to-many image gallery workflow using gallery records and related image files.
 - Clean separation between API, Core, Infrastructure, and Worker projects.
 - Repository and service layers for data access and business logic.
 - MySQL persistence through Entity Framework Core.
 - Redis-backed caching through the ASP.NET Core distributed cache abstraction.
-- RabbitMQ publishing and background message processing.
+- Configuration-selected RabbitMQ or Azure Service Bus publishing and background message processing.
 - Outbox message storage and publishing for more reliable asynchronous work.
 - Processed message tracking for image-created events.
-- API endpoints for transaction, outbox, and processed message data.
+- API endpoints for users, image galleries, outbox, and processed message data.
 - API key middleware and Swagger security configuration.
 - Global exception handling middleware.
 - Structured application logging with Serilog and Seq.
@@ -36,7 +36,7 @@ MySQLCore is a backend demo project showing how to build a layered ASP.NET Core 
 | Database | MySQL 8 |
 | Data access | Entity Framework Core, Pomelo MySQL provider, MySqlConnector |
 | Cache | Redis, StackExchangeRedis distributed cache |
-| Messaging | RabbitMQ |
+| Messaging | RabbitMQ, Azure Service Bus |
 | Background processing | Hosted services, dedicated worker process |
 | Message reliability | Outbox pattern, processed message tracking |
 | Validation | FluentValidation |
@@ -56,15 +56,16 @@ MySQLCore is a backend demo project showing how to build a layered ASP.NET Core 
 src/
   MySQLCore.API             ASP.NET Core API, controllers, middleware, security, configuration
   MySQLCore.Core            DTOs, interfaces, services, validators, messages, constants, shared models
-  MySQLCore.Infrastructure  EF Core DbContext, entities, repositories, factories, RabbitMQ and Redis services
+  MySQLCore.Infrastructure  EF Core DbContext, entities, repositories, factories, Redis services
 
 worker/
-  MySQLCore.Worker          Background workers for outbox publishing and image message processing
+  MySQLCore.Worker          Outbox publishing, RabbitMQ/Azure Service Bus clients, image message processing
 
 test/
   MySQLCore.API.Test
   MySQLCore.Core.Test
   MySQLCore.Infrastructure.Test
+  MySQLCore.Messaging.IntegrationTest
 
 data/                       SQL database and table scripts
 configurations/             Prometheus, Tempo, and OpenTelemetry collector configuration
@@ -74,24 +75,24 @@ scripts/                    Docker and Kubernetes command notes
 
 ## Main API Areas
 
-### CRUDTransactionController
+### UserController
 
-Demonstrates standard CRUD operations for a simple transaction table:
+Demonstrates standard CRUD operations for user records:
 
-- Get all records.
+- Get the latest records.
 - Get paged records.
 - Get a record by ID.
 - Create a record.
 - Update a record.
 - Delete a record.
 
-### ImageTransactionController
+### ImageGalleryController
 
-Demonstrates a richer transaction workflow with related image gallery records:
+Demonstrates an image gallery workflow with related image files:
 
-- Manage image transaction records.
-- Return related gallery data.
-- Create image transaction data for asynchronous processing.
+- Manage image gallery records.
+- Return related image files through detail and paged queries.
+- Create image gallery data with an outbox message for asynchronous processing.
 - Work with the messaging flow through the core service layer.
 
 ### OutboxMessagerController
@@ -111,9 +112,9 @@ Shows the result of messages handled by the worker process:
 
 ## Messaging Flow
 
-The project uses RabbitMQ for image-created events and an outbox table to keep the publish workflow more reliable.
+The project uses an outbox table for image gallery events, with RabbitMQ or Azure Service Bus selected through `Messaging:Provider`.
 
-When the API creates work that needs to happen asynchronously, the message is stored as an outbox record. The worker process runs an `OutboxPublisherWorker` that reads pending outbox messages and publishes them to RabbitMQ. The `ImageProcessingWorker` then consumes image-created messages, processes them through the service layer, tracks the result as a processed message, and handles retry/dead-letter style failure paths through the messaging layer.
+The API saves gallery changes and their outbox message in the same MySQL transaction. `OutboxWorker` reads pending messages and publishes them through the selected provider. `RabbitMQImageWorker` or `AzureServiceBusImageWorker` consumes the messages through `ProcessWorkerService`, with processed-message tracking and duplicate detection. The Azure consumer completes successful or duplicate deliveries, dead-letters invalid payloads, and abandons processing failures for redelivery subject to the queue's delivery limit.
 
 ## Observability
 
@@ -124,6 +125,44 @@ The project includes a small observability stack so the backend can be inspected
 - The worker exposes Prometheus metrics on its own metric server.
 - OpenTelemetry tracing is exported to the OTLP collector.
 - Tempo stores traces and Grafana can be used to inspect metrics and traces.
+
+## Azure Deployment Demonstration
+
+MySQLCore was deployed to Azure Container Apps as separate ASP.NET Core API and .NET background worker applications, with Azure Container Registry for Docker images, Azure Service Bus for asynchronous messaging, and existing MySQL database infrastructure for persistence.
+
+The worker's Service Bus client uses `DefaultAzureCredential`, supporting Azure Managed Identity authentication with Azure RBAC permissions for sending and receiving messages.
+
+### Deployment Evidence
+
+The supplied screenshots capture the demonstration on 12 October 2026.
+
+**API deployment:** Azure Container Apps shows the API application in the Running state.
+
+![Azure Container Apps API showing Running status](docs/screenshots/azure-assets/azure-container-api.png)
+
+**Worker deployment:** An active worker revision is running with one replica.
+
+![Azure Container Apps worker revision with one running replica](docs/screenshots/azure-assets/azure-container-worker.png)
+
+**API creation — HTTP 201:** `POST /api/image-gallery/create` returns a successful creation response with a gallery ID and message ID.
+
+![Image gallery creation returning HTTP 201](docs/screenshots/api-assets/imagegallery-create.png)
+
+**API retrieval — HTTP 200:** `GET /api/image-gallery` returns gallery records, including the ID from the creation response.
+
+![Image gallery retrieval returning HTTP 200](docs/screenshots/api-assets/imagegallery-index.png)
+
+**Service Bus activity:** The displayed one-hour window records 20 incoming and 20 outgoing messages. The queue is Active, with zero active (pending), dead-letter, or scheduled messages at capture time. These metrics demonstrate messaging activity; an empty queue alone does not prove successful application processing.
+
+![Azure Service Bus incoming and outgoing messages with queue counts](docs/screenshots/azure-assets/azure-servicebus.png)
+
+**Azure infrastructure:** The resource-group overview shows the API and worker Container Apps, Container Apps environment, container registry, Service Bus namespace, managed identity, networking resources, and Log Analytics workspaces.
+
+![Azure resource group showing application and supporting infrastructure](docs/screenshots/azure-assets/azure-resource-group.png)
+
+### Demonstration Lifecycle
+
+Azure resources were provisioned for a practical cloud integration demonstration and are intended to be decommissioned after verification to avoid ongoing cloud costs. The source code, deployment configurations, and screenshots remain available for reference after shutdown.
 
 ## Notes
 
