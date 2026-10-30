@@ -1,4 +1,7 @@
-namespace MySQLCore.Consumer.Worker.Configurations;
+using Microsoft.EntityFrameworkCore;
+using MySQLCore.Infrastructure.Context;
+
+namespace MySQLCore.Core.Worker.Configurations;
 
 public static class RegisterDatabases
 {

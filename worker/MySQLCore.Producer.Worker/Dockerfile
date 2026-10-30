@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 COPY ["worker/MySQLCore.Producer.Worker/MySQLCore.Producer.Worker.csproj", "worker/MySQLCore.Producer.Worker/"]
-COPY ["worker/MySQL.Core.Worker/MySQL.Core.Worker.csproj", "worker/MySQL.Core.Worker/"]
+COPY ["worker/MySQLCore.Core.Worker/MySQLCore.Core.Worker.csproj", "worker/MySQLCore.Core.Worker/"]
 COPY ["src/MySQLCore.Core/MySQLCore.Core.csproj", "src/MySQLCore.Core/"]
 COPY ["src/MySQLCore.Infrastructure/MySQLCore.Infrastructure.csproj", "src/MySQLCore.Infrastructure/"]
 

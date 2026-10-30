@@ -1,4 +1,4 @@
-namespace MySQL.Core.Worker.MetricManager;
+namespace MySQLCore.Core.Worker.MetricManager;
 
 public static class MessageMetric
 {

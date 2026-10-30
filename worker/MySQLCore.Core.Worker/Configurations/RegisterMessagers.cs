@@ -1,6 +1,6 @@
-namespace MySQL.Core.Worker.Configurations;
+namespace MySQLCore.Core.Worker.Configurations;
 
-public static class RegisterMessagers
+public static class RegisterBaseMessagers
 {
     public static IServiceCollection RegisterProvider(this IServiceCollection services, IConfiguration configuration)
     {

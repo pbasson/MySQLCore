@@ -18,6 +18,6 @@ public static class RegisterServices
     private static void RegisterCoreRepos(IServiceCollection services)
     {
         services.AddScoped<IProcessedMessageRepo, ProcessedMessageRepo>();
-        services.AddScoped<IOutboxMessagerRepo, OutboxMessagerRepo>();
+        services.AddScoped<IOutboxMessageRepo, OutboxMessageRepo>();
     }
 }

@@ -1,4 +1,4 @@
-namespace MySQL.Core.Worker.Interfaces.Worker;
+namespace MySQLCore.Core.Worker.Interfaces.Worker;
 
 public interface IRabbitMQConnection 
 {

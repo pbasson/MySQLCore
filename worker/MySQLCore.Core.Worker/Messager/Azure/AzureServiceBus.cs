@@ -1,4 +1,4 @@
-namespace MySQL.Core.Worker.Messager.Azure;
+namespace MySQLCore.Core.Worker.Messager.Azure;
 
 public sealed class AzureServiceBus : IMessageBus, IAsyncDisposable
 {

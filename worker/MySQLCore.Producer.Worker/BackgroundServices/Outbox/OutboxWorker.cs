@@ -1,5 +1,3 @@
-using MySQL.Core.Worker.Interfaces.Worker;
-
 namespace MySQLCore.Producer.Worker.BackgroundServices.Outbox;
 
 public sealed class OutboxWorker : BackgroundService
@@ -32,7 +30,7 @@ public sealed class OutboxWorker : BackgroundService
                 int messageCount = 10;
                 using var scope = _scopeFactory.CreateScope();
 
-                var outboxRepo = scope.ServiceProvider.GetRequiredService<IOutboxMessagerRepo>();
+                var outboxRepo = scope.ServiceProvider.GetRequiredService<IOutboxMessageRepo>();
                 var messageBus = scope.ServiceProvider.GetRequiredService<IMessageBus>();
 
                 var messages = await outboxRepo.GetPendingAsync(messageCount);

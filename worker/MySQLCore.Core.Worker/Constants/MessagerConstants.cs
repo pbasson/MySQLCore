@@ -1,4 +1,4 @@
-namespace MySQL.Core.Worker.Constants;
+namespace MySQLCore.Core.Worker.Constants;
 
 public static class MessagerConstants
 {

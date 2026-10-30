@@ -1,4 +1,4 @@
-namespace MySQL.Core.Worker.Constants.Settings;
+namespace MySQLCore.Core.Worker.Constants.Settings;
 
 public sealed class RabbitMQSetting
 {

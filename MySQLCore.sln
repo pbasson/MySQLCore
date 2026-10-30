@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySQLCore.Messaging.Integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySQLCore.Consumer.Worker", "worker\MySQLCore.Consumer.Worker\MySQLCore.Consumer.Worker.csproj", "{26F6B37B-DA50-433C-B2E8-B908A74064A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySQL.Core.Worker", "worker\MySQL.Core.Worker\MySQL.Core.Worker.csproj", "{65EDEC21-787F-4299-911E-D8AB5579794C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySQLCore.Core.Worker", "worker\MySQLCore.Core.Worker\MySQLCore.Core.Worker.csproj", "{65EDEC21-787F-4299-911E-D8AB5579794C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

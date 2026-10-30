@@ -1,4 +1,4 @@
-namespace MySQL.Core.Worker.Messager.RabbitMQ;
+namespace MySQLCore.Core.Worker.Messager.RabbitMQ;
 
 public sealed class RabbitMQBus : IRabbitMQBus, IAsyncDisposable
 {
