@@ -2,9 +2,9 @@ namespace MySQLCore.Core.Messager.Services;
 
 public class OutboxMessagerService : IOutboxMessagerService
 {
-    private readonly IOutboxMessagerRepo _outboxRepo;
+    private readonly IOutboxMessageRepo _outboxRepo;
 
-    public OutboxMessagerService(IOutboxMessagerRepo outboxRepo)
+    public OutboxMessagerService(IOutboxMessageRepo outboxRepo)
     {
         _outboxRepo = outboxRepo;
     }

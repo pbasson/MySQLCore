@@ -1,0 +1,61 @@
+using MySQLCore.Core.Worker.Configurations;
+
+namespace MySQLCore.Producer.Worker.Configurations;
+
+public static class RegisterConfigurations
+{
+    public static IServiceCollection RegisterConfiguration(this IServiceCollection services, IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        RegisterSeq();
+        RegisterOpenTelemetry(services);
+        RegisterMetrics(services);
+        services.RegisterDatabase(configuration);
+        services.RegisterService();
+        services.RegisterMessager(configuration);
+        return services;
+    }
+
+    private static void RegisterSeq()
+    {
+        string seqUrl = Environment.GetEnvironmentVariable(AppSettings.SEQ_URL) ?? "http://seq";
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Service", "mysqlcore-worker")
+            .WriteTo.Console()
+            .WriteTo.Seq(seqUrl)
+            .CreateLogger();
+    }
+
+    private static void RegisterOpenTelemetry(IServiceCollection services)
+    {
+        string otelCollectorURL = Environment.GetEnvironmentVariable(AppSettings.OTEL_EXPORTER_OTLP_ENDPOINT) ?? "http://otel-collector:4317";
+
+        services.AddOpenTelemetry().ConfigureResource(resource => resource.AddService(serviceName: "mysqlcore-worker"))
+            .WithTracing(tracing => tracing
+                .SetSampler(new AlwaysOnSampler())
+                .AddSource(TracingConstants.ACTIVITY_SOURCE)
+                .AddSource(TracingConstants.API_SOURCE)
+                .AddOtlpExporter(options =>
+                {
+                    options.Endpoint = new Uri(otelCollectorURL);
+                    options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                }));
+    }
+
+    private static void RegisterMetrics(IServiceCollection services)
+    {
+        services.AddMetricServer(options => { options.Port = 9100; });
+    }
+
+    public static HostApplicationBuilder RegisterHost(this HostApplicationBuilder builder)
+    {
+        builder.Logging.ClearProviders();
+        builder.Logging.AddSerilog(Log.Logger, dispose: true);
+        return builder;
+    }
+}

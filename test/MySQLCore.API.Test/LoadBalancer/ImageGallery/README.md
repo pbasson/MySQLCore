@@ -19,6 +19,19 @@ script can seed one gallery if needed; it prints the returned ID:
 k6 run ImageGallery-CreateRecord.js
 ```
 
+For 100 total create attempts shared across 10 concurrent virtual users:
+
+```bash
+k6 run -e VUS=10 -e ITERATIONS=100 ImageGallery-CreateRecord.js
+```
+
+The create script generates gallery and image names with a timestamp, virtual-user
+ID, iteration and random suffix. Leave `GALLERY_NAME`, `IMAGE_NAME` and
+`CREATE_IMAGE_GALLERY_JSON` unset to use these generated names; explicit overrides
+are reused as supplied. Use `VUS=1` for sequential requests. Each iteration sends
+one POST, and failed attempts are not retried. Created records remain in the target
+database; this script has no cleanup. Start with a development or staging target.
+
 ## Existing coverage and gaps
 
 | Scenario | Existing coverage | Extension |

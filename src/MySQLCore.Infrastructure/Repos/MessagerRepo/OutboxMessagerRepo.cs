@@ -2,9 +2,9 @@ using System.Linq.Expressions;
 
 namespace MySQLCore.Infrastructure.Repos.MessagerRepo;
 
-public sealed class OutboxMessagerRepo : BaseRepo<IBaseRepo>, IOutboxMessagerRepo
+public sealed class OutboxMessageRepo : BaseRepo<IBaseRepo>, IOutboxMessageRepo
 {
-    public OutboxMessagerRepo(MySQLCoreDBContext dBContext, ILogger<IOutboxMessagerRepo> logger) : base(dBContext, logger) { }
+    public OutboxMessageRepo(MySQLCoreDBContext dBContext, ILogger<IOutboxMessageRepo> logger) : base(dBContext, logger) { }
 
     public async Task<List<OutboxMessage>> GetPendingAsync(int take)
     {

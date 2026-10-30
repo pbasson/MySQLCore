@@ -18,12 +18,14 @@ function getPayload() {
     }
   }
 
+  const suffix = `${Date.now()}-${__VU}-${__ITER}-${Math.random().toString(36).slice(2, 10)}`;
+
   return {
-    galleryName: __ENV.GALLERY_NAME || `Load Test Gallery ${Date.now()}`,
+    galleryName: __ENV.GALLERY_NAME || `Load Test Gallery ${suffix}`,
     galleryPath: __ENV.GALLERY_PATH || "/load-test",
     imageFile: [
       {
-        imageName: __ENV.IMAGE_NAME || "load-test-image.jpg",
+        imageName: __ENV.IMAGE_NAME || `load-test-image-${suffix}.jpg`,
         imagePosition: Number(__ENV.IMAGE_POSITION || 1),
       },
     ],
@@ -48,6 +50,6 @@ export default function () {
   console.log(`Body: ${res.body}`);
 
   check(res, {
-    "status is 200": (r) => r.status === 200,
+    "status is 201": (r) => r.status === 201,
   });
 }
