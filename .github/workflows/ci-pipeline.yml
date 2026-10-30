@@ -36,4 +36,7 @@ jobs:
         run: docker build . --file ./src/MySQLCore.API/Dockerfile --tag mysqlcore-api:ci
 
       - name: Build Worker Docker image
-        run: docker build . --file ./worker/MySQLCore.Worker/Dockerfile --tag mysqlcore-worker:ci
+        run: docker build . --file ./worker/MySQLCore.Producer.Worker/Dockerfile --tag mysqlcore-producer-worker:ci
+
+      - name: Build Worker Docker image
+        run: docker build . --file ./worker/MySQLCore.Consumer.Worker/Dockerfile --tag mysqlcore-consumer-worker:ci
